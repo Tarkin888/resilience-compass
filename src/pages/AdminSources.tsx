@@ -103,7 +103,10 @@ export default function AdminSources() {
     setBusy((b) => ({ ...b, [kri_id]: true }));
     setResults((r) => ({ ...r, [kri_id]: "Running…" }));
     const fn = FN_MAP[kri_id];
-    const { data, error } = await supabase.functions.invoke(fn, { body: {} });
+    const { data, error } = await supabase.functions.invoke(fn, {
+      body: {},
+      headers: { "x-admin-password": password },
+    });
     setBusy((b) => ({ ...b, [kri_id]: false }));
     if (error) {
       setResults((r) => ({ ...r, [kri_id]: `Error: ${error.message}` }));
