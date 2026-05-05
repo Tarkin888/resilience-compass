@@ -1,0 +1,210 @@
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+
+interface SourceRow {
+  id: string;
+  kri_id: string;
+  publication_name: string;
+  edition_page_url_pattern: string;
+  last_known_file_url: string | null;
+  update_cadence: string;
+}
+interface CaptureRow { kri_id: string; captured_at: string; edition_label: string; headline_value: number | null; }
+interface LogRow { kri_id: string; outcome: string; attempt_at: string; error_detail: string | null; }
+
+const FN_MAP: Record<string, string> = {
+  vacancy: "fetch_nhs_vacancy",
+  sickness_absence: "fetch_nhs_sickness_absence",
+};
+
+const PASSWORD_KEY = "rc_admin_pw";
+
+export default function AdminSources() {
+  const stored = typeof window !== "undefined" ? sessionStorage.getItem(PASSWORD_KEY) : null;
+  const [password, setPassword] = useState(stored ?? "");
+  const [authed, setAuthed] = useState(!!stored);
+  const [authError, setAuthError] = useState<string | null>(null);
+
+  const [sources, setSources] = useState<SourceRow[]>([]);
+  const [latestCaps, setLatestCaps] = useState<Record<string, CaptureRow>>({});
+  const [latestLogs, setLatestLogs] = useState<Record<string, LogRow>>({});
+  const [overrideInputs, setOverrideInputs] = useState<Record<string, string>>({});
+  const [busy, setBusy] = useState<Record<string, boolean>>({});
+  const [results, setResults] = useState<Record<string, string>>({});
+
+  const load = async () => {
+    const { data: s } = await supabase.from("sources").select("*").order("kri_id");
+    setSources((s ?? []) as SourceRow[]);
+    const init: Record<string, string> = {};
+    (s ?? []).forEach((r: SourceRow) => { init[r.kri_id] = r.last_known_file_url ?? ""; });
+    setOverrideInputs(init);
+
+    const { data: caps } = await supabase
+      .from("kri_captures").select("kri_id,captured_at,edition_label,headline_value")
+      .order("captured_at", { ascending: false });
+    const capMap: Record<string, CaptureRow> = {};
+    (caps ?? []).forEach((c: CaptureRow) => { if (!capMap[c.kri_id]) capMap[c.kri_id] = c; });
+    setLatestCaps(capMap);
+
+    const { data: logs } = await supabase
+      .from("capture_log").select("kri_id,outcome,attempt_at,error_detail")
+      .order("attempt_at", { ascending: false });
+    const logMap: Record<string, LogRow> = {};
+    (logs ?? []).forEach((l: LogRow) => { if (!logMap[l.kri_id]) logMap[l.kri_id] = l; });
+    setLatestLogs(logMap);
+  };
+
+  useEffect(() => { if (authed) load(); }, [authed]);
+
+  const verify = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAuthError(null);
+    const { data, error } = await supabase.functions.invoke("admin_action", {
+      body: { action: "verify" },
+      headers: { "x-admin-password": password },
+    });
+    if (error || !(data as { ok?: boolean })?.ok) {
+      setAuthError("Incorrect password.");
+      return;
+    }
+    sessionStorage.setItem(PASSWORD_KEY, password);
+    setAuthed(true);
+  };
+
+  const saveOverride = async (kri_id: string) => {
+    setBusy((b) => ({ ...b, [kri_id]: true }));
+    const { error } = await supabase.functions.invoke("admin_action", {
+      body: { action: "set_override_url", kri_id, last_known_file_url: overrideInputs[kri_id] || null },
+      headers: { "x-admin-password": password },
+    });
+    setBusy((b) => ({ ...b, [kri_id]: false }));
+    setResults((r) => ({ ...r, [kri_id]: error ? `Save failed: ${error.message}` : "Override URL saved." }));
+    load();
+  };
+
+  const runCapture = async (kri_id: string) => {
+    setBusy((b) => ({ ...b, [kri_id]: true }));
+    setResults((r) => ({ ...r, [kri_id]: "Running…" }));
+    const fn = FN_MAP[kri_id];
+    const { data, error } = await supabase.functions.invoke(fn, { body: {} });
+    setBusy((b) => ({ ...b, [kri_id]: false }));
+    if (error) {
+      setResults((r) => ({ ...r, [kri_id]: `Error: ${error.message}` }));
+    } else {
+      setResults((r) => ({ ...r, [kri_id]: JSON.stringify(data, null, 2) }));
+    }
+    load();
+  };
+
+  if (!authed) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <form onSubmit={verify} className="w-full max-w-sm rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+          <h1 className="text-xl font-semibold text-slate-900">Admin sign-in</h1>
+          <p className="mt-1 text-sm text-slate-500">Enter the shared admin password to manage data sources.</p>
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="mt-4 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+            placeholder="Password"
+            autoFocus
+          />
+          {authError && <p className="mt-2 text-sm text-red-600">{authError}</p>}
+          <button type="submit" className="mt-4 w-full rounded-md bg-brand px-4 py-2 text-sm font-medium text-white hover:opacity-90">
+            Continue
+          </button>
+        </form>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-slate-50 text-slate-900">
+      <header className="border-b border-slate-200 bg-white px-6 py-4">
+        <h1 className="text-xl font-bold">Admin — Data Sources</h1>
+        <p className="text-sm text-slate-500">NHS England public data ingestion controls</p>
+      </header>
+      <main className="px-6 py-6 space-y-6">
+        {sources.map((s) => {
+          const cap = latestCaps[s.kri_id];
+          const log = latestLogs[s.kri_id];
+          return (
+            <section key={s.id} className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <h2 className="text-lg font-semibold">{s.publication_name}</h2>
+                  <p className="text-xs text-slate-500 mt-1">
+                    KRI: <code>{s.kri_id}</code> · cadence: {s.update_cadence}
+                  </p>
+                  <p className="text-xs text-slate-500 mt-1">
+                    Pattern: <code className="break-all">{s.edition_page_url_pattern}</code>
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  disabled={busy[s.kri_id]}
+                  onClick={() => runCapture(s.kri_id)}
+                  className="rounded-md bg-brand px-4 py-2 text-sm font-medium text-white hover:opacity-90 disabled:opacity-50"
+                >
+                  {busy[s.kri_id] ? "Running…" : "Run capture now"}
+                </button>
+              </div>
+
+              <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="rounded-md bg-slate-50 p-3">
+                  <p className="text-xs font-medium text-slate-500 uppercase">Last successful capture</p>
+                  {cap ? (
+                    <p className="mt-1 text-sm">
+                      {cap.edition_label} — {cap.headline_value}% · {new Date(cap.captured_at).toLocaleString("en-GB")}
+                    </p>
+                  ) : (
+                    <p className="mt-1 text-sm text-slate-500">No captures yet.</p>
+                  )}
+                </div>
+                <div className="rounded-md bg-slate-50 p-3">
+                  <p className="text-xs font-medium text-slate-500 uppercase">Last attempt</p>
+                  {log ? (
+                    <p className="mt-1 text-sm">
+                      <span className="font-medium">{log.outcome}</span> · {new Date(log.attempt_at).toLocaleString("en-GB")}
+                      {log.error_detail && <span className="block text-xs text-slate-500 mt-1">{log.error_detail}</span>}
+                    </p>
+                  ) : (
+                    <p className="mt-1 text-sm text-slate-500">No attempts yet.</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="mt-4">
+                <label className="text-xs font-medium text-slate-500 uppercase">Override file URL (used if scrape fails)</label>
+                <div className="mt-1 flex gap-2">
+                  <input
+                    type="url"
+                    value={overrideInputs[s.kri_id] ?? ""}
+                    onChange={(e) => setOverrideInputs((o) => ({ ...o, [s.kri_id]: e.target.value }))}
+                    placeholder="https://digital.nhs.uk/.../file.xlsx"
+                    className="flex-1 rounded-md border border-slate-300 px-3 py-2 text-sm"
+                  />
+                  <button
+                    type="button"
+                    disabled={busy[s.kri_id]}
+                    onClick={() => saveOverride(s.kri_id)}
+                    className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium hover:bg-slate-50"
+                  >
+                    Save
+                  </button>
+                </div>
+              </div>
+
+              {results[s.kri_id] && (
+                <pre className="mt-4 max-h-64 overflow-auto rounded-md bg-slate-900 p-3 text-xs text-slate-100 whitespace-pre-wrap">
+{results[s.kri_id]}
+                </pre>
+              )}
+            </section>
+          );
+        })}
+      </main>
+    </div>
+  );
+}
