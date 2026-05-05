@@ -5,7 +5,7 @@ import type { Tables } from "@/integrations/supabase/types";
 export type KriDefinition = Tables<"kri_definitions">;
 export type KriCapture = Tables<"kri_captures">;
 export type Threshold = Tables<"thresholds">;
-export type CaptureLog = Tables<"capture_log">;
+export type CaptureLog = Pick<Tables<"capture_log">, "id" | "kri_id" | "outcome" | "attempt_at">;
 export type Source = Tables<"sources">;
 
 export interface HumanCapitalData {
