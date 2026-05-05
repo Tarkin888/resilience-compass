@@ -8,6 +8,7 @@ interface SourceRow {
   edition_page_url_pattern: string;
   last_known_file_url: string | null;
   update_cadence: string;
+  simulate_failure?: boolean;
 }
 interface CaptureRow { kri_id: string; captured_at: string; edition_label: string; headline_value: number | null; }
 interface LogRow { kri_id: string; outcome: string; attempt_at: string; error_detail: string | null; }
