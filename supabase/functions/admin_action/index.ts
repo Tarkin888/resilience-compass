@@ -19,7 +19,7 @@ Deno.serve(async (req) => {
     });
   }
 
-  let body: { action?: string; kri_id?: string; last_known_file_url?: string } = {};
+  let body: { action?: string; kri_id?: string; last_known_file_url?: string; simulate_failure?: boolean } = {};
   try { body = await req.json(); } catch { /* ignore */ }
 
   const supabase = createClient(
