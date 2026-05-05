@@ -13,6 +13,9 @@ import {
   fetchEditionPage,
   findXlsxLink,
   Outcome,
+  requireAdminAuth,
+  sanitiseErrorDetail,
+  validateEditionInput,
 } from "../_shared/scrape.ts";
 
 const KRI_ID = "sickness_absence";
