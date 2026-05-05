@@ -3,6 +3,7 @@ import { Header } from "@/components/Header";
 import { ScoreCard } from "@/components/ScoreCard";
 import { TabBar, TabId } from "@/components/TabBar";
 import { TabPlaceholder } from "@/components/TabPlaceholder";
+import { LiveRiskAlertsTab } from "@/components/alerts/LiveRiskAlertsTab";
 
 const Index = () => {
   const [active, setActive] = useState<TabId>("alerts");
@@ -13,13 +14,7 @@ const Index = () => {
       <ScoreCard />
       <TabBar active={active} onChange={setActive} />
       <main className="px-6 py-6">
-        {active === "alerts" && (
-          <TabPlaceholder
-            title="Live Risk Alerts"
-            purpose="Real-time signals across your workforce, prioritised by severity."
-            note="Live data wire-up coming in Prompt 3"
-          />
-        )}
+        {active === "alerts" && <LiveRiskAlertsTab />}
         {active === "library" && (
           <TabPlaceholder
             title="Scenario Testing Library"
