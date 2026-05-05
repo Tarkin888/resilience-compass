@@ -74,6 +74,21 @@ Deno.serve(async (req) => {
     });
   }
 
+  if (body.action === "list_recent_logs") {
+    const { data, error } = await supabase
+      .from("capture_log")
+      .select("kri_id,outcome,attempt_at,error_detail")
+      .order("attempt_at", { ascending: false })
+      .limit(50);
+    if (error) {
+      return new Response(JSON.stringify({ ok: false, error: error.message }), {
+        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    return new Response(JSON.stringify({ ok: true, logs: data }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+
   return new Response(JSON.stringify({ ok: false, error: "unknown action" }), {
     status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
