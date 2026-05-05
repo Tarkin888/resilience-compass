@@ -1,1 +1,10 @@
 project_id = "rkjkhcesxxmghizufacj"
+
+[functions.fetch_nhs_vacancy]
+verify_jwt = false
+
+[functions.fetch_nhs_sickness_absence]
+verify_jwt = false
+
+[functions.admin_action]
+verify_jwt = false
