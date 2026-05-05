@@ -74,6 +74,26 @@ Deno.serve(async (req) => {
     });
   }
 
+  if (body.action === "set_simulate_failure") {
+    if (!body.kri_id) {
+      return new Response(JSON.stringify({ ok: false, error: "kri_id required" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const { error } = await supabase
+      .from("sources")
+      .update({ simulate_failure: !!body.simulate_failure })
+      .eq("kri_id", body.kri_id);
+    if (error) {
+      return new Response(JSON.stringify({ ok: false, error: error.message }), {
+        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    return new Response(JSON.stringify({ ok: true }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
   if (body.action === "list_recent_logs") {
     const { data, error } = await supabase
       .from("capture_log")
