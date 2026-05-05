@@ -47,6 +47,15 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        brand: {
+          DEFAULT: "#1E5BB8",
+        },
+        severity: {
+          critical: "#B91C1C",
+          warning: "#B45309",
+          watch: "#1D4ED8",
+          ok: "#15803D",
+        },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",

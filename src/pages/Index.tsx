@@ -1,16 +1,46 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useState } from "react";
+import { Header } from "@/components/Header";
+import { ScoreCard } from "@/components/ScoreCard";
+import { TabBar, TabId } from "@/components/TabBar";
+import { TabPlaceholder } from "@/components/TabPlaceholder";
 
-// IMPORTANT: Fully REPLACE this with your own code
-const PlaceholderIndex = () => {
-  // PLACEHOLDER: Replace this entire return statement with the user's app.
-  // The inline background color is intentionally not part of the design system.
+const Index = () => {
+  const [active, setActive] = useState<TabId>("alerts");
+
   return (
-    <div className="flex min-h-screen items-center justify-center" style={{ backgroundColor: '#fcfbf8' }}>
-      <img data-lovable-blank-page-placeholder="REMOVE_THIS" src="/placeholder.svg" alt="Your app will live here!" />
+    <div className="min-h-screen bg-slate-50 text-slate-900 text-sm leading-relaxed">
+      <Header />
+      <ScoreCard />
+      <TabBar active={active} onChange={setActive} />
+      <main className="px-6 py-6">
+        {active === "alerts" && (
+          <TabPlaceholder
+            title="Live Risk Alerts"
+            purpose="Real-time signals across your workforce, prioritised by severity."
+            note="Live data wire-up coming in Prompt 3"
+          />
+        )}
+        {active === "library" && (
+          <TabPlaceholder
+            title="Scenario Testing Library"
+            purpose="A catalogue of resilience scenarios you can run against your organisation."
+          />
+        )}
+        {active === "visualiser" && (
+          <TabPlaceholder
+            title="Scenario Impact Visualiser"
+            purpose="Visualise how each scenario shifts your Human Capital score and sub-indices."
+          />
+        )}
+        {active === "prediction" && (
+          <TabPlaceholder
+            title="AI Risk Prediction"
+            purpose="Forward-looking risk forecasts to help you prioritise interventions."
+          />
+        )}
+      </main>
     </div>
   );
 };
-
-const Index = PlaceholderIndex;
 
 export default Index;
