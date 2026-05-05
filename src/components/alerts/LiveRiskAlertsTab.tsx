@@ -1,10 +1,11 @@
 import { useMemo, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, Link } from "react-router-dom";
 import { RefreshCw, AlertTriangle, X } from "lucide-react";
 import { useHumanCapitalData } from "@/hooks/useHumanCapitalData";
 import { buildAlertNarrative, getStatus, getTrend, type Status, type Trend } from "@/lib/calc";
 import { AlertCard } from "./AlertCard";
 import { SEVERITY_RANK, formatDateTime } from "./severity";
+import { supabase } from "@/integrations/supabase/client";
 
 type SeverityFilter = "All" | "Critical" | "Warning" | "Watch";
 type SourceFilter = "all" | "live" | "illustrative";
@@ -16,7 +17,27 @@ const FAILURE_OUTCOMES = new Set([
   "fetch_error",
   "error",
   "failure",
+  "html_parse_failed",
+  "file_download_failed",
+  "value_extract_failed",
+  "simulated_failure",
 ]);
+
+const FAILURE_REASONS: Record<string, string> = {
+  page_not_found: "Edition URL pattern did not resolve to a published page",
+  html_parse_failed: "Edition page parsed but no data file link was found",
+  file_download_failed: "Data file could not be downloaded",
+  value_extract_failed: "Data file could not be parsed for the headline value",
+  simulated_failure: "Simulated failure toggled on for this source",
+  fetch_error: "Source could not be fetched",
+  error: "Capture pipeline reported an error",
+  failure: "Capture pipeline reported a failure",
+};
+
+const FN_MAP: Record<string, string> = {
+  vacancy: "fetch_nhs_vacancy",
+  sickness_absence: "fetch_nhs_sickness_absence",
+};
 
 export const LiveRiskAlertsTab = () => {
   const { data, loading, error, refresh } = useHumanCapitalData();
@@ -26,7 +47,7 @@ export const LiveRiskAlertsTab = () => {
   const [dismissedBanners, setDismissedBanners] = useState<Set<string>>(new Set());
   const [refreshing, setRefreshing] = useState(false);
 
-  const simulateFailure = params.get("simulateFailure"); // e.g. "vacancy"
+  const simulateFailure = params.get("simulateFailure");
 
   const rows = useMemo(() => {
     return data.definitions.map((def) => {
@@ -103,16 +124,25 @@ export const LiveRiskAlertsTab = () => {
   }, [rows]);
 
   const failureBanners = useMemo(() => {
-    const banners: { kriId: string; displayName: string; lastSuccessAt?: string }[] = [];
+    const banners: {
+      kriId: string;
+      displayName: string;
+      sourceLabel: string;
+      reason: string;
+      lastSuccessAt?: string;
+    }[] = [];
     rows.forEach((r) => {
       if (!r.def.is_live) return;
       const log = data.latestLogByKri[r.def.kri_id];
       const dbFailure = log && FAILURE_OUTCOMES.has(log.outcome);
-      const simulated = simulateFailure === r.def.kri_id;
+      const simulated = simulateFailure === r.def.kri_id || (r.source as { simulate_failure?: boolean } | undefined)?.simulate_failure;
       if (dbFailure || simulated) {
+        const outcome = simulated ? "simulated_failure" : (log?.outcome ?? "error");
         banners.push({
           kriId: r.def.kri_id,
           displayName: r.def.display_name,
+          sourceLabel: `${r.source?.publication_name ?? "Source"}${r.captures[0]?.edition_label ? ` · ${r.captures[0].edition_label}` : ""}`,
+          reason: FAILURE_REASONS[outcome] ?? "Capture failed",
           lastSuccessAt: r.captures[0]?.captured_at,
         });
       }
@@ -121,9 +151,27 @@ export const LiveRiskAlertsTab = () => {
   }, [rows, data.latestLogByKri, simulateFailure, dismissedBanners]);
 
   const handleRefresh = async () => {
+    console.info("refresh:start");
     setRefreshing(true);
-    await refresh();
-    setRefreshing(false);
+    try {
+      const liveKris = rows.filter((r) => r.def.is_live).map((r) => r.def.kri_id);
+      const results = await Promise.allSettled(
+        liveKris.map((kri) => {
+          const fn = FN_MAP[kri];
+          if (!fn) return Promise.resolve({ skipped: true });
+          return supabase.functions.invoke(fn, { body: {} });
+        }),
+      );
+      const anyOk = results.some((r) => r.status === "fulfilled");
+      if (anyOk) console.info("refresh:capture-ok", results);
+      else console.error("refresh:error", results);
+      await refresh();
+      console.info("refresh:rerender");
+    } catch (e) {
+      console.error("refresh:error", e);
+    } finally {
+      setRefreshing(false);
+    }
   };
 
   const chips: SeverityFilter[] = ["All", "Critical", "Warning", "Watch"];
@@ -134,15 +182,33 @@ export const LiveRiskAlertsTab = () => {
         <div
           key={b.kriId}
           role="alert"
-          className="flex items-start gap-3 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900"
+          className="flex items-start gap-3 rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-900"
         >
-          <AlertTriangle size={18} className="mt-0.5 shrink-0 text-amber-700" />
+          <AlertTriangle size={18} className="mt-0.5 shrink-0 text-red-700" />
           <div className="flex-1">
             <div className="font-semibold">Live data fetch failed for {b.displayName}.</div>
-            <div className="mt-0.5">
+            <div className="mt-0.5 text-red-800">{b.sourceLabel}</div>
+            <div className="mt-0.5">{b.reason}.</div>
+            <div className="mt-0.5 text-xs text-red-800">
               {b.lastSuccessAt
                 ? `Showing last successful capture from ${formatDateTime(b.lastSuccessAt)} — value may be out of date.`
                 : "No prior successful capture is available."}
+            </div>
+            <div className="mt-2 flex gap-2">
+              <button
+                type="button"
+                onClick={handleRefresh}
+                disabled={refreshing}
+                className="rounded-md border border-red-300 bg-white px-3 py-1 text-xs font-medium text-red-800 hover:bg-red-100 disabled:opacity-50"
+              >
+                Retry now
+              </button>
+              <Link
+                to={`/admin/sources#${b.kriId}`}
+                className="rounded-md border border-red-300 bg-white px-3 py-1 text-xs font-medium text-red-800 hover:bg-red-100"
+              >
+                Open admin
+              </Link>
             </div>
           </div>
           <button
@@ -155,7 +221,7 @@ export const LiveRiskAlertsTab = () => {
               })
             }
             aria-label="Dismiss"
-            className="rounded p-1 hover:bg-amber-100"
+            className="rounded p-1 hover:bg-red-100"
           >
             <X size={16} />
           </button>
@@ -213,10 +279,10 @@ export const LiveRiskAlertsTab = () => {
             type="button"
             onClick={handleRefresh}
             disabled={refreshing || loading}
-            className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-900 shadow-sm hover:bg-slate-50 disabled:opacity-60"
+            className="inline-flex items-center gap-2 rounded-lg bg-brand px-3 py-1.5 text-xs font-medium text-white shadow-sm hover:opacity-90 disabled:opacity-60"
           >
             <RefreshCw size={14} className={refreshing ? "animate-spin" : ""} />
-            Refresh now
+            {refreshing ? "Refreshing…" : "Refresh"}
           </button>
         </div>
       </div>
