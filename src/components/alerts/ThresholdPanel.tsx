@@ -22,6 +22,10 @@ export const ThresholdPanel = ({
 }: Props) => {
   const [open, setOpen] = useState(false);
   const unit = threshold.units === "percent" ? "%" : ` ${threshold.units}`;
+  const rationale = (threshold as Threshold & { rationale?: string | null }).rationale;
+  const overrideValue = (threshold as Threshold & { trust_override_value?: number | null }).trust_override_value;
+  const overrideSource = (threshold as Threshold & { trust_override_source?: string | null }).trust_override_source;
+  const overrideAt = (threshold as Threshold & { trust_override_captured_at?: string | null }).trust_override_captured_at;
 
   return (
     <div className="rounded-lg border border-slate-200 bg-slate-50">
@@ -70,6 +74,30 @@ export const ThresholdPanel = ({
                 {threshold.methodology_window_start} – {threshold.methodology_window_end}
                 {threshold.methodology_n ? ` · n=${threshold.methodology_n}` : ""}
               </div>
+            )}
+          </div>
+
+          {rationale && (
+            <div>
+              <div className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                Rationale
+              </div>
+              <p className="mt-1 text-slate-700">{rationale}</p>
+            </div>
+          )}
+
+          <div className="text-xs">
+            {overrideValue != null ? (
+              <span className="text-slate-700">
+                Trust-specific threshold in use: &lt; {overrideValue}
+                {unit}
+                {overrideSource ? ` (set by ${overrideSource}` : ""}
+                {overrideAt ? `, ${formatDateTime(overrideAt)})` : overrideSource ? ")" : ""}
+              </span>
+            ) : (
+              <span className="text-slate-500">
+                No trust-specific threshold supplied — using working benchmark.
+              </span>
             )}
           </div>
 

@@ -8,9 +8,10 @@ import type {
   Source,
   Threshold,
 } from "@/hooks/useHumanCapitalData";
-import { SEVERITY_STYLES, formatDate, trendArrow } from "./severity";
+import { SEVERITY_STYLES, formatDate, formatDateTime, trendArrow } from "./severity";
 import { ThresholdPanel } from "./ThresholdPanel";
 import { CapturedEditionsPanel } from "./CapturedEditionsPanel";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface Props {
   definition: KriDefinition;
@@ -62,14 +63,40 @@ export const AlertCard = ({
           <div className="flex flex-wrap items-center gap-2">
             <h3 className="text-lg font-semibold text-slate-900">{definition.display_name}</h3>
             {definition.is_live ? (
-              <span className="inline-flex items-center gap-1 rounded-full border border-blue-200 bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700">
-                <span className="h-1.5 w-1.5 rounded-full bg-blue-600" />
-                Live · Public Data
-              </span>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    type="button"
+                    className="inline-flex items-center gap-1 rounded-full border border-blue-200 bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
+                    aria-label="Live source details"
+                  >
+                    <span className="h-1.5 w-1.5 rounded-full bg-blue-600" />
+                    Live · Public Data
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent className="max-w-xs">
+                  <div className="space-y-0.5 text-xs">
+                    <div><span className="font-semibold">Publication:</span> {source?.publication_name ?? "—"}</div>
+                    <div><span className="font-semibold">Edition:</span> {latest?.edition_label ?? "—"}</div>
+                    <div><span className="font-semibold">Captured:</span> {latest?.captured_at ? formatDateTime(latest.captured_at) : "—"}</div>
+                  </div>
+                </TooltipContent>
+              </Tooltip>
             ) : (
-              <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
-                Illustrative
-              </span>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    type="button"
+                    className="inline-flex items-center rounded-full border border-slate-200 bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400"
+                    aria-label="Illustrative data"
+                  >
+                    Illustrative
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <span className="text-xs">Demo placeholder — not from a live source</span>
+                </TooltipContent>
+              </Tooltip>
             )}
           </div>
 

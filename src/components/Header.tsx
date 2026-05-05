@@ -1,4 +1,4 @@
-import { ChevronDown, RefreshCw } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 
 export const Header = () => {
   return (
@@ -20,16 +20,7 @@ export const Header = () => {
           </button>
         </div>
 
-        <div className="flex flex-col items-end">
-          <button
-            type="button"
-            className="inline-flex items-center gap-2 rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white shadow-sm hover:opacity-90"
-          >
-            <RefreshCw size={16} />
-            Refresh data
-          </button>
-          <span className="mt-1 text-xs text-slate-500">Last refreshed: 5 May 2026, 14:32</span>
-        </div>
+        <div />
       </div>
     </header>
   );

@@ -154,6 +154,7 @@ export type Database = {
           publication_name: string
           publisher: string
           series_landing_page_url: string
+          simulate_failure: boolean
           update_cadence: string
           updated_at: string
         }
@@ -166,6 +167,7 @@ export type Database = {
           publication_name: string
           publisher: string
           series_landing_page_url: string
+          simulate_failure?: boolean
           update_cadence: string
           updated_at?: string
         }
@@ -178,6 +180,7 @@ export type Database = {
           publication_name?: string
           publisher?: string
           series_landing_page_url?: string
+          simulate_failure?: boolean
           update_cadence?: string
           updated_at?: string
         }
@@ -195,8 +198,12 @@ export type Database = {
           methodology_window_end: string | null
           methodology_window_start: string | null
           qualifier_label: string | null
+          rationale: string | null
           threshold_type: string
           threshold_value: number
+          trust_override_captured_at: string | null
+          trust_override_source: string | null
+          trust_override_value: number | null
           units: string
           updated_at: string
         }
@@ -211,8 +218,12 @@ export type Database = {
           methodology_window_end?: string | null
           methodology_window_start?: string | null
           qualifier_label?: string | null
+          rationale?: string | null
           threshold_type?: string
           threshold_value: number
+          trust_override_captured_at?: string | null
+          trust_override_source?: string | null
+          trust_override_value?: number | null
           units?: string
           updated_at?: string
         }
@@ -227,8 +238,12 @@ export type Database = {
           methodology_window_end?: string | null
           methodology_window_start?: string | null
           qualifier_label?: string | null
+          rationale?: string | null
           threshold_type?: string
           threshold_value?: number
+          trust_override_captured_at?: string | null
+          trust_override_source?: string | null
+          trust_override_value?: number | null
           units?: string
           updated_at?: string
         }

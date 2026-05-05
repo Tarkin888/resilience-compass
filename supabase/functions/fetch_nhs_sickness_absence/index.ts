@@ -51,6 +51,11 @@ Deno.serve(async (req) => {
       return respond({ ok: false, kri_id: KRI_ID, outcome: "page_not_found", error: "source row missing" }, 500);
     }
 
+    if ((source as { simulate_failure?: boolean }).simulate_failure) {
+      await writeLog("page_not_found", "simulated failure (admin toggle)");
+      return respond({ ok: false, kri_id: KRI_ID, outcome: "page_not_found", error: "simulated failure" }, 200);
+    }
+
     let def: { month: string; year: number };
     if (body.month !== undefined || body.year !== undefined) {
       const v = validateEditionInput(body.month, body.year);

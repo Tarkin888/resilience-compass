@@ -19,7 +19,7 @@ Deno.serve(async (req) => {
     });
   }
 
-  let body: { action?: string; kri_id?: string; last_known_file_url?: string } = {};
+  let body: { action?: string; kri_id?: string; last_known_file_url?: string; simulate_failure?: boolean } = {};
   try { body = await req.json(); } catch { /* ignore */ }
 
   const supabase = createClient(
@@ -64,6 +64,26 @@ Deno.serve(async (req) => {
       outcome: "page_not_found",
       error_detail: "Simulated failure for demo (admin-triggered).",
     });
+    if (error) {
+      return new Response(JSON.stringify({ ok: false, error: error.message }), {
+        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    return new Response(JSON.stringify({ ok: true }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
+  if (body.action === "set_simulate_failure") {
+    if (!body.kri_id) {
+      return new Response(JSON.stringify({ ok: false, error: "kri_id required" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const { error } = await supabase
+      .from("sources")
+      .update({ simulate_failure: !!body.simulate_failure })
+      .eq("kri_id", body.kri_id);
     if (error) {
       return new Response(JSON.stringify({ ok: false, error: error.message }), {
         status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
