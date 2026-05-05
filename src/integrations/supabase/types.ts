@@ -14,7 +14,234 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      capture_log: {
+        Row: {
+          attempt_at: string
+          error_detail: string | null
+          id: string
+          kri_id: string
+          linked_capture_id: string | null
+          outcome: string
+        }
+        Insert: {
+          attempt_at?: string
+          error_detail?: string | null
+          id?: string
+          kri_id: string
+          linked_capture_id?: string | null
+          outcome: string
+        }
+        Update: {
+          attempt_at?: string
+          error_detail?: string | null
+          id?: string
+          kri_id?: string
+          linked_capture_id?: string | null
+          outcome?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "capture_log_linked_capture_id_fkey"
+            columns: ["linked_capture_id"]
+            isOneToOne: false
+            referencedRelation: "kri_captures"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      kri_captures: {
+        Row: {
+          captured_at: string
+          edition_label: string
+          edition_page_url: string
+          file_sha256: string | null
+          file_size_bytes: number | null
+          file_source_url: string | null
+          headline_unit: string | null
+          headline_value: number | null
+          id: string
+          kri_id: string
+          prior_value: number | null
+          raw_extract: Json | null
+          source_id: string
+        }
+        Insert: {
+          captured_at?: string
+          edition_label: string
+          edition_page_url: string
+          file_sha256?: string | null
+          file_size_bytes?: number | null
+          file_source_url?: string | null
+          headline_unit?: string | null
+          headline_value?: number | null
+          id?: string
+          kri_id: string
+          prior_value?: number | null
+          raw_extract?: Json | null
+          source_id: string
+        }
+        Update: {
+          captured_at?: string
+          edition_label?: string
+          edition_page_url?: string
+          file_sha256?: string | null
+          file_size_bytes?: number | null
+          file_source_url?: string | null
+          headline_unit?: string | null
+          headline_value?: number | null
+          id?: string
+          kri_id?: string
+          prior_value?: number | null
+          raw_extract?: Json | null
+          source_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kri_captures_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "sources"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      kri_definitions: {
+        Row: {
+          description: string | null
+          display_name: string
+          display_order: number
+          id: string
+          illustrative_status: string | null
+          illustrative_target: number | null
+          illustrative_trend: string | null
+          illustrative_value: number | null
+          is_live: boolean
+          kri_id: string
+        }
+        Insert: {
+          description?: string | null
+          display_name: string
+          display_order?: number
+          id?: string
+          illustrative_status?: string | null
+          illustrative_target?: number | null
+          illustrative_trend?: string | null
+          illustrative_value?: number | null
+          is_live?: boolean
+          kri_id: string
+        }
+        Update: {
+          description?: string | null
+          display_name?: string
+          display_order?: number
+          id?: string
+          illustrative_status?: string | null
+          illustrative_target?: number | null
+          illustrative_trend?: string | null
+          illustrative_value?: number | null
+          is_live?: boolean
+          kri_id?: string
+        }
+        Relationships: []
+      }
+      sources: {
+        Row: {
+          edition_page_url_pattern: string
+          file_format: string
+          id: string
+          kri_id: string
+          last_known_file_url: string | null
+          publication_name: string
+          publisher: string
+          series_landing_page_url: string
+          update_cadence: string
+          updated_at: string
+        }
+        Insert: {
+          edition_page_url_pattern: string
+          file_format?: string
+          id?: string
+          kri_id: string
+          last_known_file_url?: string | null
+          publication_name: string
+          publisher: string
+          series_landing_page_url: string
+          update_cadence: string
+          updated_at?: string
+        }
+        Update: {
+          edition_page_url_pattern?: string
+          file_format?: string
+          id?: string
+          kri_id?: string
+          last_known_file_url?: string | null
+          publication_name?: string
+          publisher?: string
+          series_landing_page_url?: string
+          update_cadence?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      thresholds: {
+        Row: {
+          effective_from: string
+          id: string
+          is_official_nhs_target: boolean
+          kri_id: string
+          methodology_label: string
+          methodology_long: string | null
+          methodology_n: number | null
+          methodology_window_end: string | null
+          methodology_window_start: string | null
+          qualifier_label: string | null
+          threshold_type: string
+          threshold_value: number
+          units: string
+          updated_at: string
+        }
+        Insert: {
+          effective_from?: string
+          id?: string
+          is_official_nhs_target?: boolean
+          kri_id: string
+          methodology_label: string
+          methodology_long?: string | null
+          methodology_n?: number | null
+          methodology_window_end?: string | null
+          methodology_window_start?: string | null
+          qualifier_label?: string | null
+          threshold_type?: string
+          threshold_value: number
+          units?: string
+          updated_at?: string
+        }
+        Update: {
+          effective_from?: string
+          id?: string
+          is_official_nhs_target?: boolean
+          kri_id?: string
+          methodology_label?: string
+          methodology_long?: string | null
+          methodology_n?: number | null
+          methodology_window_end?: string | null
+          methodology_window_start?: string | null
+          qualifier_label?: string | null
+          threshold_type?: string
+          threshold_value?: number
+          units?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "thresholds_kri_id_fkey"
+            columns: ["kri_id"]
+            isOneToOne: false
+            referencedRelation: "sources"
+            referencedColumns: ["kri_id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
