@@ -14,6 +14,9 @@ import {
   fetchEditionPage,
   findXlsxLink,
   Outcome,
+  requireAdminAuth,
+  sanitiseErrorDetail,
+  validateEditionInput,
 } from "../_shared/scrape.ts";
 
 const KRI_ID = "vacancy";
@@ -25,6 +28,9 @@ interface InvokeBody {
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+
+  const authError = requireAdminAuth(req);
+  if (authError) return authError;
 
   const supabase = createClient(
     Deno.env.get("SUPABASE_URL")!,
@@ -38,7 +44,7 @@ Deno.serve(async (req) => {
 
   const writeLog = async (outcome: Outcome, error_detail?: string, linked_capture_id?: string) => {
     await supabase.from("capture_log").insert({
-      kri_id: KRI_ID, outcome, error_detail: error_detail ?? null, linked_capture_id: linked_capture_id ?? null,
+      kri_id: KRI_ID, outcome, error_detail: sanitiseErrorDetail(error_detail), linked_capture_id: linked_capture_id ?? null,
     });
   };
   const respond = (r: CaptureResponse, status = 200) =>
@@ -52,9 +58,16 @@ Deno.serve(async (req) => {
       return respond({ ok: false, kri_id: KRI_ID, outcome: "page_not_found", error: "source row missing" }, 500);
     }
 
-    const def = body.month && body.year
-      ? { month: body.month.toLowerCase(), year: body.year }
-      : defaultQuarterlyEdition();
+    let def: { month: string; year: number };
+    if (body.month !== undefined || body.year !== undefined) {
+      const v = validateEditionInput(body.month, body.year);
+      if (!v.ok) {
+        return respond({ ok: false, kri_id: KRI_ID, outcome: "page_not_found", error: v.error }, 400);
+      }
+      def = { month: v.month, year: v.year };
+    } else {
+      def = defaultQuarterlyEdition();
+    }
     const editionUrl = buildEditionUrl(source.edition_page_url_pattern, def.month, def.year);
     const label = editionLabel(def.month, def.year);
 

@@ -5,7 +5,7 @@ import type { Tables } from "@/integrations/supabase/types";
 export type KriDefinition = Tables<"kri_definitions">;
 export type KriCapture = Tables<"kri_captures">;
 export type Threshold = Tables<"thresholds">;
-export type CaptureLog = Tables<"capture_log">;
+export type CaptureLog = Pick<Tables<"capture_log">, "id" | "kri_id" | "outcome" | "attempt_at">;
 export type Source = Tables<"sources">;
 
 export interface HumanCapitalData {
@@ -38,7 +38,7 @@ export function useHumanCapitalData() {
         supabase.from("kri_captures").select("*").order("captured_at", { ascending: false }),
         supabase.from("thresholds").select("*"),
         supabase.from("sources").select("*"),
-        supabase.from("capture_log").select("*").order("attempt_at", { ascending: false }),
+        supabase.from("capture_log").select("id,kri_id,outcome,attempt_at").order("attempt_at", { ascending: false }),
       ]);
 
       const firstError = [defs, caps, thresh, srcs, logs].find((r) => r.error)?.error;

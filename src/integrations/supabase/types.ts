@@ -244,7 +244,27 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      capture_log_public: {
+        Row: {
+          attempt_at: string | null
+          id: string | null
+          kri_id: string | null
+          outcome: string | null
+        }
+        Insert: {
+          attempt_at?: string | null
+          id?: string | null
+          kri_id?: string | null
+          outcome?: string | null
+        }
+        Update: {
+          attempt_at?: string | null
+          id?: string | null
+          kri_id?: string | null
+          outcome?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never

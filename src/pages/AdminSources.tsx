@@ -17,13 +17,30 @@ const FN_MAP: Record<string, string> = {
   sickness_absence: "fetch_nhs_sickness_absence",
 };
 
-const PASSWORD_KEY = "rc_admin_pw";
+const SESSION_KEY = "rc_admin_session";
 
 export default function AdminSources() {
-  const stored = typeof window !== "undefined" ? sessionStorage.getItem(PASSWORD_KEY) : null;
-  const [password, setPassword] = useState(stored ?? "");
-  const [authed, setAuthed] = useState(!!stored);
+  const stored = typeof window !== "undefined" ? sessionStorage.getItem(SESSION_KEY) : null;
+  const [password, setPassword] = useState("");
+  const [authed, setAuthed] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
+
+  // Re-verify any persisted session token on mount; never trust sessionStorage alone.
+  useEffect(() => {
+    if (!stored) return;
+    (async () => {
+      const { data, error } = await supabase.functions.invoke("admin_action", {
+        body: { action: "verify" },
+        headers: { "x-admin-password": stored },
+      });
+      if (!error && (data as { ok?: boolean })?.ok) {
+        setPassword(stored);
+        setAuthed(true);
+      } else {
+        sessionStorage.removeItem(SESSION_KEY);
+      }
+    })();
+  }, [stored]);
 
   const [sources, setSources] = useState<SourceRow[]>([]);
   const [latestCaps, setLatestCaps] = useState<Record<string, CaptureRow>>({});
@@ -46,11 +63,13 @@ export default function AdminSources() {
     (caps ?? []).forEach((c: CaptureRow) => { if (!capMap[c.kri_id]) capMap[c.kri_id] = c; });
     setLatestCaps(capMap);
 
-    const { data: logs } = await supabase
-      .from("capture_log").select("kri_id,outcome,attempt_at,error_detail")
-      .order("attempt_at", { ascending: false });
+    const { data: logResp } = await supabase.functions.invoke("admin_action", {
+      body: { action: "list_recent_logs" },
+      headers: { "x-admin-password": password },
+    });
+    const logs = (logResp as { logs?: LogRow[] } | null)?.logs ?? [];
     const logMap: Record<string, LogRow> = {};
-    (logs ?? []).forEach((l: LogRow) => { if (!logMap[l.kri_id]) logMap[l.kri_id] = l; });
+    logs.forEach((l) => { if (!logMap[l.kri_id]) logMap[l.kri_id] = l; });
     setLatestLogs(logMap);
   };
 
@@ -67,7 +86,7 @@ export default function AdminSources() {
       setAuthError("Incorrect password.");
       return;
     }
-    sessionStorage.setItem(PASSWORD_KEY, password);
+    sessionStorage.setItem(SESSION_KEY, password);
     setAuthed(true);
   };
 
@@ -86,7 +105,10 @@ export default function AdminSources() {
     setBusy((b) => ({ ...b, [kri_id]: true }));
     setResults((r) => ({ ...r, [kri_id]: "Running…" }));
     const fn = FN_MAP[kri_id];
-    const { data, error } = await supabase.functions.invoke(fn, { body: {} });
+    const { data, error } = await supabase.functions.invoke(fn, {
+      body: {},
+      headers: { "x-admin-password": password },
+    });
     setBusy((b) => ({ ...b, [kri_id]: false }));
     if (error) {
       setResults((r) => ({ ...r, [kri_id]: `Error: ${error.message}` }));
