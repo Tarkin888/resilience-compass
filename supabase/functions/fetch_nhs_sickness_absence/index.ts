@@ -25,6 +25,9 @@ interface InvokeBody { month?: string; year?: number; }
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
+  const authError = requireAdminAuth(req);
+  if (authError) return authError;
+
   const supabase = createClient(
     Deno.env.get("SUPABASE_URL")!,
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
@@ -35,7 +38,7 @@ Deno.serve(async (req) => {
 
   const writeLog = async (outcome: Outcome, error_detail?: string, linked_capture_id?: string) => {
     await supabase.from("capture_log").insert({
-      kri_id: KRI_ID, outcome, error_detail: error_detail ?? null, linked_capture_id: linked_capture_id ?? null,
+      kri_id: KRI_ID, outcome, error_detail: sanitiseErrorDetail(error_detail), linked_capture_id: linked_capture_id ?? null,
     });
   };
   const respond = (r: CaptureResponse, status = 200) =>
