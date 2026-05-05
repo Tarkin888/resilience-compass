@@ -84,7 +84,7 @@ export default function AdminSources() {
       setAuthError("Incorrect password.");
       return;
     }
-    sessionStorage.setItem(PASSWORD_KEY, password);
+    sessionStorage.setItem(SESSION_KEY, password);
     setAuthed(true);
   };
 
