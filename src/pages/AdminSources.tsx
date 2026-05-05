@@ -63,11 +63,13 @@ export default function AdminSources() {
     (caps ?? []).forEach((c: CaptureRow) => { if (!capMap[c.kri_id]) capMap[c.kri_id] = c; });
     setLatestCaps(capMap);
 
-    const { data: logs } = await supabase
-      .from("capture_log").select("kri_id,outcome,attempt_at,error_detail")
-      .order("attempt_at", { ascending: false });
+    const { data: logResp } = await supabase.functions.invoke("admin_action", {
+      body: { action: "list_recent_logs" },
+      headers: { "x-admin-password": password },
+    });
+    const logs = (logResp as { logs?: LogRow[] } | null)?.logs ?? [];
     const logMap: Record<string, LogRow> = {};
-    (logs ?? []).forEach((l: LogRow) => { if (!logMap[l.kri_id]) logMap[l.kri_id] = l; });
+    logs.forEach((l) => { if (!logMap[l.kri_id]) logMap[l.kri_id] = l; });
     setLatestLogs(logMap);
   };
 
