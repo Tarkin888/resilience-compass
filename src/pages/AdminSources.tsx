@@ -96,6 +96,20 @@ export default function AdminSources() {
     load();
   };
 
+  const simulateFailure = async (kri_id: string) => {
+    setBusy((b) => ({ ...b, [kri_id]: true }));
+    const { error } = await supabase.functions.invoke("admin_action", {
+      body: { action: "simulate_failure", kri_id },
+      headers: { "x-admin-password": password },
+    });
+    setBusy((b) => ({ ...b, [kri_id]: false }));
+    setResults((r) => ({
+      ...r,
+      [kri_id]: error ? `Error: ${error.message}` : "Simulated failure logged. Tab 1 will now show a loud-failure banner.",
+    }));
+    load();
+  };
+
   if (!authed) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
@@ -141,14 +155,24 @@ export default function AdminSources() {
                     Pattern: <code className="break-all">{s.edition_page_url_pattern}</code>
                   </p>
                 </div>
-                <button
-                  type="button"
-                  disabled={busy[s.kri_id]}
-                  onClick={() => runCapture(s.kri_id)}
-                  className="rounded-md bg-brand px-4 py-2 text-sm font-medium text-white hover:opacity-90 disabled:opacity-50"
-                >
-                  {busy[s.kri_id] ? "Running…" : "Run capture now"}
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    disabled={busy[s.kri_id]}
+                    onClick={() => runCapture(s.kri_id)}
+                    className="rounded-md bg-brand px-4 py-2 text-sm font-medium text-white hover:opacity-90 disabled:opacity-50"
+                  >
+                    {busy[s.kri_id] ? "Running…" : "Run capture now"}
+                  </button>
+                  <button
+                    type="button"
+                    disabled={busy[s.kri_id]}
+                    onClick={() => simulateFailure(s.kri_id)}
+                    className="rounded-md border border-amber-300 bg-amber-50 px-4 py-2 text-sm font-medium text-amber-900 hover:bg-amber-100 disabled:opacity-50"
+                  >
+                    Simulate failure
+                  </button>
+                </div>
               </div>
 
               <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">

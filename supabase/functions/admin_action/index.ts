@@ -53,6 +53,27 @@ Deno.serve(async (req) => {
     });
   }
 
+  if (body.action === "simulate_failure") {
+    if (!body.kri_id) {
+      return new Response(JSON.stringify({ ok: false, error: "kri_id required" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const { error } = await supabase.from("capture_log").insert({
+      kri_id: body.kri_id,
+      outcome: "page_not_found",
+      error_detail: "Simulated failure for demo (admin-triggered).",
+    });
+    if (error) {
+      return new Response(JSON.stringify({ ok: false, error: error.message }), {
+        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    return new Response(JSON.stringify({ ok: true }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
   return new Response(JSON.stringify({ ok: false, error: "unknown action" }), {
     status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
