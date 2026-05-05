@@ -198,7 +198,11 @@ export default function AdminSources() {
           const cap = latestCaps[s.kri_id];
           const log = latestLogs[s.kri_id];
           return (
-            <section key={s.id} className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+            <section
+              key={s.id}
+              id={s.kri_id}
+              className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm scroll-mt-6"
+            >
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <h2 className="text-lg font-semibold">{s.publication_name}</h2>
@@ -224,9 +228,30 @@ export default function AdminSources() {
                     onClick={() => simulateFailure(s.kri_id)}
                     className="rounded-md border border-amber-300 bg-amber-50 px-4 py-2 text-sm font-medium text-amber-900 hover:bg-amber-100 disabled:opacity-50"
                   >
-                    Simulate failure
+                    Log a failure (one-shot)
                   </button>
                 </div>
+              </div>
+
+              <div className="mt-4 flex items-center justify-between rounded-md border border-slate-200 bg-slate-50 px-4 py-3">
+                <div>
+                  <p className="text-sm font-medium text-slate-900">Simulate failure for next refresh</p>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    When on, the next refresh for this source will fail without changing the live URL pattern. Used to demo the loud-failure banner.
+                  </p>
+                </div>
+                <label className="inline-flex items-center gap-2 cursor-pointer select-none">
+                  <span className={`text-xs font-medium ${s.simulate_failure ? "text-red-700" : "text-slate-500"}`}>
+                    {s.simulate_failure ? "ON" : "OFF"}
+                  </span>
+                  <input
+                    type="checkbox"
+                    checked={!!s.simulate_failure}
+                    disabled={busy[s.kri_id]}
+                    onChange={(e) => toggleSimulateFailure(s.kri_id, e.target.checked)}
+                    className="h-4 w-4"
+                  />
+                </label>
               </div>
 
               <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
