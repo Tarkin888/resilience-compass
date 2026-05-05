@@ -76,19 +76,39 @@ export default function AdminSources() {
 
   useEffect(() => { if (authed) load(); }, [authed]);
 
-  const verify = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const verify = async (e?: React.FormEvent | React.MouseEvent) => {
+    if (e && "preventDefault" in e) e.preventDefault();
     setAuthError(null);
-    const { data, error } = await supabase.functions.invoke("admin_action", {
-      body: { action: "verify" },
+    try {
+      const { data, error } = await supabase.functions.invoke("admin_action", {
+        body: { action: "verify" },
+        headers: { "x-admin-password": password },
+      });
+      if (error || !(data as { ok?: boolean })?.ok) {
+        setAuthError("Incorrect password.");
+        return;
+      }
+      sessionStorage.setItem(SESSION_KEY, password);
+      setAuthed(true);
+    } catch (err) {
+      setAuthError("Sign-in failed. Please try again.");
+    }
+  };
+
+  const toggleSimulateFailure = async (kri_id: string, value: boolean) => {
+    setBusy((b) => ({ ...b, [kri_id]: true }));
+    const { error } = await supabase.functions.invoke("admin_action", {
+      body: { action: "set_simulate_failure", kri_id, simulate_failure: value },
       headers: { "x-admin-password": password },
     });
-    if (error || !(data as { ok?: boolean })?.ok) {
-      setAuthError("Incorrect password.");
-      return;
-    }
-    sessionStorage.setItem(SESSION_KEY, password);
-    setAuthed(true);
+    setBusy((b) => ({ ...b, [kri_id]: false }));
+    setResults((r) => ({
+      ...r,
+      [kri_id]: error ? `Error: ${error.message}` : value
+        ? "Simulate failure: ON. Next refresh for this source will fail and the loud-failure banner will appear."
+        : "Simulate failure: OFF. Normal capture behaviour restored.",
+    }));
+    load();
   };
 
   const saveOverride = async (kri_id: string) => {
