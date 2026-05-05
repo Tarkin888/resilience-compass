@@ -88,6 +88,7 @@ Deno.serve(async (req) => {
     return new Response(JSON.stringify({ ok: true, logs: data }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
+  }
 
   return new Response(JSON.stringify({ ok: false, error: "unknown action" }), {
     status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
