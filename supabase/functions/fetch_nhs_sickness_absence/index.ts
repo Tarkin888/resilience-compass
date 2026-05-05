@@ -51,9 +51,16 @@ Deno.serve(async (req) => {
       return respond({ ok: false, kri_id: KRI_ID, outcome: "page_not_found", error: "source row missing" }, 500);
     }
 
-    const def = body.month && body.year
-      ? { month: body.month.toLowerCase(), year: body.year }
-      : defaultMonthlyEdition();
+    let def: { month: string; year: number };
+    if (body.month !== undefined || body.year !== undefined) {
+      const v = validateEditionInput(body.month, body.year);
+      if (!v.ok) {
+        return respond({ ok: false, kri_id: KRI_ID, outcome: "page_not_found", error: v.error }, 400);
+      }
+      def = { month: v.month, year: v.year };
+    } else {
+      def = defaultMonthlyEdition();
+    }
     const editionUrl = buildEditionUrl(source.edition_page_url_pattern, def.month, def.year);
     const label = editionLabel(def.month, def.year);
 
