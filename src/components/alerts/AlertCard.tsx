@@ -8,9 +8,10 @@ import type {
   Source,
   Threshold,
 } from "@/hooks/useHumanCapitalData";
-import { SEVERITY_STYLES, formatDate, trendArrow } from "./severity";
+import { SEVERITY_STYLES, formatDate, formatDateTime, trendArrow } from "./severity";
 import { ThresholdPanel } from "./ThresholdPanel";
 import { CapturedEditionsPanel } from "./CapturedEditionsPanel";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface Props {
   definition: KriDefinition;
