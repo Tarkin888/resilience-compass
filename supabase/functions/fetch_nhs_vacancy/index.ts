@@ -17,6 +17,7 @@ import {
   requireAdminAuth,
   sanitiseErrorDetail,
   validateEditionInput,
+  withinCadenceWindow,
 } from "../_shared/scrape.ts";
 
 const KRI_ID = "vacancy";
@@ -85,6 +86,11 @@ Deno.serve(async (req) => {
 
     const page = await fetchEditionPage(editionUrl);
     if (!page.ok) {
+      if (page.status === 404 && withinCadenceWindow(existing?.[0] ? (await supabase.from("kri_captures").select("captured_at").eq("kri_id", KRI_ID).order("captured_at", { ascending: false }).limit(1)).data?.[0]?.captured_at : null, source.update_cadence)) {
+        const friendly = "No new edition published yet — next check after expected publication window.";
+        await writeLog("no_new_edition", friendly);
+        return respond({ ok: false, kri_id: KRI_ID, outcome: "no_new_edition", error: friendly }, 200);
+      }
       const detail = `edition page returned ${page.status} for ${editionUrl}`;
       await writeLog("page_not_found", detail);
       return respond({ ok: false, kri_id: KRI_ID, outcome: "page_not_found", error: detail }, 200);
