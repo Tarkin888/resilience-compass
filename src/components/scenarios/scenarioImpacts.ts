@@ -49,13 +49,13 @@ export const SCENARIO_IMPACTS: Record<string, ScenarioImpact> = {
   "winter-surge": {
     rows: [
       row("Sickness Absence Rate", 5.2, 8.5, "Critical"),
-      row("Staff Vacancies", 9.1, 10.4, "Critical"),
-      row("Training Compliance", 78.0, 70.0, "Warning"),
-      row("Voluntary Turnover", 13.1, 13.1, "Warning"),
-      row("Staff Engagement Score", 6.4, 5.8, "Watch"),
+      row("Staff Vacancies", 9.1, 9.1, "Warning"),
+      row("Training Compliance", 78.0, 65.0, "Warning"),
+      row("Voluntary Turnover", 13.1, 16.4, "Warning"),
+      row("Staff Engagement Score", 6.4, 5.7, "Watch"),
     ],
     narrative:
-      "Under this scenario, the Human Capital score falls from 54 to 38 — entering the Critical range. The dominant driver is a 63% rise in sickness absence, with knock-on effects on training compliance and staff engagement as workforce pressure compounds.",
+      "Under this scenario, the Human Capital score falls from 54 to 38 — entering the Critical range. The primary driver is a 63% increase in sickness absence, with knock-on impacts on training compliance and staff engagement. Vacancy rate is held constant in this scenario.",
   },
   "nursing-shortage": {
     rows: [
