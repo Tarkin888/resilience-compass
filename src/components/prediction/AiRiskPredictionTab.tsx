@@ -324,7 +324,7 @@ export const AiRiskPredictionTab = () => {
               </span>
               <div className="min-w-0 flex-1">
                 <div className="font-semibold text-slate-900">{i.title}</div>
-                <p className="mt-1 text-sm text-slate-600">{i.description}</p>
+                <p className="mt-1 text-base text-slate-600">{i.description}</p>
                 <span className="mt-2 inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] font-medium text-slate-600">
                   Targets: {i.targets}
                 </span>
