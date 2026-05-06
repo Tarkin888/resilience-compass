@@ -266,6 +266,7 @@ export const LiveRiskAlertsTab = () => {
               key={c}
               type="button"
               onClick={() => setSeverityFilter(c)}
+              aria-pressed={severityFilter === c}
               className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
                 severityFilter === c
                   ? "bg-slate-900 text-white"
@@ -289,6 +290,7 @@ export const LiveRiskAlertsTab = () => {
               key={key}
               type="button"
               onClick={() => setSourceFilter(key)}
+              aria-pressed={sourceFilter === key}
               className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
                 sourceFilter === key
                   ? "bg-slate-900 text-white"

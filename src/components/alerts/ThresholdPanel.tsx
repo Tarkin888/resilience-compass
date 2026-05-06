@@ -108,6 +108,11 @@ export const ThresholdPanel = ({
               </div>
               <div className="mt-1">
                 {source.publication_name}
+                {source.kri_id === "sickness_absence" && (
+                  <>
+                    , <em>Table 1, England column</em>
+                  </>
+                )}
                 {editionLabel ? <span className="text-slate-500"> · {editionLabel}</span> : null}
               </div>
               <div className="text-xs text-slate-500">{source.publisher}</div>
