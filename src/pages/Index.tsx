@@ -4,9 +4,18 @@ import { ScoreCard } from "@/components/ScoreCard";
 import { TabBar, TabId } from "@/components/TabBar";
 import { TabPlaceholder } from "@/components/TabPlaceholder";
 import { LiveRiskAlertsTab } from "@/components/alerts/LiveRiskAlertsTab";
+import { ScenarioLibraryTab } from "@/components/scenarios/ScenarioLibraryTab";
+import { VisualiserMockup } from "@/components/scenarios/VisualiserMockup";
+import type { Scenario } from "@/components/scenarios/scenarios";
 
 const Index = () => {
   const [active, setActive] = useState<TabId>("alerts");
+  const [loadedScenario, setLoadedScenario] = useState<Scenario | null>(null);
+
+  const handleLoadScenario = (s: Scenario) => {
+    setLoadedScenario(s);
+    setActive("visualiser");
+  };
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 text-sm leading-relaxed">
@@ -15,18 +24,8 @@ const Index = () => {
       <TabBar active={active} onChange={setActive} />
       <main className="px-6 py-6">
         {active === "alerts" && <LiveRiskAlertsTab />}
-        {active === "library" && (
-          <TabPlaceholder
-            title="Scenario Testing Library"
-            purpose="A catalogue of resilience scenarios you can run against your organisation."
-          />
-        )}
-        {active === "visualiser" && (
-          <TabPlaceholder
-            title="Scenario Impact Visualiser"
-            purpose="Visualise how each scenario shifts your Human Capital score and sub-indices."
-          />
-        )}
+        {active === "library" && <ScenarioLibraryTab onLoadScenario={handleLoadScenario} />}
+        {active === "visualiser" && <VisualiserMockup scenario={loadedScenario} />}
         {active === "prediction" && (
           <TabPlaceholder
             title="AI Risk Prediction"
