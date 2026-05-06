@@ -49,6 +49,8 @@ export const LiveRiskAlertsTab = () => {
   const [sourceFilter, setSourceFilter] = useState<SourceFilter>("all");
   const [dismissedBanners, setDismissedBanners] = useState<Set<string>>(new Set());
   const [refreshing, setRefreshing] = useState(false);
+  const [lastCheckedAt, setLastCheckedAt] = useState<Date | null>(null);
+  const [lastCheckSummary, setLastCheckSummary] = useState<string>("");
 
   const simulateFailure = params.get("simulateFailure");
 
