@@ -139,6 +139,7 @@ export const LiveRiskAlertsTab = () => {
     rows.forEach((r) => {
       if (!r.def.is_live) return;
       const log = data.latestLogByKri[r.def.kri_id];
+      if (log && BENIGN_OUTCOMES.has(log.outcome)) return;
       const dbFailure = log && FAILURE_OUTCOMES.has(log.outcome);
       const simulated = simulateFailure === r.def.kri_id || (r.source as { simulate_failure?: boolean } | undefined)?.simulate_failure;
       if (dbFailure || simulated) {
