@@ -62,18 +62,21 @@ Deno.serve(async (req) => {
       }
       def = { month: v.month, year: v.year };
     } else {
+      // The edition page URL pattern targets the publication month, which is
+      // typically ~3 months after the data month for the Sickness Absence
+      // series (e.g. the January 2026 data row is published in the April 2026
+      // edition, available from late April / early May).
       def = defaultMonthlyEdition();
     }
     const editionUrl = buildEditionUrl(source.edition_page_url_pattern, def.month, def.year);
-    const label = editionLabel(def.month, def.year);
+    // NB: `label` is provisional; the authoritative edition label is derived
+    // below from the latest populated data row in Table 1, so it always
+    // matches the headline figure.
+    const provisionalLabel = editionLabel(def.month, def.year);
 
     const { data: existing } = await supabase
       .from("kri_captures").select("id, edition_label, captured_at")
       .eq("kri_id", KRI_ID).order("captured_at", { ascending: false }).limit(1);
-    if (existing && existing[0]?.edition_label === label) {
-      await writeLog("no_new_edition", `already captured ${label}`);
-      return respond({ ok: true, kri_id: KRI_ID, outcome: "no_new_edition", edition_label: label });
-    }
     const lastCapturedAt = existing?.[0]?.captured_at ?? null;
 
     const page = await fetchEditionPage(editionUrl);
@@ -108,6 +111,7 @@ Deno.serve(async (req) => {
 
     let headline: number | null = null;
     let prior: number | null = null;
+    let dataMonthLabel: string | null = null;
     try {
       const wb = XLSX.read(bytes, { type: "array" });
       const sheetName = wb.SheetNames.find((n) => /^table\s*1/i.test(n)) ?? wb.SheetNames[0];
@@ -124,24 +128,94 @@ Deno.serve(async (req) => {
       }
       if (headerIdx < 0) throw new Error("'England' header not found in Table 1");
 
+      // Derive the data-month label from the latest populated row of Table 1.
+      // Table 1's leftmost columns identify the period (e.g. "Year"+"Month",
+      // a single "Date" cell, or a label like "Jan-26"). We pick the last
+      // row where the England column has a numeric value, then parse the
+      // period from columns 0..englandCol-1.
+      const monthNames = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+      const monthShort = ["jan","feb","mar","apr","may","jun","jul","aug","sep","oct","nov","dec"];
+      const formatLabel = (m: number, y: number) =>
+        m >= 0 && m <= 11 && y > 1900 ? `${monthNames[m]} ${y}` : null;
+      const parsePeriod = (cells: unknown[]): string | null => {
+        // Excel serial date or JS Date
+        for (const c of cells) {
+          if (c instanceof Date) {
+            return formatLabel(c.getUTCMonth(), c.getUTCFullYear());
+          }
+          if (typeof c === "number" && c > 20000 && c < 80000) {
+            // Excel serial → ms since 1899-12-30
+            const ms = Math.round((c - 25569) * 86400 * 1000);
+            const d = new Date(ms);
+            const lbl = formatLabel(d.getUTCMonth(), d.getUTCFullYear());
+            if (lbl) return lbl;
+          }
+        }
+        // Year + Month split across cells, in either order
+        let yr: number | null = null;
+        let mo: number | null = null;
+        for (const c of cells) {
+          if (typeof c === "number" && Number.isInteger(c) && c >= 2000 && c <= 2100) yr = c;
+          if (typeof c === "string") {
+            const s = c.trim().toLowerCase();
+            const idxLong = monthNames.findIndex((n) => n.toLowerCase() === s);
+            const idxShort = monthShort.findIndex((n) => s.startsWith(n));
+            if (idxLong >= 0) mo = idxLong;
+            else if (idxShort >= 0) mo = idxShort;
+            // "January 2026" / "Jan 2026" / "Jan-26" in a single cell
+            const m1 = s.match(/^([a-z]{3,9})[\s\-\/]+(\d{2,4})$/i);
+            if (m1) {
+              const im = monthShort.findIndex((n) => m1[1].toLowerCase().startsWith(n));
+              if (im >= 0) {
+                let y = Number(m1[2]);
+                if (y < 100) y += 2000;
+                return formatLabel(im, y);
+              }
+            }
+          }
+        }
+        if (yr != null && mo != null) return formatLabel(mo, yr);
+        return null;
+      };
+
       const series: number[] = [];
+      let lastDataRowIdx = -1;
       for (let i = headerIdx + 1; i < grid.length; i++) {
         const v = (grid[i] as unknown[])[englandCol];
-        if (typeof v === "number" && isFinite(v)) series.push(v);
+        if (typeof v === "number" && isFinite(v)) {
+          series.push(v);
+          lastDataRowIdx = i;
+        }
       }
       if (series.length === 0) throw new Error("no numeric values in England column");
       headline = series[series.length - 1];
       prior = series.length >= 2 ? series[series.length - 2] : null;
+
+      if (lastDataRowIdx >= 0) {
+        const row = grid[lastDataRowIdx] as unknown[];
+        const periodCells = row.slice(0, englandCol);
+        dataMonthLabel = parsePeriod(periodCells);
+      }
     } catch (e) {
       const detail = `extract failed: ${(e as Error).message}`;
       await writeLog("value_extract_failed", detail);
       return respond({ ok: false, kri_id: KRI_ID, outcome: "value_extract_failed", error: detail }, 200);
     }
 
+    // Authoritative edition label = the data month parsed from Table 1.
+    // Falls back to the provisional publication-month label only if parsing
+    // failed (which would also be flagged in the log).
+    const finalLabel = dataMonthLabel ?? provisionalLabel;
+
+    if (existing && existing[0]?.edition_label === finalLabel) {
+      await writeLog("no_new_edition", `already captured ${finalLabel}`);
+      return respond({ ok: true, kri_id: KRI_ID, outcome: "no_new_edition", edition_label: finalLabel });
+    }
+
     const { data: cap, error: capErr } = await supabase.from("kri_captures").insert({
       kri_id: KRI_ID,
       source_id: source.id,
-      edition_label: label,
+      edition_label: finalLabel,
       edition_page_url: editionUrl,
       file_source_url: fileUrl,
       file_size_bytes: size,
@@ -158,7 +232,7 @@ Deno.serve(async (req) => {
     await writeLog("success", undefined, cap.id);
     return respond({
       ok: true, kri_id: KRI_ID, outcome: "success",
-      capture_id: cap.id, edition_label: label, headline_value: Number(headline.toFixed(2)),
+      capture_id: cap.id, edition_label: finalLabel, headline_value: Number(headline.toFixed(2)),
     });
   } catch (e) {
     const msg = (e as Error).message ?? String(e);
