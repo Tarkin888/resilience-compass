@@ -16,6 +16,7 @@ import {
   requireAdminAuth,
   sanitiseErrorDetail,
   validateEditionInput,
+  withinCadenceWindow,
 } from "../_shared/scrape.ts";
 
 const KRI_ID = "sickness_absence";
@@ -67,15 +68,21 @@ Deno.serve(async (req) => {
     const label = editionLabel(def.month, def.year);
 
     const { data: existing } = await supabase
-      .from("kri_captures").select("id, edition_label")
+      .from("kri_captures").select("id, edition_label, captured_at")
       .eq("kri_id", KRI_ID).order("captured_at", { ascending: false }).limit(1);
     if (existing && existing[0]?.edition_label === label) {
       await writeLog("no_new_edition", `already captured ${label}`);
       return respond({ ok: true, kri_id: KRI_ID, outcome: "no_new_edition", edition_label: label });
     }
+    const lastCapturedAt = existing?.[0]?.captured_at ?? null;
 
     const page = await fetchEditionPage(editionUrl);
     if (!page.ok) {
+      if (page.status === 404 && withinCadenceWindow(lastCapturedAt, source.update_cadence)) {
+        const friendly = "No new edition published yet — next check after expected publication window.";
+        await writeLog("no_new_edition", friendly);
+        return respond({ ok: false, kri_id: KRI_ID, outcome: "no_new_edition", error: friendly }, 200);
+      }
       const detail = `edition page returned ${page.status} for ${editionUrl}`;
       await writeLog("page_not_found", detail);
       return respond({ ok: false, kri_id: KRI_ID, outcome: "page_not_found", error: detail }, 200);
