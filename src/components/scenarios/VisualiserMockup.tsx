@@ -283,13 +283,13 @@ const KriRow = ({ row }: { row: KriImpactRow }) => {
           </span>
         </div>
       </td>
-      <td className="px-4 py-3 font-mono tabular-nums text-slate-900">
+      <td className="px-4 py-3 font-mono text-base tabular-nums text-slate-900">
         {formatKriValue(row, row.current)}
       </td>
-      <td className="px-4 py-3 font-mono tabular-nums text-slate-900">
+      <td className="px-4 py-3 font-mono text-base tabular-nums text-slate-900">
         {formatKriValue(row, row.projected)}
       </td>
-      <td className={`px-4 py-3 font-mono tabular-nums font-semibold ${deltaColour}`}>
+      <td className={`px-4 py-3 font-mono text-base tabular-nums font-semibold ${deltaColour}`}>
         {formatKriDelta(row)}
       </td>
       <td className="px-4 py-3">
