@@ -2,10 +2,10 @@ import { useState } from "react";
 import { Header } from "@/components/Header";
 import { ScoreCard } from "@/components/ScoreCard";
 import { TabBar, TabId } from "@/components/TabBar";
-import { TabPlaceholder } from "@/components/TabPlaceholder";
 import { LiveRiskAlertsTab } from "@/components/alerts/LiveRiskAlertsTab";
 import { ScenarioLibraryTab } from "@/components/scenarios/ScenarioLibraryTab";
 import { VisualiserMockup } from "@/components/scenarios/VisualiserMockup";
+import { AiRiskPredictionTab } from "@/components/prediction/AiRiskPredictionTab";
 import type { Scenario } from "@/components/scenarios/scenarios";
 
 const Index = () => {
@@ -31,12 +31,7 @@ const Index = () => {
             onBrowseScenarios={() => setActive("library")}
           />
         )}
-        {active === "prediction" && (
-          <TabPlaceholder
-            title="AI Risk Prediction"
-            purpose="Forward-looking risk forecasts to help you prioritise interventions."
-          />
-        )}
+        {active === "prediction" && <AiRiskPredictionTab />}
       </main>
     </div>
   );
