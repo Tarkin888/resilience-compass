@@ -165,7 +165,7 @@ const ScenarioCard = ({ scenario, onLoad }: { scenario: Scenario; onLoad: () => 
       <h3 className="mt-3 text-base font-semibold leading-snug text-slate-900">{scenario.title}</h3>
 
       <p
-        className="mt-2 text-sm text-slate-600"
+        className="mt-2 text-base text-slate-600"
         style={{
           display: "-webkit-box",
           WebkitLineClamp: 2,

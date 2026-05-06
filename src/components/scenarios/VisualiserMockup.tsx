@@ -158,7 +158,7 @@ const LoadedView = ({
           <div className="text-xs font-medium uppercase tracking-wide text-slate-500">
             Why this projection
           </div>
-          <p className="mt-2 text-sm text-slate-700">{impact.narrative}</p>
+          <p className="mt-2 text-base text-slate-700">{impact.narrative}</p>
           <p className="mt-4 text-xs italic text-slate-500">
             Projected values are illustrative for the 14 May demo. Calculation logic is built
             post-demo.
@@ -283,13 +283,13 @@ const KriRow = ({ row }: { row: KriImpactRow }) => {
           </span>
         </div>
       </td>
-      <td className="px-4 py-3 font-mono tabular-nums text-slate-900">
+      <td className="px-4 py-3 font-mono text-base tabular-nums text-slate-900">
         {formatKriValue(row, row.current)}
       </td>
-      <td className="px-4 py-3 font-mono tabular-nums text-slate-900">
+      <td className="px-4 py-3 font-mono text-base tabular-nums text-slate-900">
         {formatKriValue(row, row.projected)}
       </td>
-      <td className={`px-4 py-3 font-mono tabular-nums font-semibold ${deltaColour}`}>
+      <td className={`px-4 py-3 font-mono text-base tabular-nums font-semibold ${deltaColour}`}>
         {formatKriDelta(row)}
       </td>
       <td className="px-4 py-3">

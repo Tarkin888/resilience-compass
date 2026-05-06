@@ -293,10 +293,11 @@ export const AiRiskPredictionTab = () => {
         <div className="text-xs font-medium uppercase tracking-wide text-slate-500">
           Why this prediction
         </div>
-        <p className="mt-2 text-sm leading-relaxed text-slate-700">
+        <p className="mt-2 text-base leading-relaxed text-slate-700">
           On the current four-quarter trajectory, the Human Capital score is projected to fall to
-          44 by 2026/27 Q4 — entering the Critical range — if no targeted interventions are
-          implemented. The dominant drivers are sustained sickness absence above the pre-pandemic
+          44 by 2026/27 Q4 — approaching the Critical range, with the lower bound of the forecast
+          (38) sitting inside Critical — if no targeted interventions are implemented. The
+          dominant drivers are sustained sickness absence above the pre-pandemic
           benchmark and a vacancy rate that has not closed. Implementing the top three recommended
           interventions in combination could counteract the decline and stabilise the score in the
           55–60 range over the same horizon.
@@ -323,7 +324,7 @@ export const AiRiskPredictionTab = () => {
               </span>
               <div className="min-w-0 flex-1">
                 <div className="font-semibold text-slate-900">{i.title}</div>
-                <p className="mt-1 text-sm text-slate-600">{i.description}</p>
+                <p className="mt-1 text-base text-slate-600">{i.description}</p>
                 <span className="mt-2 inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] font-medium text-slate-600">
                   Targets: {i.targets}
                 </span>
@@ -356,7 +357,7 @@ export const AiRiskPredictionTab = () => {
           />
         </button>
         {explainerOpen && (
-          <div className="space-y-4 border-t border-slate-200 px-6 py-5 text-sm text-slate-700">
+          <div className="space-y-4 border-t border-slate-200 px-6 py-5 text-base text-slate-700">
             <Subsection title="Inputs">
               Four quarters of historical Human Capital score (2025/26 Q1–Q4): 62, 58, 56, 54.
             </Subsection>
