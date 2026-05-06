@@ -293,10 +293,11 @@ export const AiRiskPredictionTab = () => {
         <div className="text-xs font-medium uppercase tracking-wide text-slate-500">
           Why this prediction
         </div>
-        <p className="mt-2 text-sm leading-relaxed text-slate-700">
+        <p className="mt-2 text-base leading-relaxed text-slate-700">
           On the current four-quarter trajectory, the Human Capital score is projected to fall to
-          44 by 2026/27 Q4 — entering the Critical range — if no targeted interventions are
-          implemented. The dominant drivers are sustained sickness absence above the pre-pandemic
+          44 by 2026/27 Q4 — approaching the Critical range, with the lower bound of the forecast
+          (38) sitting inside Critical — if no targeted interventions are implemented. The
+          dominant drivers are sustained sickness absence above the pre-pandemic
           benchmark and a vacancy rate that has not closed. Implementing the top three recommended
           interventions in combination could counteract the decline and stabilise the score in the
           55–60 range over the same horizon.
