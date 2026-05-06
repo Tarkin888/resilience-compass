@@ -23,6 +23,8 @@ const FAILURE_OUTCOMES = new Set([
   "simulated_failure",
 ]);
 
+const BENIGN_OUTCOMES = new Set(["ok", "success", "no_new_edition"]);
+
 const FAILURE_REASONS: Record<string, string> = {
   page_not_found: "Edition URL pattern did not resolve to a published page",
   html_parse_failed: "Edition page parsed but no data file link was found",
@@ -32,6 +34,7 @@ const FAILURE_REASONS: Record<string, string> = {
   fetch_error: "Source could not be fetched",
   error: "Capture pipeline reported an error",
   failure: "Capture pipeline reported a failure",
+  no_new_edition: "No new edition published yet",
 };
 
 const FN_MAP: Record<string, string> = {
@@ -46,6 +49,8 @@ export const LiveRiskAlertsTab = () => {
   const [sourceFilter, setSourceFilter] = useState<SourceFilter>("all");
   const [dismissedBanners, setDismissedBanners] = useState<Set<string>>(new Set());
   const [refreshing, setRefreshing] = useState(false);
+  const [lastCheckedAt, setLastCheckedAt] = useState<Date | null>(null);
+  const [lastCheckSummary, setLastCheckSummary] = useState<string>("");
 
   const simulateFailure = params.get("simulateFailure");
 
@@ -134,6 +139,7 @@ export const LiveRiskAlertsTab = () => {
     rows.forEach((r) => {
       if (!r.def.is_live) return;
       const log = data.latestLogByKri[r.def.kri_id];
+      if (log && BENIGN_OUTCOMES.has(log.outcome)) return;
       const dbFailure = log && FAILURE_OUTCOMES.has(log.outcome);
       const simulated = simulateFailure === r.def.kri_id || (r.source as { simulate_failure?: boolean } | undefined)?.simulate_failure;
       if (dbFailure || simulated) {
@@ -158,17 +164,42 @@ export const LiveRiskAlertsTab = () => {
       const results = await Promise.allSettled(
         liveKris.map((kri) => {
           const fn = FN_MAP[kri];
-          if (!fn) return Promise.resolve({ skipped: true });
+          if (!fn) return Promise.resolve({ data: { skipped: true }, error: null });
           return supabase.functions.invoke(fn, { body: {} });
         }),
       );
       const anyOk = results.some((r) => r.status === "fulfilled");
       if (anyOk) console.info("refresh:capture-ok", results);
       else console.error("refresh:error", results);
+
+      let newCount = 0;
+      let noNewCount = 0;
+      let hardFailCount = 0;
+      results.forEach((res) => {
+        if (res.status !== "fulfilled") { hardFailCount++; return; }
+        const payload = (res.value as { data?: { outcome?: string; skipped?: boolean } } | undefined)?.data;
+        const outcome = payload?.outcome;
+        if (payload?.skipped) return;
+        if (outcome === "success") newCount++;
+        else if (outcome === "no_new_edition") noNewCount++;
+        else hardFailCount++;
+      });
+
+      let summary = "";
+      if (newCount > 0) {
+        summary = `${newCount} new edition${newCount === 1 ? "" : "s"} captured`;
+      } else if (hardFailCount === 0 && noNewCount > 0) {
+        summary = "No new editions available yet";
+      }
+      setLastCheckedAt(new Date());
+      setLastCheckSummary(summary);
+
       await refresh();
       console.info("refresh:rerender");
     } catch (e) {
       console.error("refresh:error", e);
+      setLastCheckedAt(new Date());
+      setLastCheckSummary("");
     } finally {
       setRefreshing(false);
     }
@@ -269,21 +300,29 @@ export const LiveRiskAlertsTab = () => {
           ))}
         </div>
 
-        <div className="ml-auto flex items-center gap-3">
-          <span className="text-xs text-slate-500">
-            {lastRefreshed
-              ? `Last refreshed: ${formatDateTime(lastRefreshed)}`
-              : "Last refreshed: —"}
-          </span>
-          <button
-            type="button"
-            onClick={handleRefresh}
-            disabled={refreshing || loading}
-            className="inline-flex items-center gap-2 rounded-lg bg-brand px-3 py-1.5 text-xs font-medium text-white shadow-sm hover:opacity-90 disabled:opacity-60"
-          >
-            <RefreshCw size={14} className={refreshing ? "animate-spin" : ""} />
-            {refreshing ? "Refreshing…" : "Refresh"}
-          </button>
+        <div className="ml-auto flex flex-col items-end gap-0.5">
+          <div className="flex items-center gap-3">
+            <span className="text-xs text-slate-500">
+              {lastRefreshed
+                ? `Last refreshed: ${formatDateTime(lastRefreshed)}`
+                : "Last refreshed: —"}
+            </span>
+            <button
+              type="button"
+              onClick={handleRefresh}
+              disabled={refreshing || loading}
+              className="inline-flex items-center gap-2 rounded-lg bg-brand px-3 py-1.5 text-xs font-medium text-white shadow-sm hover:opacity-90 disabled:opacity-60"
+            >
+              <RefreshCw size={14} className={refreshing ? "animate-spin" : ""} />
+              {refreshing ? "Refreshing…" : "Refresh"}
+            </button>
+          </div>
+          {lastCheckedAt && (
+            <span className="text-[11px] text-slate-400">
+              Last checked {formatDateTime(lastCheckedAt.toISOString())}
+              {lastCheckSummary ? ` — ${lastCheckSummary}` : ""}
+            </span>
+          )}
         </div>
       </div>
 
