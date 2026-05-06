@@ -357,7 +357,7 @@ export const AiRiskPredictionTab = () => {
           />
         </button>
         {explainerOpen && (
-          <div className="space-y-4 border-t border-slate-200 px-6 py-5 text-sm text-slate-700">
+          <div className="space-y-4 border-t border-slate-200 px-6 py-5 text-base text-slate-700">
             <Subsection title="Inputs">
               Four quarters of historical Human Capital score (2025/26 Q1–Q4): 62, 58, 56, 54.
             </Subsection>
