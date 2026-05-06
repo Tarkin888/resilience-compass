@@ -103,3 +103,16 @@ All colors MUST be HSL.
     @apply bg-background text-foreground;
   }
 }
+
+@layer utilities {
+  .stale-stripes {
+    background-color: hsl(48 96% 89%);
+    background-image: repeating-linear-gradient(
+      45deg,
+      hsl(38 92% 50% / 0.15) 0,
+      hsl(38 92% 50% / 0.15) 4px,
+      transparent 4px,
+      transparent 8px
+    );
+  }
+}

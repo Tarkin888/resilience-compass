@@ -110,6 +110,24 @@ Deno.serve(async (req) => {
     });
   }
 
+  if (body.action === "reset_demo") {
+    const { error: e1 } = await supabase.from("kri_captures").delete().not("id", "is", null);
+    if (e1) {
+      return new Response(JSON.stringify({ ok: false, error: `kri_captures: ${e1.message}` }), {
+        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const { error: e2 } = await supabase.from("capture_log").delete().not("id", "is", null);
+    if (e2) {
+      return new Response(JSON.stringify({ ok: false, error: `capture_log: ${e2.message}` }), {
+        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    return new Response(JSON.stringify({ ok: true }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
   return new Response(JSON.stringify({ ok: false, error: "unknown action" }), {
     status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
