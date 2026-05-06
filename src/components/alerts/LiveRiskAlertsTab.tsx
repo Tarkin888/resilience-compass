@@ -164,17 +164,42 @@ export const LiveRiskAlertsTab = () => {
       const results = await Promise.allSettled(
         liveKris.map((kri) => {
           const fn = FN_MAP[kri];
-          if (!fn) return Promise.resolve({ skipped: true });
+          if (!fn) return Promise.resolve({ data: { skipped: true }, error: null });
           return supabase.functions.invoke(fn, { body: {} });
         }),
       );
       const anyOk = results.some((r) => r.status === "fulfilled");
       if (anyOk) console.info("refresh:capture-ok", results);
       else console.error("refresh:error", results);
+
+      let newCount = 0;
+      let noNewCount = 0;
+      let hardFailCount = 0;
+      results.forEach((res) => {
+        if (res.status !== "fulfilled") { hardFailCount++; return; }
+        const payload = (res.value as { data?: { outcome?: string; skipped?: boolean } } | undefined)?.data;
+        const outcome = payload?.outcome;
+        if (payload?.skipped) return;
+        if (outcome === "success") newCount++;
+        else if (outcome === "no_new_edition") noNewCount++;
+        else hardFailCount++;
+      });
+
+      let summary = "";
+      if (newCount > 0) {
+        summary = `${newCount} new edition${newCount === 1 ? "" : "s"} captured`;
+      } else if (hardFailCount === 0 && noNewCount > 0) {
+        summary = "No new editions available yet";
+      }
+      setLastCheckedAt(new Date());
+      setLastCheckSummary(summary);
+
       await refresh();
       console.info("refresh:rerender");
     } catch (e) {
       console.error("refresh:error", e);
+      setLastCheckedAt(new Date());
+      setLastCheckSummary("");
     } finally {
       setRefreshing(false);
     }
