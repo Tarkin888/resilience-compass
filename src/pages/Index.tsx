@@ -34,6 +34,7 @@ const Index = () => {
         )}
         {active === "prediction" && <AiRiskPredictionTab />}
       </main>
+      <Footer />
     </div>
   );
 };
