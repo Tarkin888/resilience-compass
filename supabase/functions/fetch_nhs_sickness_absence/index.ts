@@ -25,9 +25,6 @@ interface InvokeBody { month?: string; year?: number; }
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
-  const authError = requireAdminAuth(req);
-  if (authError) return authError;
-
   const supabase = createClient(
     Deno.env.get("SUPABASE_URL")!,
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
