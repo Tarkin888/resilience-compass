@@ -144,7 +144,7 @@ export const AlertCard = ({
           />
         </button>
         {whyOpen && (
-          <div className="space-y-3 border-t border-slate-200 px-5 py-4 text-sm text-slate-700">
+          <div className="space-y-3 border-t border-slate-200 px-5 py-4 text-base text-slate-700">
             <p>
               {status === "OK"
                 ? `${definition.display_name} is currently within the working threshold.`
