@@ -82,6 +82,31 @@ export function defaultMonthlyEdition(now = new Date()): { month: string; year: 
   return { month: monthName(d.getMonth()), year: d.getFullYear() };
 }
 
+/**
+ * How long after the last successful capture should we still treat a 404 on
+ * the next edition page as benign ("no_new_edition")? Beyond this window the
+ * publisher is genuinely overdue and we surface it as page_not_found.
+ */
+export function cadenceWindowDays(cadence: string | null | undefined): number {
+  const c = (cadence ?? "").toLowerCase();
+  if (c.includes("month")) return 49; // ~7 weeks
+  if (c.includes("quarter")) return 140; // ~20 weeks
+  if (c.includes("annual") || c.includes("year")) return 420; // ~14 months
+  return 60; // sensible default
+}
+
+export function withinCadenceWindow(
+  lastCapturedAt: string | null | undefined,
+  cadence: string | null | undefined,
+  now: Date = new Date(),
+): boolean {
+  if (!lastCapturedAt) return false;
+  const last = new Date(lastCapturedAt).getTime();
+  if (!isFinite(last)) return false;
+  const days = (now.getTime() - last) / (1000 * 60 * 60 * 24);
+  return days <= cadenceWindowDays(cadence);
+}
+
 export function buildEditionUrl(pattern: string, month: string, year: number): string {
   const path = pattern.replace("{month}", month).replace("{year}", String(year));
   return `${NHS_BASE}${path.startsWith("/") ? path : "/" + path}`;
