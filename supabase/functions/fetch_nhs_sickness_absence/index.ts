@@ -62,18 +62,21 @@ Deno.serve(async (req) => {
       }
       def = { month: v.month, year: v.year };
     } else {
+      // The edition page URL pattern targets the publication month, which is
+      // typically ~3 months after the data month for the Sickness Absence
+      // series (e.g. the January 2026 data row is published in the April 2026
+      // edition, available from late April / early May).
       def = defaultMonthlyEdition();
     }
     const editionUrl = buildEditionUrl(source.edition_page_url_pattern, def.month, def.year);
-    const label = editionLabel(def.month, def.year);
+    // NB: `label` is provisional; the authoritative edition label is derived
+    // below from the latest populated data row in Table 1, so it always
+    // matches the headline figure.
+    const provisionalLabel = editionLabel(def.month, def.year);
 
     const { data: existing } = await supabase
       .from("kri_captures").select("id, edition_label, captured_at")
       .eq("kri_id", KRI_ID).order("captured_at", { ascending: false }).limit(1);
-    if (existing && existing[0]?.edition_label === label) {
-      await writeLog("no_new_edition", `already captured ${label}`);
-      return respond({ ok: true, kri_id: KRI_ID, outcome: "no_new_edition", edition_label: label });
-    }
     const lastCapturedAt = existing?.[0]?.captured_at ?? null;
 
     const page = await fetchEditionPage(editionUrl);
