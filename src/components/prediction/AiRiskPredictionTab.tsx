@@ -146,7 +146,7 @@ export const AiRiskPredictionTab = () => {
             <div
               className="h-72 w-full"
               role="img"
-              aria-label="Human Capital score trajectory: 62, 58, 56, 54 historical, 51, 48, 46, 44, 43, 43 projected over six months. Forecast confidence range plus or minus 4 points."
+              aria-label="Human Capital score trajectory: 62, 58, 56, 54 historical (last four quarters), projected to fall to 51, 48, 46, 44, 43, 43 over the next six months. Forecast confidence range plus or minus 4 points."
             >
               <ResponsiveContainer width="100%" height="100%">
                 <ComposedChart
