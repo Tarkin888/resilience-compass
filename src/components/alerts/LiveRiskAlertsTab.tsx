@@ -290,6 +290,7 @@ export const LiveRiskAlertsTab = () => {
               key={key}
               type="button"
               onClick={() => setSourceFilter(key)}
+              aria-pressed={sourceFilter === key}
               className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
                 sourceFilter === key
                   ? "bg-slate-900 text-white"
