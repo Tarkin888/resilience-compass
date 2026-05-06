@@ -82,7 +82,7 @@ export const ThresholdPanel = ({
               <div className="text-xs font-medium uppercase tracking-wide text-slate-500">
                 Rationale
               </div>
-              <p className="mt-1 text-slate-700">{rationale}</p>
+              <p className="mt-1 text-base text-slate-700">{rationale}</p>
             </div>
           )}
 
