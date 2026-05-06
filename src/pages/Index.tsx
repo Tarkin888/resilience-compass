@@ -25,7 +25,12 @@ const Index = () => {
       <main className="px-6 py-6">
         {active === "alerts" && <LiveRiskAlertsTab />}
         {active === "library" && <ScenarioLibraryTab onLoadScenario={handleLoadScenario} />}
-        {active === "visualiser" && <VisualiserMockup scenario={loadedScenario} />}
+        {active === "visualiser" && (
+          <VisualiserMockup
+            scenario={loadedScenario}
+            onBrowseScenarios={() => setActive("library")}
+          />
+        )}
         {active === "prediction" && (
           <TabPlaceholder
             title="AI Risk Prediction"
