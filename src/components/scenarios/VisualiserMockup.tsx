@@ -173,19 +173,14 @@ const ScoreBar = ({ current, projected }: { current: number; projected: number }
   return (
     <div className="relative mt-6 h-8 w-full">
       <div className="flex h-3 w-full overflow-hidden rounded-full">
-        {SCORE_BANDS.map((b) => {
-          const width = b.max - b.min + (b.min === 0 ? 0 : 1);
-          // Bands are 0-40 (41 wide), 41-55 (15), 56-70 (15), 71-100 (30) → total 101.
-          // Approximate by using max-min+1 normalised to 100.
-          return (
-            <div
-              key={b.label}
-              className={b.fill}
-              style={{ width: `${width}%` }}
-              aria-hidden
-            />
-          );
-        })}
+        {SCORE_BANDS.map((b) => (
+          <div
+            key={b.label}
+            className={b.fill}
+            style={{ width: `${b.max - b.min}%` }}
+            aria-hidden
+          />
+        ))}
       </div>
       <Pip value={current} label={`${current}`} variant="current" />
       <Pip value={projected} label={`${projected}`} variant="projected" />
