@@ -158,7 +158,7 @@ const LoadedView = ({
           <div className="text-xs font-medium uppercase tracking-wide text-slate-500">
             Why this projection
           </div>
-          <p className="mt-2 text-sm text-slate-700">{impact.narrative}</p>
+          <p className="mt-2 text-base text-slate-700">{impact.narrative}</p>
           <p className="mt-4 text-xs italic text-slate-500">
             Projected values are illustrative for the 14 May demo. Calculation logic is built
             post-demo.
