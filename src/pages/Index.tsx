@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Header } from "@/components/Header";
 import { ScoreCard } from "@/components/ScoreCard";
 import { Footer } from "@/components/Footer";
-import { TabBar, TabId } from "@/components/TabBar";
+import { TabBar, TabId, tabButtonId, tabPanelId } from "@/components/TabBar";
 import { LiveRiskAlertsTab } from "@/components/alerts/LiveRiskAlertsTab";
 import { ScenarioLibraryTab } from "@/components/scenarios/ScenarioLibraryTab";
 import { VisualiserMockup } from "@/components/scenarios/VisualiserMockup";
