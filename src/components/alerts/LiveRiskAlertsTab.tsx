@@ -300,12 +300,30 @@ export const LiveRiskAlertsTab = () => {
           ))}
         </div>
 
-        <div className="ml-auto flex items-center gap-3">
-          <span className="text-xs text-slate-500">
-            {lastRefreshed
-              ? `Last refreshed: ${formatDateTime(lastRefreshed)}`
-              : "Last refreshed: —"}
-          </span>
+        <div className="ml-auto flex flex-col items-end gap-0.5">
+          <div className="flex items-center gap-3">
+            <span className="text-xs text-slate-500">
+              {lastRefreshed
+                ? `Last refreshed: ${formatDateTime(lastRefreshed)}`
+                : "Last refreshed: —"}
+            </span>
+            <button
+              type="button"
+              onClick={handleRefresh}
+              disabled={refreshing || loading}
+              className="inline-flex items-center gap-2 rounded-lg bg-brand px-3 py-1.5 text-xs font-medium text-white shadow-sm hover:opacity-90 disabled:opacity-60"
+            >
+              <RefreshCw size={14} className={refreshing ? "animate-spin" : ""} />
+              {refreshing ? "Refreshing…" : "Refresh"}
+            </button>
+          </div>
+          {lastCheckedAt && (
+            <span className="text-[11px] text-slate-400">
+              Last checked {formatDateTime(lastCheckedAt.toISOString())}
+              {lastCheckSummary ? ` — ${lastCheckSummary}` : ""}
+            </span>
+          )}
+        </div>
           <button
             type="button"
             onClick={handleRefresh}
