@@ -23,6 +23,8 @@ const FAILURE_OUTCOMES = new Set([
   "simulated_failure",
 ]);
 
+const BENIGN_OUTCOMES = new Set(["ok", "success", "no_new_edition"]);
+
 const FAILURE_REASONS: Record<string, string> = {
   page_not_found: "Edition URL pattern did not resolve to a published page",
   html_parse_failed: "Edition page parsed but no data file link was found",
@@ -32,6 +34,7 @@ const FAILURE_REASONS: Record<string, string> = {
   fetch_error: "Source could not be fetched",
   error: "Capture pipeline reported an error",
   failure: "Capture pipeline reported a failure",
+  no_new_edition: "No new edition published yet",
 };
 
 const FN_MAP: Record<string, string> = {
