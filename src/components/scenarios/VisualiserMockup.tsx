@@ -154,7 +154,7 @@ const LoadedView = ({
 
       {/* 3.4 Narrative */}
       {impact && (
-        <div className="rounded-xl bg-slate-50 border border-slate-200 p-6">
+        <div className="rounded-xl bg-slate-50 border border-slate-200 p-4 sm:p-6">
           <div className="text-xs font-medium uppercase tracking-wide text-slate-500">
             Why this projection
           </div>
