@@ -23,6 +23,7 @@ const Index = () => {
     <div className="min-h-screen bg-slate-50 text-slate-900 text-sm leading-relaxed">
       <Header />
       <ScoreCard />
+      <TrendPanel />
       <TabBar active={active} onChange={setActive} />
       <main className="px-6 py-6">
         <div role="tabpanel" id={tabPanelId("alerts")} aria-labelledby={tabButtonId("alerts")} hidden={active !== "alerts"}>
