@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Header } from "@/components/Header";
 import { ScoreCard } from "@/components/ScoreCard";
+import { TrendPanel } from "@/components/TrendPanel";
 import { Footer } from "@/components/Footer";
 import { TabBar, TabId, tabButtonId, tabPanelId } from "@/components/TabBar";
 import { LiveRiskAlertsTab } from "@/components/alerts/LiveRiskAlertsTab";
