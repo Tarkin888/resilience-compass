@@ -40,14 +40,14 @@ export const TabBar = ({ active, onChange }: Props) => {
   };
 
   return (
-    <div className="border-b border-slate-200 bg-white px-6">
+    <div className="border-b border-slate-200 bg-white px-3 sm:px-6">
       <nav
         role="tablist"
         aria-label="Module"
-        className="flex gap-1"
+        className="-mx-1 flex gap-1 overflow-x-auto whitespace-nowrap [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
         onKeyDown={handleKeyDown}
       >
-        {TABS.map(({ id, label, icon: Icon }) => {
+        {TABS.map(({ id, label, shortLabel, icon: Icon }) => {
           const isActive = id === active;
           return (
             <button
@@ -58,14 +58,16 @@ export const TabBar = ({ active, onChange }: Props) => {
               id={tabButtonId(id)}
               aria-selected={isActive}
               aria-controls={tabPanelId(id)}
+              aria-label={label}
               tabIndex={isActive ? 0 : -1}
               onClick={() => onChange(id)}
-              className={`relative flex items-center gap-2 px-4 py-3 text-sm font-medium transition-colors ${
+              className={`relative flex shrink-0 items-center gap-2 px-3 py-3 text-sm font-medium transition-colors min-h-[44px] sm:px-4 ${
                 isActive ? "text-brand" : "text-slate-500 hover:text-slate-900"
               }`}
             >
-              <Icon size={16} />
-              {label}
+              <Icon size={16} aria-hidden />
+              <span className="sm:hidden">{shortLabel}</span>
+              <span className="hidden sm:inline">{label}</span>
               {isActive && (
                 <span className="absolute inset-x-2 bottom-0 h-0.5 rounded-full bg-brand" />
               )}
