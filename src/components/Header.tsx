@@ -7,7 +7,7 @@ export const Header = () => {
         <div className="flex items-center gap-3">
           <span
             aria-hidden
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-brand text-sm font-bold text-accent"
+            className="flex h-9 w-9 items-center justify-center rounded-full bg-brand text-sm font-bold text-accent2"
           >
             RC
           </span>
@@ -22,7 +22,7 @@ export const Header = () => {
             type="button"
             className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-brand shadow-sm hover:bg-slate-50"
           >
-            <span className="h-2 w-2 rounded-full bg-accent" />
+            <span className="h-2 w-2 rounded-full bg-accent2" />
             Demo NHS Trust
             <ChevronDown size={16} className="text-slate-500" />
           </button>
