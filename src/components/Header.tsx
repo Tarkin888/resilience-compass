@@ -13,7 +13,7 @@ export const Header = () => {
           </span>
           <div className="flex flex-col leading-tight">
             <span className="text-lg font-bold text-brand sm:text-xl">ResilienC</span>
-            <span className="text-xs text-slate-500">Human Capital</span>
+            <span className="text-slate-500 text-2xl">Human Capital</span>
           </div>
         </div>
 
