@@ -74,7 +74,7 @@ export const ScoreCard = () => {
                   </Tooltip>
                 )}
               </div>
-              <div className="mt-2 flex items-center gap-3">
+              <div className="mt-2 flex flex-wrap items-center gap-2 sm:gap-3">
                 <span className="text-sm font-medium text-slate-500">Human Capital Score</span>
                 <span
                   className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold text-severity-warning ${
