@@ -113,8 +113,8 @@ const LoadedView = ({
       </div>
 
       {/* 3.2 Score impact strip */}
-      <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-        <div className="flex items-center justify-center gap-6">
+      <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
+        <div className="flex items-center justify-center gap-4 sm:gap-6">
           <div className="text-center">
             <div className="text-3xl font-bold tabular-nums text-slate-900">{CURRENT_SCORE}</div>
             <div className={`mt-1 text-xs font-semibold ${currentBand.text}`}>
