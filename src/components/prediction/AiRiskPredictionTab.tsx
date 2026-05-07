@@ -261,7 +261,7 @@ export const AiRiskPredictionTab = () => {
 
         {/* Right — interventions (≈40%) */}
         <div className="lg:col-span-2">
-          <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
             <h3 className="text-base font-semibold text-slate-900">Priority interventions</h3>
             <ul className="mt-4 space-y-3">
               {INTERVENTIONS.map((i) => {
