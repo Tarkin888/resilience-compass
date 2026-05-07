@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Header } from "@/components/Header";
 import { ScoreCard } from "@/components/ScoreCard";
+import { TrendPanel } from "@/components/TrendPanel";
 import { Footer } from "@/components/Footer";
 import { TabBar, TabId, tabButtonId, tabPanelId } from "@/components/TabBar";
 import { LiveRiskAlertsTab } from "@/components/alerts/LiveRiskAlertsTab";
@@ -22,6 +23,7 @@ const Index = () => {
     <div className="min-h-screen bg-slate-50 text-slate-900 text-sm leading-relaxed">
       <Header />
       <ScoreCard />
+      <TrendPanel />
       <TabBar active={active} onChange={setActive} />
       <main className="px-6 py-6">
         <div role="tabpanel" id={tabPanelId("alerts")} aria-labelledby={tabButtonId("alerts")} hidden={active !== "alerts"}>
