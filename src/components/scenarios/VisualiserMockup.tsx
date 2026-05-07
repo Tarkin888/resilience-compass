@@ -219,7 +219,8 @@ const Pip = ({
 const KriTable = ({ rows }: { rows: KriImpactRow[] }) => {
   return (
     <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-      <table className="w-full text-sm">
+      <div className="overflow-x-auto">
+      <table className="w-full min-w-[560px] text-sm">
         <thead className="border-b border-slate-200 bg-slate-50">
           <tr className="text-left text-xs font-medium uppercase tracking-wide text-slate-500">
             <th className="px-4 py-3">KRI</th>
