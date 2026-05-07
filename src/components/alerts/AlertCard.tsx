@@ -51,7 +51,7 @@ export const AlertCard = ({
       className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm"
       aria-label={`${definition.display_name} — ${sev.label}`}
     >
-      <div className="flex items-start gap-4 p-5">
+      <div className="flex items-start gap-3 p-4 sm:gap-4 sm:p-5">
         <div className="flex flex-col items-center pt-1">
           <span className={`h-3 w-3 rounded-full ${sev.dot}`} aria-hidden />
           <span className="mt-2 text-[10px] font-semibold uppercase tracking-wide text-slate-500">
