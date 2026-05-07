@@ -141,7 +141,7 @@ export const LiveRiskAlertsTab = () => {
       const log = data.latestLogByKri[r.def.kri_id];
       if (log && BENIGN_OUTCOMES.has(log.outcome)) return;
       const dbFailure = log && FAILURE_OUTCOMES.has(log.outcome);
-      const simulated = simulateFailure === r.def.kri_id || (r.source as { simulate_failure?: boolean } | undefined)?.simulate_failure;
+      const simulated = simulateFailure === r.def.kri_id;
       if (dbFailure || simulated) {
         const outcome = simulated ? "simulated_failure" : (log?.outcome ?? "error");
         banners.push({
