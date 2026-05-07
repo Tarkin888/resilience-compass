@@ -87,23 +87,6 @@ export const ScoreCard = () => {
             </div>
           </div>
 
-          <div className="flex flex-col items-end">
-            <div className="h-16 w-48">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={data} margin={{ top: 8, right: 8, bottom: 8, left: 8 }}>
-                  <Line
-                    type="monotone"
-                    dataKey="v"
-                    stroke="#B45309"
-                    strokeWidth={2}
-                    dot={<LastDot />}
-                    isAnimationActive={false}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-            <span className="mt-1 text-xs text-slate-500">Trend: declining (last 4 quarters)</span>
-          </div>
         </div>
       </div>
     </section>
