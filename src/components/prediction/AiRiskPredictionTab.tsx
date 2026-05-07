@@ -317,7 +317,7 @@ export const AiRiskPredictionTab = () => {
           type="button"
           onClick={() => setExplainerOpen((v) => !v)}
           aria-expanded={explainerOpen}
-          className="flex w-full items-center justify-between px-6 py-4 text-left"
+          className="flex w-full items-center justify-between px-4 py-4 text-left sm:px-6"
         >
           <span className="text-sm font-semibold text-slate-900">Why this prediction?</span>
           <ChevronDown
