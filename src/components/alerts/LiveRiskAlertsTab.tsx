@@ -160,7 +160,7 @@ export const LiveRiskAlertsTab = () => {
     console.info("refresh:start");
     setRefreshing(true);
     try {
-      const adminPassword = sessionStorage.getItem("rc_admin_pw") ?? "";
+      const adminPassword = sessionStorage.getItem("rc_admin_session") ?? "";
       const liveKris = rows.filter((r) => r.def.is_live).map((r) => r.def.kri_id);
       const results = adminPassword
         ? await Promise.allSettled(
