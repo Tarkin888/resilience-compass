@@ -259,15 +259,15 @@ export const LiveRiskAlertsTab = () => {
         </div>
       ))}
 
-      <div className="flex flex-wrap items-center gap-3 rounded-xl border border-slate-200 bg-white p-3">
-        <div className="flex items-center gap-1" role="group" aria-label="Severity filter">
+      <div className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-3 sm:flex-row sm:flex-wrap sm:items-center">
+        <div className="flex flex-wrap items-center gap-1" role="group" aria-label="Severity filter">
           {chips.map((c) => (
             <button
               key={c}
               type="button"
               onClick={() => setSeverityFilter(c)}
               aria-pressed={severityFilter === c}
-              className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+              className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors min-h-[36px] ${
                 severityFilter === c
                   ? "bg-slate-900 text-white"
                   : "bg-slate-100 text-slate-700 hover:bg-slate-200"
@@ -278,9 +278,9 @@ export const LiveRiskAlertsTab = () => {
           ))}
         </div>
 
-        <div className="h-5 w-px bg-slate-200" />
+        <div className="hidden h-5 w-px bg-slate-200 sm:block" />
 
-        <div className="flex items-center gap-1" role="group" aria-label="Source filter">
+        <div className="flex flex-wrap items-center gap-1" role="group" aria-label="Source filter">
           {([
             ["all", "All sources"],
             ["live", "Live only"],
@@ -291,7 +291,7 @@ export const LiveRiskAlertsTab = () => {
               type="button"
               onClick={() => setSourceFilter(key)}
               aria-pressed={sourceFilter === key}
-              className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+              className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors min-h-[36px] ${
                 sourceFilter === key
                   ? "bg-slate-900 text-white"
                   : "bg-slate-100 text-slate-700 hover:bg-slate-200"
@@ -302,8 +302,8 @@ export const LiveRiskAlertsTab = () => {
           ))}
         </div>
 
-        <div className="ml-auto flex flex-col items-end gap-0.5">
-          <div className="flex items-center gap-3">
+        <div className="flex flex-col gap-1 sm:ml-auto sm:items-end">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
             <span className="text-xs text-slate-500">
               {lastRefreshed
                 ? `Last refreshed: ${formatDateTime(lastRefreshed)}`
@@ -313,7 +313,7 @@ export const LiveRiskAlertsTab = () => {
               type="button"
               onClick={handleRefresh}
               disabled={refreshing || loading}
-              className="inline-flex items-center gap-2 rounded-lg bg-brand px-3 py-1.5 text-xs font-medium text-white shadow-sm hover:opacity-90 disabled:opacity-60"
+              className="inline-flex min-h-[36px] items-center gap-2 rounded-lg bg-brand px-3 py-1.5 text-xs font-medium text-white shadow-sm hover:opacity-90 disabled:opacity-60"
             >
               <RefreshCw size={14} className={refreshing ? "animate-spin" : ""} />
               {refreshing ? "Refreshing…" : "Refresh"}
