@@ -48,7 +48,10 @@ export default {
           foreground: "hsl(var(--card-foreground))",
         },
         brand: {
-          DEFAULT: "#1E5BB8",
+          DEFAULT: "#001D57",
+        },
+        accent2: {
+          DEFAULT: "#24BEAA",
         },
         severity: {
           critical: "#B91C1C",
