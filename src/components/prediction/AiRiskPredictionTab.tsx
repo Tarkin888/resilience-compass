@@ -135,7 +135,7 @@ export const AiRiskPredictionTab = () => {
       <div className="grid gap-5 lg:grid-cols-5">
         {/* Left — chart (≈60%) */}
         <div className="lg:col-span-3">
-          <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
             <div className="mb-2 flex items-baseline justify-between">
               <h2 className="text-base font-semibold text-slate-900">
                 Human Capital score trajectory
@@ -144,7 +144,7 @@ export const AiRiskPredictionTab = () => {
             </div>
 
             <div
-              className="h-72 w-full"
+              className="h-64 w-full sm:h-72"
               role="img"
               aria-label="Human Capital score trajectory: 62, 58, 56, 54 historical (last four quarters), projected to fall to 51, 48, 46, 44, 43, 43 over the next six months. Forecast confidence range plus or minus 4 points."
             >
