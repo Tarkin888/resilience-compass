@@ -51,10 +51,14 @@ export default function AdminSources() {
   const [results, setResults] = useState<Record<string, string>>({});
 
   const load = async () => {
-    const { data: s } = await supabase.from("sources").select("*").order("kri_id");
-    setSources((s ?? []) as SourceRow[]);
+    const { data: sResp } = await supabase.functions.invoke("admin_action", {
+      body: { action: "list_sources" },
+      headers: { "x-admin-password": password },
+    });
+    const s = (sResp as { sources?: SourceRow[] } | null)?.sources ?? [];
+    setSources(s as SourceRow[]);
     const init: Record<string, string> = {};
-    (s ?? []).forEach((r: SourceRow) => { init[r.kri_id] = r.last_known_file_url ?? ""; });
+    s.forEach((r: SourceRow) => { init[r.kri_id] = r.last_known_file_url ?? ""; });
     setOverrideInputs(init);
 
     const { data: caps } = await supabase

@@ -94,6 +94,21 @@ Deno.serve(async (req) => {
     });
   }
 
+  if (body.action === "list_sources") {
+    const { data, error } = await supabase
+      .from("sources")
+      .select("*")
+      .order("kri_id");
+    if (error) {
+      return new Response(JSON.stringify({ ok: false, error: error.message }), {
+        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    return new Response(JSON.stringify({ ok: true, sources: data }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
   if (body.action === "list_recent_logs") {
     const { data, error } = await supabase
       .from("capture_log")

@@ -141,7 +141,7 @@ export const LiveRiskAlertsTab = () => {
       const log = data.latestLogByKri[r.def.kri_id];
       if (log && BENIGN_OUTCOMES.has(log.outcome)) return;
       const dbFailure = log && FAILURE_OUTCOMES.has(log.outcome);
-      const simulated = simulateFailure === r.def.kri_id || (r.source as { simulate_failure?: boolean } | undefined)?.simulate_failure;
+      const simulated = simulateFailure === r.def.kri_id;
       if (dbFailure || simulated) {
         const outcome = simulated ? "simulated_failure" : (log?.outcome ?? "error");
         banners.push({
@@ -160,14 +160,20 @@ export const LiveRiskAlertsTab = () => {
     console.info("refresh:start");
     setRefreshing(true);
     try {
+      const adminPassword = sessionStorage.getItem("rc_admin_session") ?? "";
       const liveKris = rows.filter((r) => r.def.is_live).map((r) => r.def.kri_id);
-      const results = await Promise.allSettled(
-        liveKris.map((kri) => {
-          const fn = FN_MAP[kri];
-          if (!fn) return Promise.resolve({ data: { skipped: true }, error: null });
-          return supabase.functions.invoke(fn, { body: {} });
-        }),
-      );
+      const results = adminPassword
+        ? await Promise.allSettled(
+            liveKris.map((kri) => {
+              const fn = FN_MAP[kri];
+              if (!fn) return Promise.resolve({ data: { skipped: true }, error: null });
+              return supabase.functions.invoke(fn, {
+                body: {},
+                headers: { "x-admin-password": adminPassword },
+              });
+            }),
+          )
+        : [];
       const anyOk = results.some((r) => r.status === "fulfilled");
       if (anyOk) console.info("refresh:capture-ok", results);
       else console.error("refresh:error", results);
