@@ -3,11 +3,11 @@ import { Bell, Layers, BarChart3, TrendingUp, LucideIcon } from "lucide-react";
 
 export type TabId = "alerts" | "library" | "visualiser" | "prediction";
 
-export const TABS: { id: TabId; label: string; icon: LucideIcon }[] = [
-  { id: "alerts", label: "Live Risk Alerts", icon: Bell },
-  { id: "library", label: "Scenario Testing Library", icon: Layers },
-  { id: "visualiser", label: "Scenario Impact Visualiser", icon: BarChart3 },
-  { id: "prediction", label: "AI Risk Prediction", icon: TrendingUp },
+export const TABS: { id: TabId; label: string; shortLabel: string; icon: LucideIcon }[] = [
+  { id: "alerts", label: "Live Risk Alerts", shortLabel: "Alerts", icon: Bell },
+  { id: "library", label: "Scenario Testing Library", shortLabel: "Scenarios", icon: Layers },
+  { id: "visualiser", label: "Scenario Impact Visualiser", shortLabel: "Visualiser", icon: BarChart3 },
+  { id: "prediction", label: "AI Risk Prediction", shortLabel: "Prediction", icon: TrendingUp },
 ];
 
 export const tabButtonId = (id: TabId) => `tab-${id}`;
