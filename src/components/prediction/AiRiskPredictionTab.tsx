@@ -327,7 +327,7 @@ export const AiRiskPredictionTab = () => {
           />
         </button>
         {explainerOpen && (
-          <div className="border-t border-slate-200 px-6 py-5 text-base leading-relaxed text-slate-700">
+          <div className="border-t border-slate-200 px-4 py-5 text-base leading-relaxed text-slate-700 sm:px-6">
             This projection extrapolates the current trend in vacancy rate and sickness absence
             forward 6 months and assumes no new interventions are taken. The shaded band reflects
             modelled uncertainty. Interventions on the right are ranked by expected uplift on the
