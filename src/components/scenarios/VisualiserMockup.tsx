@@ -236,6 +236,7 @@ const KriTable = ({ rows }: { rows: KriImpactRow[] }) => {
           ))}
         </tbody>
       </table>
+      </div>
     </div>
   );
 };
