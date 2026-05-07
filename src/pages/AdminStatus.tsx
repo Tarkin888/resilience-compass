@@ -72,13 +72,13 @@ export default function AdminStatus() {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col">
-      <header className="border-b border-slate-200 bg-white px-6 py-4">
+      <header className="border-b border-slate-200 bg-white px-4 py-4 sm:px-6">
         <h1 className="text-xl font-bold">Live Data Status</h1>
         <p className="text-sm text-slate-500">
           Operational view of the live NHS data feeds powering this dashboard.
         </p>
       </header>
-      <main className="flex-1 px-6 py-6 space-y-5">
+      <main className="flex-1 px-4 py-6 space-y-5 sm:px-6">
         <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
           <table className="w-full text-sm">
             <thead className="border-b border-slate-200 bg-slate-50">
