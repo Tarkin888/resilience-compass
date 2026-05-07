@@ -48,13 +48,13 @@ export const ScoreCard = () => {
   }, []);
 
   return (
-    <section className="px-6 py-6">
-      <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-        <div className="flex items-center justify-between gap-6">
+    <section className="px-4 py-4 sm:px-6 sm:py-6">
+      <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
+        <div className="flex items-center justify-between gap-4 sm:gap-6">
           <div className="flex items-baseline gap-3">
             <div>
               <div className="flex items-baseline gap-2">
-                <span className="text-6xl font-bold text-slate-900 leading-none">54</span>
+                <span className="text-5xl font-bold text-slate-900 leading-none sm:text-6xl">54</span>
                 <span className="text-2xl text-slate-500">/100</span>
                 {stale && (
                   <Tooltip>
@@ -74,7 +74,7 @@ export const ScoreCard = () => {
                   </Tooltip>
                 )}
               </div>
-              <div className="mt-2 flex items-center gap-3">
+              <div className="mt-2 flex flex-wrap items-center gap-2 sm:gap-3">
                 <span className="text-sm font-medium text-slate-500">Human Capital Score</span>
                 <span
                   className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold text-severity-warning ${

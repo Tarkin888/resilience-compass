@@ -25,7 +25,7 @@ const Index = () => {
       <ScoreCard />
       <TrendPanel />
       <TabBar active={active} onChange={setActive} />
-      <main className="px-6 py-6">
+      <main className="px-4 py-4 sm:px-6 sm:py-6">
         <div role="tabpanel" id={tabPanelId("alerts")} aria-labelledby={tabButtonId("alerts")} hidden={active !== "alerts"}>
           {active === "alerts" && <LiveRiskAlertsTab />}
         </div>

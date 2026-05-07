@@ -83,7 +83,7 @@ const LoadedView = ({
   return (
     <div className="space-y-5">
       {/* 3.1 Header band */}
-      <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <div className="text-xs font-medium uppercase tracking-wide text-slate-500">
@@ -113,8 +113,8 @@ const LoadedView = ({
       </div>
 
       {/* 3.2 Score impact strip */}
-      <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-        <div className="flex items-center justify-center gap-6">
+      <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
+        <div className="flex items-center justify-center gap-4 sm:gap-6">
           <div className="text-center">
             <div className="text-3xl font-bold tabular-nums text-slate-900">{CURRENT_SCORE}</div>
             <div className={`mt-1 text-xs font-semibold ${currentBand.text}`}>
@@ -154,7 +154,7 @@ const LoadedView = ({
 
       {/* 3.4 Narrative */}
       {impact && (
-        <div className="rounded-xl bg-slate-50 border border-slate-200 p-6">
+        <div className="rounded-xl bg-slate-50 border border-slate-200 p-4 sm:p-6">
           <div className="text-xs font-medium uppercase tracking-wide text-slate-500">
             Why this projection
           </div>
@@ -219,7 +219,8 @@ const Pip = ({
 const KriTable = ({ rows }: { rows: KriImpactRow[] }) => {
   return (
     <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-      <table className="w-full text-sm">
+      <div className="overflow-x-auto">
+      <table className="w-full min-w-[560px] text-sm">
         <thead className="border-b border-slate-200 bg-slate-50">
           <tr className="text-left text-xs font-medium uppercase tracking-wide text-slate-500">
             <th className="px-4 py-3">KRI</th>
@@ -235,6 +236,7 @@ const KriTable = ({ rows }: { rows: KriImpactRow[] }) => {
           ))}
         </tbody>
       </table>
+      </div>
     </div>
   );
 };

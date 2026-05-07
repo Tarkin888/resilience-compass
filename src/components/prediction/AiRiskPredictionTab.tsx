@@ -135,7 +135,7 @@ export const AiRiskPredictionTab = () => {
       <div className="grid gap-5 lg:grid-cols-5">
         {/* Left — chart (≈60%) */}
         <div className="lg:col-span-3">
-          <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
             <div className="mb-2 flex items-baseline justify-between">
               <h2 className="text-base font-semibold text-slate-900">
                 Human Capital score trajectory
@@ -144,7 +144,7 @@ export const AiRiskPredictionTab = () => {
             </div>
 
             <div
-              className="h-72 w-full"
+              className="h-64 w-full sm:h-72"
               role="img"
               aria-label="Human Capital score trajectory: 62, 58, 56, 54 historical (last four quarters), projected to fall to 51, 48, 46, 44, 43, 43 over the next six months. Forecast confidence range plus or minus 4 points."
             >
@@ -261,7 +261,7 @@ export const AiRiskPredictionTab = () => {
 
         {/* Right — interventions (≈40%) */}
         <div className="lg:col-span-2">
-          <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
             <h3 className="text-base font-semibold text-slate-900">Priority interventions</h3>
             <ul className="mt-4 space-y-3">
               {INTERVENTIONS.map((i) => {
@@ -317,7 +317,7 @@ export const AiRiskPredictionTab = () => {
           type="button"
           onClick={() => setExplainerOpen((v) => !v)}
           aria-expanded={explainerOpen}
-          className="flex w-full items-center justify-between px-6 py-4 text-left"
+          className="flex w-full items-center justify-between px-4 py-4 text-left sm:px-6"
         >
           <span className="text-sm font-semibold text-slate-900">Why this prediction?</span>
           <ChevronDown
@@ -327,7 +327,7 @@ export const AiRiskPredictionTab = () => {
           />
         </button>
         {explainerOpen && (
-          <div className="border-t border-slate-200 px-6 py-5 text-base leading-relaxed text-slate-700">
+          <div className="border-t border-slate-200 px-4 py-5 text-base leading-relaxed text-slate-700 sm:px-6">
             This projection extrapolates the current trend in vacancy rate and sickness absence
             forward 6 months and assumes no new interventions are taken. The shaded band reflects
             modelled uncertainty. Interventions on the right are ranked by expected uplift on the

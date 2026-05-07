@@ -75,8 +75,8 @@ export const ScenarioLibraryTab = ({ onLoadScenario }: Props) => {
       </div>
 
       <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="relative min-w-[220px] flex-1">
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+          <div className="relative w-full min-w-0 flex-1 sm:min-w-[220px]">
             <Search
               size={16}
               className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
@@ -91,9 +91,9 @@ export const ScenarioLibraryTab = ({ onLoadScenario }: Props) => {
             />
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-xs font-medium text-slate-500">Severity</span>
+            <span className="shrink-0 text-xs font-medium text-slate-500">Severity</span>
             <Select value={severity} onValueChange={(v) => setSeverity(v as typeof severity)}>
-              <SelectTrigger className="w-[140px]">
+              <SelectTrigger className="w-full sm:w-[140px]">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -106,9 +106,9 @@ export const ScenarioLibraryTab = ({ onLoadScenario }: Props) => {
             </Select>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-xs font-medium text-slate-500">Type</span>
+            <span className="shrink-0 text-xs font-medium text-slate-500">Type</span>
             <Select value={type} onValueChange={(v) => setType(v as typeof type)}>
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="w-full sm:w-[180px]">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>

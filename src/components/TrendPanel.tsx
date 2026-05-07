@@ -36,8 +36,8 @@ export const TrendPanel = () => {
   const s = summarise(trendData);
 
   return (
-    <section className="w-full px-6 pt-2 pb-4">
-      <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+    <section className="w-full px-4 pt-2 pb-4 sm:px-6">
+      <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
         <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">
           12-month trend
         </div>

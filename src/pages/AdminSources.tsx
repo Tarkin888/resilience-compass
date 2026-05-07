@@ -189,11 +189,11 @@ export default function AdminSources() {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
-      <header className="border-b border-slate-200 bg-white px-6 py-4">
+      <header className="border-b border-slate-200 bg-white px-4 py-4 sm:px-6">
         <h1 className="text-xl font-bold">Admin — Data Sources</h1>
         <p className="text-sm text-slate-500">NHS England public data ingestion controls</p>
       </header>
-      <main className="px-6 py-6 space-y-6">
+      <main className="px-4 py-6 space-y-6 sm:px-6">
         {sources.map((s) => {
           const cap = latestCaps[s.kri_id];
           const log = latestLogs[s.kri_id];
