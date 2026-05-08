@@ -85,7 +85,7 @@ export const ScoreCard = () => {
             </div>
           </div>
           <div className="border-t border-slate-200 pt-4 sm:flex-1 sm:border-l sm:border-t-0 sm:pl-6 sm:pt-0">
-            <p className="text-[13px] italic leading-relaxed text-slate-600 sm:text-[14px] lg:text-[15px]">
+            <p className="text-[13px] font-semibold italic leading-relaxed text-slate-700 sm:text-[14px] lg:text-[15px]">
               This is an AI-powered resilience dashboard helping NHS Trusts monitor and anticipate workforce risk. This prototype focuses on the Human Capital pillar, presenting a composite score drawn from Key Risk Indicators benchmarked against pre-pandemic NHS performance. Staff Vacancy Rate and Sickness Absence Rate are populated with live public data from NHS England; remaining KRIs are clearly labelled as illustrative demo data. This is a working demonstration intended to invite challenge and iteration, not a finished product.
             </p>
           </div>
