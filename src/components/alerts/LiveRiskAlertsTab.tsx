@@ -1,9 +1,10 @@
 import { useMemo, useState } from "react";
 import { useSearchParams, Link } from "react-router-dom";
-import { RefreshCw, AlertTriangle, X } from "lucide-react";
+import { AlertTriangle, X } from "lucide-react";
 import { useHumanCapitalData } from "@/hooks/useHumanCapitalData";
 import { buildAlertNarrative, getStatus, getTrend, type Status, type Trend } from "@/lib/calc";
 import { AlertCard } from "./AlertCard";
+import { LiveDataStatusBanner } from "./LiveDataStatusBanner";
 import { SEVERITY_RANK, formatDateTime } from "./severity";
 import { supabase } from "@/integrations/supabase/client";
 
