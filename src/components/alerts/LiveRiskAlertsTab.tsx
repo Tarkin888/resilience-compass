@@ -1,9 +1,10 @@
 import { useMemo, useState } from "react";
 import { useSearchParams, Link } from "react-router-dom";
-import { RefreshCw, AlertTriangle, X } from "lucide-react";
+import { AlertTriangle, X } from "lucide-react";
 import { useHumanCapitalData } from "@/hooks/useHumanCapitalData";
 import { buildAlertNarrative, getStatus, getTrend, type Status, type Trend } from "@/lib/calc";
 import { AlertCard } from "./AlertCard";
+import { LiveDataStatusBanner } from "./LiveDataStatusBanner";
 import { SEVERITY_RANK, formatDateTime } from "./severity";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -308,31 +309,20 @@ export const LiveRiskAlertsTab = () => {
           ))}
         </div>
 
-        <div className="flex flex-col gap-1 sm:ml-auto sm:items-end">
-          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-            <span className="text-xs text-slate-500">
-              {lastRefreshed
-                ? `Last refreshed: ${formatDateTime(lastRefreshed)}`
-                : "Last refreshed: —"}
-            </span>
-            <button
-              type="button"
-              onClick={handleRefresh}
-              disabled={refreshing || loading}
-              className="inline-flex min-h-[36px] items-center gap-2 rounded-lg bg-brand px-3 py-1.5 text-xs font-medium text-white shadow-sm hover:opacity-90 disabled:opacity-60"
-            >
-              <RefreshCw size={14} className={refreshing ? "animate-spin" : ""} />
-              {refreshing ? "Refreshing…" : "Refresh"}
-            </button>
-          </div>
-          {lastCheckedAt && (
-            <span className="text-[11px] text-slate-400">
-              Last checked {formatDateTime(lastCheckedAt.toISOString())}
-              {lastCheckSummary ? ` — ${lastCheckSummary}` : ""}
-            </span>
-          )}
-        </div>
+        {lastCheckedAt && (
+          <span className="text-[11px] text-slate-400 sm:ml-auto">
+            Last checked {formatDateTime(lastCheckedAt.toISOString())}
+            {lastCheckSummary ? ` — ${lastCheckSummary}` : ""}
+          </span>
+        )}
       </div>
+
+      <LiveDataStatusBanner
+        lastRefreshed={lastRefreshed}
+        onRefresh={handleRefresh}
+        refreshing={refreshing}
+        loading={loading}
+      />
 
       {error && (
         <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
