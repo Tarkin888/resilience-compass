@@ -14,6 +14,8 @@ export interface KriImpactRow {
 export interface ScenarioImpact {
   rows: KriImpactRow[];
   narrative: string;
+  horizon: string;
+  inputs: string;
 }
 
 // Sort order matches Tab 1: Sickness → Vacancies → Training → Turnover → Engagement
