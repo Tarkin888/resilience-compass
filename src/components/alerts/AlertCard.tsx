@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, ExternalLink } from "lucide-react";
 import type { Status, Trend } from "@/lib/calc";
 import { getInterventions } from "@/lib/interventions";
 import type {
