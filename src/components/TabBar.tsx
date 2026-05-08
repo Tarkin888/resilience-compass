@@ -1,13 +1,13 @@
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { Bell, Layers, BarChart3, TrendingUp, LucideIcon } from "lucide-react";
 
 export type TabId = "alerts" | "library" | "visualiser" | "prediction";
 
-export const TABS: { id: TabId; label: string; shortLabel: string; icon: LucideIcon }[] = [
-  { id: "alerts", label: "Live Risk Alerts", shortLabel: "Alerts", icon: Bell },
-  { id: "library", label: "Scenario Testing Library", shortLabel: "Scenarios", icon: Layers },
-  { id: "visualiser", label: "Scenario Impact Visualiser", shortLabel: "Visualiser", icon: BarChart3 },
-  { id: "prediction", label: "AI Risk Prediction", shortLabel: "Prediction", icon: TrendingUp },
+export const TABS: { id: TabId; label: string; icon: LucideIcon }[] = [
+  { id: "alerts", label: "Live Risk Alerts", icon: Bell },
+  { id: "library", label: "Scenario Testing", icon: Layers },
+  { id: "visualiser", label: "Visualiser", icon: BarChart3 },
+  { id: "prediction", label: "AI Risk Prediction", icon: TrendingUp },
 ];
 
 export const tabButtonId = (id: TabId) => `tab-${id}`;
@@ -26,6 +26,14 @@ export const TabBar = ({ active, onChange }: Props) => {
     requestAnimationFrame(() => refs.current[id]?.focus());
   };
 
+  // Smoothly scroll the active tab into view when it changes
+  useEffect(() => {
+    const el = refs.current[active];
+    if (el && "scrollIntoView" in el) {
+      el.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "nearest" });
+    }
+  }, [active]);
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
     const idx = TABS.findIndex((t) => t.id === active);
     if (idx < 0) return;
@@ -40,14 +48,23 @@ export const TabBar = ({ active, onChange }: Props) => {
   };
 
   return (
-    <div className="border-b border-slate-200 bg-white px-3 sm:px-6">
+    <div
+      className="relative border-b border-slate-200 bg-white px-3 sm:px-6"
+      style={{
+        WebkitMaskImage:
+          "linear-gradient(to right, black 0, black calc(100% - 32px), transparent 100%)",
+        maskImage:
+          "linear-gradient(to right, black 0, black calc(100% - 32px), transparent 100%)",
+      }}
+    >
       <nav
         role="tablist"
         aria-label="Module"
         className="-mx-1 flex gap-1 overflow-x-auto whitespace-nowrap [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+        style={{ WebkitOverflowScrolling: "touch" }}
         onKeyDown={handleKeyDown}
       >
-        {TABS.map(({ id, label, shortLabel, icon: Icon }) => {
+        {TABS.map(({ id, label, icon: Icon }) => {
           const isActive = id === active;
           return (
             <button
@@ -58,7 +75,6 @@ export const TabBar = ({ active, onChange }: Props) => {
               id={tabButtonId(id)}
               aria-selected={isActive}
               aria-controls={tabPanelId(id)}
-              aria-label={label}
               tabIndex={isActive ? 0 : -1}
               onClick={() => onChange(id)}
               className={`relative flex shrink-0 items-center gap-2 px-3 py-3 text-sm font-medium transition-colors min-h-[44px] sm:px-4 ${
@@ -66,8 +82,7 @@ export const TabBar = ({ active, onChange }: Props) => {
               }`}
             >
               <Icon size={16} aria-hidden />
-              <span className="sm:hidden">{shortLabel}</span>
-              <span className="hidden sm:inline">{label}</span>
+              <span>{label}</span>
               {isActive && (
                 <span className="absolute inset-x-2 bottom-0 h-0.5 rounded-full bg-brand" />
               )}
