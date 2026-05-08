@@ -50,43 +50,45 @@ export const ScoreCard = () => {
   return (
     <section className="px-4 py-4 sm:px-6 sm:py-6">
       <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
-        <div className="flex items-center justify-between gap-4 sm:gap-6">
-          <div className="flex items-baseline gap-3">
-            <div>
-              <div className="flex items-baseline gap-2">
-                <span className="text-5xl font-bold text-slate-900 leading-none sm:text-6xl">54</span>
-                <span className="text-2xl text-slate-500">/100</span>
-                {stale && (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <span
-                        tabIndex={0}
-                        role="button"
-                        aria-describedby="score-stale-tooltip"
-                        className="ml-1 inline-flex items-center text-amber-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 rounded"
-                      >
-                        <AlertTriangle size={20} aria-hidden />
-                      </span>
-                    </TooltipTrigger>
-                    <TooltipContent id="score-stale-tooltip" role="tooltip" className="max-w-xs">
-                      Live data is stale — figure shown is from last successful capture.
-                    </TooltipContent>
-                  </Tooltip>
-                )}
-              </div>
-              <div className="mt-2 flex flex-wrap items-center gap-2 sm:gap-3">
-                <span className="text-sm font-medium text-slate-500">Human Capital Score</span>
-                <span
-                  className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold text-severity-warning ${
-                    stale ? "stale-stripes" : "bg-amber-50"
-                  }`}
-                >
-                  At Risk
-                </span>
-              </div>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-6">
+          <div className="sm:w-1/3 sm:shrink-0">
+            <div className="flex items-baseline gap-2">
+              <span className="text-5xl font-bold text-slate-900 leading-none sm:text-6xl">54</span>
+              <span className="text-2xl text-slate-500">/100</span>
+              {stale && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span
+                      tabIndex={0}
+                      role="button"
+                      aria-describedby="score-stale-tooltip"
+                      className="ml-1 inline-flex items-center text-amber-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 rounded"
+                    >
+                      <AlertTriangle size={20} aria-hidden />
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent id="score-stale-tooltip" role="tooltip" className="max-w-xs">
+                    Live data is stale — figure shown is from last successful capture.
+                  </TooltipContent>
+                </Tooltip>
+              )}
+            </div>
+            <div className="mt-2 flex flex-wrap items-center gap-2 sm:gap-3">
+              <span className="text-sm font-medium text-slate-500">Human Capital Score</span>
+              <span
+                className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold text-severity-warning ${
+                  stale ? "stale-stripes" : "bg-amber-50"
+                }`}
+              >
+                At Risk
+              </span>
             </div>
           </div>
-
+          <div className="border-t border-slate-200 pt-4 sm:flex-1 sm:border-l sm:border-t-0 sm:pl-6 sm:pt-0">
+            <p className="text-[13px] italic leading-relaxed text-slate-600 sm:text-[14px] lg:text-[15px]">
+              This is an AI-powered resilience dashboard helping NHS Trusts monitor and anticipate workforce risk. This prototype focuses on the Human Capital pillar, presenting a composite score drawn from Key Risk Indicators benchmarked against pre-pandemic NHS performance. Staff Vacancy Rate and Sickness Absence Rate are populated with live public data from NHS England; remaining KRIs are clearly labelled as illustrative demo data. This is a working demonstration intended to invite challenge and iteration, not a finished product.
+            </p>
+          </div>
         </div>
       </div>
     </section>
