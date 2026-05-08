@@ -1,15 +1,11 @@
-import { Info, ArrowRight } from "lucide-react";
+import { Info } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { Button } from "@/components/ui/button";
 import {
   SCENARIO_IMPACTS,
-  SCORE_BANDS,
-  bandForScore,
-  formatKriDelta,
-  formatKriValue,
   type KriImpactRow,
+  type ScenarioImpact,
 } from "./scenarioImpacts";
-import { SCENARIO_SEVERITY_STYLES, type Scenario } from "./scenarios";
+import type { Scenario } from "./scenarios";
 
 interface Props {
   scenario: Scenario | null;
@@ -44,24 +40,74 @@ export const VisualiserMockup = ({ scenario, onBrowseScenarios }: Props) => {
       {scenario ? (
         <LoadedView scenario={scenario} onBrowseScenarios={onBrowseScenarios} />
       ) : (
-        <EmptyState onBrowseScenarios={onBrowseScenarios} />
+        <EmptyState />
       )}
     </div>
   );
 };
 
-const EmptyState = ({ onBrowseScenarios }: { onBrowseScenarios: () => void }) => (
-  <div className="rounded-xl border border-slate-200 bg-white px-6 py-16 text-center shadow-sm">
-    <h2 className="text-lg font-semibold text-slate-900">No scenario loaded</h2>
-    <p className="mx-auto mt-2 max-w-md text-sm text-slate-600">
-      Choose a scenario from the Scenario Testing Library to see its projected impact on the Human
-      Capital score and individual KRIs.
+const EmptyState = () => (
+  <div className="rounded-xl border border-dashed border-slate-300 bg-white px-6 py-16 text-center">
+    <p className="mx-auto max-w-md text-sm italic text-slate-500">
+      Load a scenario from the Scenarios tab to visualise its projected impact.
     </p>
-    <Button className="mt-6" onClick={onBrowseScenarios}>
-      Browse scenarios
-    </Button>
   </div>
 );
+
+interface DriverContribution {
+  kri: string;
+  points: number;
+}
+
+function computeDrivers(rows: KriImpactRow[], totalDelta: number): DriverContribution[] {
+  // Lower-is-better KRIs
+  const lowerBetter = new Set([
+    "Sickness Absence Rate",
+    "Staff Vacancies",
+    "Voluntary Turnover",
+  ]);
+
+  // Raw signed contribution: sign aligned with whether the KRI improved (+) or deteriorated (-)
+  const raw = rows.map((r) => {
+    const delta = r.projected - r.current;
+    const signed = lowerBetter.has(r.kri) ? -delta : delta;
+    return { kri: r.kri, signed };
+  });
+
+  const sumSigned = raw.reduce((a, b) => a + b.signed, 0);
+
+  // Scale raw contributions so they sum to the composite delta in points
+  let scaled: DriverContribution[];
+  if (Math.abs(sumSigned) < 1e-9) {
+    scaled = raw.map((r) => ({ kri: r.kri, points: 0 }));
+  } else {
+    const scale = totalDelta / sumSigned;
+    scaled = raw.map((r) => ({ kri: r.kri, points: r.signed * scale }));
+  }
+
+  // Round to integers, preserve sum
+  const rounded = scaled.map((s) => ({ kri: s.kri, points: Math.round(s.points) }));
+  const diff = totalDelta - rounded.reduce((a, b) => a + b.points, 0);
+  if (diff !== 0 && rounded.length > 0) {
+    // Apply correction to the largest absolute contributor
+    let idx = 0;
+    rounded.forEach((r, i) => {
+      if (Math.abs(r.points) > Math.abs(rounded[idx].points)) idx = i;
+    });
+    rounded[idx] = { ...rounded[idx], points: rounded[idx].points + diff };
+  }
+
+  // Sort by absolute contribution desc
+  return rounded.sort((a, b) => Math.abs(b.points) - Math.abs(a.points));
+}
+
+function verdictWord(delta: number): string {
+  if (delta >= 10) return "sustained improvement";
+  if (delta >= 4) return "modest improvement";
+  if (delta <= -10) return "sustained decline";
+  if (delta <= -4) return "modest decline";
+  return "stable";
+}
 
 const LoadedView = ({
   scenario,
@@ -70,238 +116,210 @@ const LoadedView = ({
   scenario: Scenario;
   onBrowseScenarios: () => void;
 }) => {
-  const impact = SCENARIO_IMPACTS[scenario.id];
-  const sevStyles = SCENARIO_SEVERITY_STYLES[scenario.severity];
+  const impact: ScenarioImpact | undefined = SCENARIO_IMPACTS[scenario.id];
   const projected = scenario.projectedScore;
-  const currentBand = bandForScore(CURRENT_SCORE);
-  const projectedBand = bandForScore(projected);
   const delta = projected - CURRENT_SCORE;
+  const hasLive = impact?.rows.some((r) => r.source === "live") ?? false;
 
-  const arrowTint =
-    delta > 0 ? "text-emerald-600" : delta < 0 ? "text-red-600" : "text-slate-400";
+  const drivers = impact ? computeDrivers(impact.rows, delta) : [];
+  const maxAbs = drivers.reduce((m, d) => Math.max(m, Math.abs(d.points)), 0);
+
+  const deltaTone =
+    delta > 0
+      ? { text: "text-emerald-700", arrow: "▲", sign: "+" }
+      : delta < 0
+        ? { text: "text-red-700", arrow: "▼", sign: "" }
+        : { text: "text-slate-600", arrow: "▬", sign: "" };
 
   return (
     <div className="space-y-5">
-      {/* 3.1 Header band */}
-      <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div>
-            <div className="text-xs font-medium uppercase tracking-wide text-slate-500">
+      {/* Section 1 — Scenario summary header */}
+      <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div className="min-w-0 flex-1">
+            <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
               Scenario loaded
             </div>
-            <h2 className="mt-2 text-2xl font-semibold text-slate-900">{scenario.title}</h2>
-            <div className="mt-3 flex flex-wrap items-center gap-2">
-              <span
-                className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-semibold ${sevStyles.chip}`}
-              >
-                <span className={`h-1.5 w-1.5 rounded-full ${sevStyles.dot}`} aria-hidden />
-                {scenario.severity}
-              </span>
-              <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2.5 py-0.5 text-xs font-medium text-slate-600">
-                {scenario.type}
-              </span>
+            <h2 className="mt-1.5 text-[18px] font-medium leading-snug text-slate-900">
+              {scenario.title}
+            </h2>
+            <p className="mt-2 text-sm leading-relaxed text-slate-600">{scenario.description}</p>
+            <button
+              type="button"
+              onClick={onBrowseScenarios}
+              className="mt-3 text-sm font-medium text-brand hover:underline"
+            >
+              Load a different scenario →
+            </button>
+          </div>
+          <div className="flex flex-wrap gap-2 sm:flex-col sm:items-end">
+            <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700">
+              {impact?.horizon ?? "Horizon TBC"}
+            </span>
+            <span
+              className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold ${
+                hasLive
+                  ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                  : "border-amber-200 bg-amber-50 text-amber-800"
+              }`}
+            >
+              {hasLive ? "Live data" : "Illustrative"}
+            </span>
+          </div>
+        </div>
+      </section>
+
+      {/* Section 2 — Projected impact */}
+      <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
+        <h3 className="text-base font-medium text-slate-900">Projected impact</h3>
+
+        <div
+          className="mt-4 grid gap-3"
+          style={{ gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))" }}
+        >
+          <MetricBlock
+            label="Baseline"
+            value={CURRENT_SCORE}
+            suffix="/100"
+            descriptor="Current Human Capital score"
+          />
+          <MetricBlock
+            label="Projected"
+            value={projected}
+            suffix="/100"
+            descriptor="Post-scenario application"
+          />
+          <div className="rounded-lg bg-slate-50 p-4">
+            <div className="text-xs font-medium uppercase tracking-wide text-slate-500">Delta</div>
+            <div className={`mt-2 text-2xl font-medium tabular-nums ${deltaTone.text}`}>
+              <span aria-hidden>{deltaTone.arrow}</span>{" "}
+              {deltaTone.sign}
+              {delta} pts
+            </div>
+            <div className="mt-1 text-xs text-slate-500">{verdictWord(delta)}</div>
+          </div>
+        </div>
+
+        {drivers.length > 0 && (
+          <div className="mt-6">
+            <div className="text-[13px] text-slate-500">Drivers — contribution per KRI</div>
+            <div className="mt-3 space-y-2.5">
+              {drivers.map((d) => (
+                <DriverRow key={d.kri} driver={d} maxAbs={maxAbs} />
+              ))}
             </div>
           </div>
-          <button
-            type="button"
-            onClick={onBrowseScenarios}
-            className="text-sm font-medium text-brand hover:underline"
-          >
-            Load a different scenario →
-          </button>
+        )}
+      </section>
+
+      {/* Section 3 — How this is calculated */}
+      <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
+        <h3 className="text-base font-medium text-slate-900">How this is calculated</h3>
+        <div className="mt-4 space-y-5">
+          <CalcSubsection label="Inputs">
+            {impact?.inputs ??
+              "Scenario assumptions are pulled from the scenario configuration and modelled across the Human Capital KRIs."}
+          </CalcSubsection>
+          <CalcSubsection label="Calculation">
+            Each KRI's projected value is recomputed under the scenario assumptions, then reweighted
+            to the composite using the Human Capital pillar weights. Baseline is the current
+            composite; projected applies the scenario uplifts. Per-KRI bars show each indicator's
+            points contribution to the delta.
+          </CalcSubsection>
+          <CalcSubsection label="Caveats">
+            Linear uplift assumed; does not model trust-specific factors, external shocks, or
+            interaction effects between interventions. The production engine will apply confidence
+            bands and rules-based clamping to the historical KRI range.
+          </CalcSubsection>
+        </div>
+      </section>
+
+      {/* Section 4 — Illustrative footer banner */}
+      <div
+        role="note"
+        aria-label="Illustrative scenario projection disclaimer"
+        className="rounded-lg border border-blue-200 border-l-4 border-l-blue-600 bg-blue-50 p-4 sm:p-5"
+      >
+        <div className="flex items-start gap-3">
+          <Info size={20} className="mt-0.5 shrink-0 text-blue-700" aria-hidden />
+          <div className="min-w-0">
+            <h2 className="text-base font-semibold text-blue-900">
+              Illustrative scenario projection
+            </h2>
+            <p className="mt-1.5 text-sm leading-relaxed text-blue-900/90">
+              Production build will use the same rules-based engine as the AI Risk Prediction tab,
+              with documented inputs, weights, and intervention uplifts.
+            </p>
+          </div>
         </div>
       </div>
-
-      {/* 3.2 Score impact strip */}
-      <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
-        <div className="flex items-center justify-center gap-4 sm:gap-6">
-          <div className="text-center">
-            <div className="text-3xl font-bold tabular-nums text-slate-900">{CURRENT_SCORE}</div>
-            <div className={`mt-1 text-xs font-semibold ${currentBand.text}`}>
-              ({currentBand.label})
-            </div>
-          </div>
-          <ArrowRight size={28} className={arrowTint} aria-hidden />
-          <div className="text-center">
-            <div className="text-3xl font-bold tabular-nums text-slate-900">{projected}</div>
-            <div className={`mt-1 text-xs font-semibold ${projectedBand.text}`}>
-              ({projectedBand.label})
-            </div>
-          </div>
-        </div>
-
-        <ScoreBar current={CURRENT_SCORE} projected={projected} />
-
-        <div className="mt-4 text-center font-mono text-sm tabular-nums text-slate-700">
-          Estimated impact: {CURRENT_SCORE} → {projected} ({delta > 0 ? "+" : ""}
-          {delta})
-        </div>
-
-        <div className="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
-          {SCORE_BANDS.map((b) => (
-            <div key={b.label} className="flex items-center gap-1.5">
-              <span className={`h-2.5 w-2.5 rounded-sm ${b.swatch}`} aria-hidden />
-              <span className="text-xs text-slate-600">
-                {b.label} ({b.min}–{b.max})
-              </span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* 3.3 KRI before / after table */}
-      {impact && <KriTable rows={impact.rows} />}
-
-      {/* 3.4 Narrative */}
-      {impact && (
-        <div className="rounded-xl bg-slate-50 border border-slate-200 p-4 sm:p-6">
-          <div className="text-xs font-medium uppercase tracking-wide text-slate-500">
-            Why this projection
-          </div>
-          <p className="mt-2 text-base text-slate-700">{impact.narrative}</p>
-          <p className="mt-4 text-xs italic text-slate-500">
-            Projected values are illustrative for the 14 May demo. Calculation logic is built
-            post-demo.
-          </p>
-        </div>
-      )}
     </div>
   );
 };
 
-const ScoreBar = ({ current, projected }: { current: number; projected: number }) => {
+const MetricBlock = ({
+  label,
+  value,
+  suffix,
+  descriptor,
+}: {
+  label: string;
+  value: number;
+  suffix: string;
+  descriptor: string;
+}) => (
+  <div className="rounded-lg bg-slate-50 p-4">
+    <div className="text-xs font-medium uppercase tracking-wide text-slate-500">{label}</div>
+    <div className="mt-2 text-2xl font-medium tabular-nums text-slate-900">
+      {value}
+      <span className="ml-0.5 text-base font-normal text-slate-500">{suffix}</span>
+    </div>
+    <div className="mt-1 text-xs text-slate-500">{descriptor}</div>
+  </div>
+);
+
+const DriverRow = ({ driver, maxAbs }: { driver: DriverContribution; maxAbs: number }) => {
+  const pct = maxAbs > 0 ? (Math.abs(driver.points) / maxAbs) * 100 : 0;
+  const tone =
+    driver.points > 0
+      ? { fill: "bg-emerald-500", text: "text-emerald-700", sign: "+" }
+      : driver.points < 0
+        ? { fill: "bg-red-500", text: "text-red-700", sign: "−" }
+        : { fill: "bg-slate-300", text: "text-slate-600", sign: "" };
+
+  const absPts = Math.abs(driver.points);
+  const valueLabel =
+    driver.points === 0 ? "0 pts" : `${tone.sign}${absPts} pt${absPts === 1 ? "" : "s"}`;
+
   return (
-    <div className="relative mt-6 h-8 w-full">
-      <div className="flex h-3 w-full overflow-hidden rounded-full">
-        {SCORE_BANDS.map((b) => (
+    <div className="flex flex-col gap-1.5 sm:flex-row sm:items-center sm:gap-3">
+      <div className="text-sm text-slate-800 sm:w-[180px] sm:shrink-0">{driver.kri}</div>
+      <div className="flex flex-1 items-center gap-3">
+        <div
+          className="h-2 flex-1 overflow-hidden rounded-full bg-slate-100"
+          role="presentation"
+        >
           <div
-            key={b.label}
-            className={b.fill}
-            style={{ width: `${b.max - b.min}%` }}
+            className={`h-full rounded-full ${tone.fill}`}
+            style={{ width: `${pct}%` }}
             aria-hidden
           />
-        ))}
-      </div>
-      <Pip value={current} label={`${current}`} variant="current" />
-      <Pip value={projected} label={`${projected}`} variant="projected" />
-    </div>
-  );
-};
-
-const Pip = ({
-  value,
-  label,
-  variant,
-}: {
-  value: number;
-  label: string;
-  variant: "current" | "projected";
-}) => {
-  const left = `${Math.max(0, Math.min(100, value))}%`;
-  const colour = variant === "current" ? "bg-slate-900" : "bg-brand";
-  const labelPos = variant === "current" ? "-top-5" : "top-5";
-  return (
-    <div
-      className="absolute top-0 -translate-x-1/2"
-      style={{ left }}
-      aria-label={`${variant} score ${value}`}
-    >
-      <div className={`h-3 w-1 rounded-full ${colour}`} />
-      <div
-        className={`absolute ${labelPos} left-1/2 -translate-x-1/2 whitespace-nowrap font-mono text-[11px] tabular-nums text-slate-700`}
-      >
-        {label}
-      </div>
-    </div>
-  );
-};
-
-const KriTable = ({ rows }: { rows: KriImpactRow[] }) => {
-  return (
-    <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-      <div className="overflow-x-auto">
-      <table className="w-full min-w-[560px] text-sm">
-        <thead className="border-b border-slate-200 bg-slate-50">
-          <tr className="text-left text-xs font-medium uppercase tracking-wide text-slate-500">
-            <th className="px-4 py-3">KRI</th>
-            <th className="px-4 py-3">Current</th>
-            <th className="px-4 py-3">Projected</th>
-            <th className="px-4 py-3">Δ</th>
-            <th className="px-4 py-3">Status under scenario</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((r) => (
-            <KriRow key={r.kri} row={r} />
-          ))}
-        </tbody>
-      </table>
-      </div>
-    </div>
-  );
-};
-
-const KriRow = ({ row }: { row: KriImpactRow }) => {
-  const delta = row.projected - row.current;
-  const deltaColour =
-    delta > 0
-      ? row.kri === "Training Compliance" || row.kri === "Staff Engagement Score"
-        ? "text-emerald-700"
-        : "text-red-700"
-      : delta < 0
-        ? row.kri === "Training Compliance" || row.kri === "Staff Engagement Score"
-          ? "text-red-700"
-          : "text-emerald-700"
-        : "text-slate-600";
-
-  const statusStyles =
-    row.status === "Critical"
-      ? "bg-red-50 text-red-700 border-red-200"
-      : row.status === "Warning"
-        ? "bg-amber-50 text-amber-800 border-amber-200"
-        : "bg-blue-50 text-blue-700 border-blue-200";
-  const statusDot =
-    row.status === "Critical"
-      ? "bg-red-600"
-      : row.status === "Warning"
-        ? "bg-amber-500"
-        : "bg-blue-500";
-
-  const sourceChip =
-    row.source === "live"
-      ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-      : "bg-slate-100 text-slate-600 border-slate-200";
-  const sourceLabel = row.source === "live" ? "Live · Public Data" : "Illustrative";
-
-  return (
-    <tr className="border-b border-slate-100 last:border-0">
-      <td className="px-4 py-3">
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="font-medium text-slate-900">{row.kri}</span>
-          <span
-            className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${sourceChip}`}
-          >
-            {sourceLabel}
-          </span>
         </div>
-      </td>
-      <td className="px-4 py-3 font-mono text-base tabular-nums text-slate-900">
-        {formatKriValue(row, row.current)}
-      </td>
-      <td className="px-4 py-3 font-mono text-base tabular-nums text-slate-900">
-        {formatKriValue(row, row.projected)}
-      </td>
-      <td className={`px-4 py-3 font-mono text-base tabular-nums font-semibold ${deltaColour}`}>
-        {formatKriDelta(row)}
-      </td>
-      <td className="px-4 py-3">
-        <span
-          className={`inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-xs font-semibold ${statusStyles}`}
+        <div
+          className={`w-[60px] shrink-0 text-right text-sm font-medium tabular-nums ${tone.text}`}
         >
-          <span className={`h-1.5 w-1.5 rounded-full ${statusDot}`} aria-hidden />
-          {row.status}
-        </span>
-      </td>
-    </tr>
+          {valueLabel}
+        </div>
+      </div>
+    </div>
   );
 };
+
+const CalcSubsection = ({ label, children }: { label: string; children: React.ReactNode }) => (
+  <div>
+    <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+      {label}
+    </div>
+    <p className="mt-1.5 text-sm leading-[1.6] text-slate-700">{children}</p>
+  </div>
+);
