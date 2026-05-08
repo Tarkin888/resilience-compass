@@ -24,6 +24,9 @@ const Index = () => {
       <Header />
       <ScoreCard />
       <TrendPanel />
+      <p className="max-w-prose px-4 py-4 text-[14px] italic leading-relaxed text-slate-600 sm:px-6 sm:py-6 sm:text-[15px]">
+        This is an AI-powered resilience dashboard helping NHS Trusts monitor and anticipate workforce risk. This prototype focuses on the Human Capital pillar, presenting a composite score drawn from Key Risk Indicators benchmarked against pre-pandemic NHS performance. Staff Vacancy Rate and Sickness Absence Rate are populated with live public data from NHS England; remaining KRIs are clearly labelled as illustrative demo data. This is a working demonstration intended to invite challenge and iteration, not a finished product.
+      </p>
       <TabBar active={active} onChange={setActive} />
       <main className="px-4 py-4 sm:px-6 sm:py-6">
         <div role="tabpanel" id={tabPanelId("alerts")} aria-labelledby={tabButtonId("alerts")} hidden={active !== "alerts"}>
