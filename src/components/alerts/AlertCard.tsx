@@ -189,7 +189,9 @@ export const AlertCard = ({
         <CapturedEditionsPanel
           open={editionsOpen}
           onOpenChange={setEditionsOpen}
+          kriId={definition.kri_id}
           displayName={definition.display_name}
+          isLive={definition.is_live}
           captures={captures}
           source={source}
         />
