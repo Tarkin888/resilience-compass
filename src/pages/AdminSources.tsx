@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { BackButton } from "@/components/BackButton";
 
 interface SourceRow {
   id: string;
@@ -194,6 +195,9 @@ export default function AdminSources() {
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
       <header className="border-b border-slate-200 bg-white px-4 py-4 sm:px-6">
+        <div className="mb-3">
+          <BackButton />
+        </div>
         <h1 className="text-xl font-bold">Admin — Data Sources</h1>
         <p className="text-sm text-slate-500">NHS England public data ingestion controls</p>
       </header>
