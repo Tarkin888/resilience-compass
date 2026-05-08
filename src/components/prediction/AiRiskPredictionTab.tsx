@@ -131,6 +131,31 @@ export const AiRiskPredictionTab = () => {
         </p>
       </div>
 
+      {/* Illustrative forecast disclaimer */}
+      <div
+        role="note"
+        aria-label="Illustrative forecast disclaimer"
+        className="rounded-lg border border-blue-200 border-l-4 border-l-blue-600 bg-blue-50 p-4 sm:p-5"
+      >
+        <div className="flex items-start gap-3">
+          <Info size={20} className="mt-0.5 shrink-0 text-blue-700" aria-hidden />
+          <div className="min-w-0">
+            <h2 className="text-base font-semibold text-blue-900">
+              Illustrative forecast — methodology in development
+            </h2>
+            <p className="mt-1.5 text-sm leading-relaxed text-blue-900/90">
+              The 6-month forecast shown below is an illustrative projection generated to
+              demonstrate the dashboard's predictive capability. In the production build, this
+              view will be driven by a rules-based engine combining per-KRI linear-trend
+              projection, bounded historical ranges, pillar-weighted composite scoring, and
+              intervention-uplift overlays. The agreed rule set will be documented and
+              version-controlled alongside the methodology applied to the Human Capital
+              composite score.
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Two-column main area */}
       <div className="grid gap-5 lg:grid-cols-5">
         {/* Left — chart (≈60%) */}
