@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { CheckCircle2, AlertTriangle, HelpCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Footer } from "@/components/Footer";
+import { BackButton } from "@/components/BackButton";
 
 interface CapRow {
   kri_id: string;
@@ -73,6 +74,9 @@ export default function AdminStatus() {
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col">
       <header className="border-b border-slate-200 bg-white px-4 py-4 sm:px-6">
+        <div className="mb-3">
+          <BackButton />
+        </div>
         <h1 className="text-xl font-bold">Live Data Status</h1>
         <p className="text-sm text-slate-500">
           Operational view of the live NHS data feeds powering this dashboard.
@@ -136,17 +140,6 @@ export default function AdminStatus() {
           </table>
         </div>
 
-        <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="text-sm font-semibold text-slate-900">How this page works.</h2>
-          <p className="mt-2 text-base leading-relaxed text-slate-700">
-            This page reads directly from the capture_log and kri_captures tables in Supabase. A
-            successful capture writes a row to both tables; a failure writes only a capture_log
-            row with the failure reason. If the most recent attempt for either KRI was a failure,
-            the corresponding row is highlighted amber. The dashboard's headline values continue
-            to display the most recent successful capture, with a stale indicator if no
-            successful capture has occurred in the last seven days.
-          </p>
-        </div>
       </main>
       <Footer />
     </div>
