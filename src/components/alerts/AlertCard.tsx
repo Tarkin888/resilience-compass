@@ -65,20 +65,24 @@ export const AlertCard = ({
             {definition.is_live ? (
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <button
-                    type="button"
-                    className="inline-flex items-center gap-1 rounded-full border border-blue-200 bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
-                    aria-label="Live source details"
+                  <a
+                    href={source?.series_landing_page_url ?? "#"}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex min-h-[44px] items-center gap-1 rounded-full border border-blue-200 bg-blue-50 px-2.5 py-0.5 text-xs font-medium text-blue-700 hover:bg-blue-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 sm:min-h-0"
+                    aria-label={`Open ${source?.publication_name ?? "source"} in a new tab`}
                   >
                     <span className="h-1.5 w-1.5 rounded-full bg-blue-600" />
                     Live · Public Data
-                  </button>
+                    <ExternalLink size={12} aria-hidden />
+                  </a>
                 </TooltipTrigger>
                 <TooltipContent className="max-w-xs">
                   <div className="space-y-0.5 text-xs">
                     <div><span className="font-semibold">Publication:</span> {source?.publication_name ?? "—"}</div>
                     <div><span className="font-semibold">Edition:</span> {latest?.edition_label ?? "—"}</div>
                     <div><span className="font-semibold">Captured:</span> {latest?.captured_at ? formatDateTime(latest.captured_at) : "—"}</div>
+                    <div className="pt-1 text-blue-700">Opens NHS source in a new tab</div>
                   </div>
                 </TooltipContent>
               </Tooltip>
