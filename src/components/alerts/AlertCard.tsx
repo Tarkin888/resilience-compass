@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { ChevronDown, ExternalLink } from "lucide-react";
 import type { Status, Trend } from "@/lib/calc";
-import { getInterventions } from "@/lib/interventions";
+import { PriorityInterventionsCard } from "./PriorityInterventionsCard";
 import type {
   KriCapture,
   KriDefinition,
