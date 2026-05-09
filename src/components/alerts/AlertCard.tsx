@@ -40,7 +40,7 @@ export const AlertCard = ({
   const [editionsOpen, setEditionsOpen] = useState(false);
   const sev = SEVERITY_STYLES[status];
   const arrow = trend ? trendArrow(trend) : null;
-  const interventions = getInterventions(definition.kri_id);
+  const isFlagged = status !== "OK";
   const latest = captures[0];
 
   const unitSymbol = unit === "percent" ? "%" : ` ${unit}`;
