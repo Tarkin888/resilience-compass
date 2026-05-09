@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { ChevronDown, ExternalLink } from "lucide-react";
 import type { Status, Trend } from "@/lib/calc";
-import { getInterventions } from "@/lib/interventions";
+import { PriorityInterventionsCard } from "./PriorityInterventionsCard";
 import type {
   KriCapture,
   KriDefinition,
@@ -40,7 +40,7 @@ export const AlertCard = ({
   const [editionsOpen, setEditionsOpen] = useState(false);
   const sev = SEVERITY_STYLES[status];
   const arrow = trend ? trendArrow(trend) : null;
-  const interventions = getInterventions(definition.kri_id);
+  const isFlagged = status !== "OK";
   const latest = captures[0];
 
   const unitSymbol = unit === "percent" ? "%" : ` ${unit}`;
@@ -160,21 +160,11 @@ export const AlertCard = ({
                         : "The reading is steady against the prior period."
                   }`}
             </p>
-            {interventions.length > 0 && (
-              <div>
-                <div className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                  Suggested interventions
-                </div>
-                <ul className="list-disc space-y-1 pl-5">
-                  {interventions.map((i) => (
-                    <li key={i}>{i}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
           </div>
         )}
       </div>
+
+      {isFlagged && <PriorityInterventionsCard kriId={definition.kri_id} />}
 
       {threshold && (
         <div className="border-t border-slate-200 px-5 py-4">
