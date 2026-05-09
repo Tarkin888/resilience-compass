@@ -160,18 +160,11 @@ export const AlertCard = ({
                         : "The reading is steady against the prior period."
                   }`}
             </p>
-            {interventions.length > 0 && (
-              <div>
-                <div className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                  Suggested interventions
-                </div>
-                <ul className="list-disc space-y-1 pl-5">
-                  {interventions.map((i) => (
-                    <li key={i}>{i}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
+          </div>
+        )}
+      </div>
+
+      {isFlagged && <PriorityInterventionsCard kriId={definition.kri_id} />}
           </div>
         )}
       </div>
