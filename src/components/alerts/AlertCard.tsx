@@ -165,9 +165,6 @@ export const AlertCard = ({
       </div>
 
       {isFlagged && <PriorityInterventionsCard kriId={definition.kri_id} />}
-          </div>
-        )}
-      </div>
 
       {threshold && (
         <div className="border-t border-slate-200 px-5 py-4">
