@@ -11,7 +11,7 @@ import type {
 import { SEVERITY_STYLES, formatDate, formatDateTime, trendArrow } from "./severity";
 import { ThresholdPanel } from "./ThresholdPanel";
 import { CapturedEditionsPanel } from "./CapturedEditionsPanel";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { DataSourceChip } from "@/components/DataSourceChip";
 
 interface Props {
   definition: KriDefinition;
