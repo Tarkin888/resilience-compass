@@ -97,7 +97,11 @@ export const AlertCard = ({
             )}
           </div>
 
-          <p className="mt-2 text-sm text-slate-700">{narrative}</p>
+          <div className="mt-2 space-y-1 text-sm text-slate-700">
+            {narrative.split("\n").map((line, i) => (
+              <p key={i}>{line}</p>
+            ))}
+          </div>
 
           {definition.is_live && latest && (
             <p className="mt-1 text-xs text-slate-500">
