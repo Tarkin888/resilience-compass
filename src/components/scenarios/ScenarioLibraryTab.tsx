@@ -16,13 +16,20 @@ interface Props {
 }
 
 const SEVERITY_OPTIONS: Array<"All" | ScenarioSeverity> = ["All", "Critical", "Warning", "Watch"];
-const TYPE_OPTIONS: Array<"All" | ScenarioType> = [
-  "All",
-  "Workforce shock",
-  "Demand surge",
-  "Strategic",
-  "Compliance",
+const TYPE_OPTIONS: Array<{ value: "All" | ScenarioType; label: string }> = [
+  { value: "All", label: "All types" },
+  { value: "Demand surge", label: "Demand surge" },
+  { value: "Workforce shock", label: "Workforce shock" },
+  { value: "Compliance", label: "Compliance" },
+  { value: "Strategic", label: "Strategic" },
 ];
+
+const pillClass = (active: boolean) =>
+  `rounded-full px-3 py-1.5 text-xs font-medium transition-colors min-h-[36px] focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 ${
+    active
+      ? "bg-slate-900 text-white"
+      : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+  }`;
 
 export const ScenarioLibraryTab = ({ onLoadScenario }: Props) => {
   const [query, setQuery] = useState("");
