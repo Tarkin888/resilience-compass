@@ -12,7 +12,6 @@ import {
   ReferenceDot,
   ResponsiveContainer,
 } from "recharts";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { DataSourceChip } from "@/components/DataSourceChip";
 
 interface Point {
