@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Search, Info } from "lucide-react";
+import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,7 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { DataSourceChip } from "@/components/DataSourceChip";
 import {
   SCENARIOS,
   SCENARIO_SEVERITY_STYLES,
