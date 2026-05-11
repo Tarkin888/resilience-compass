@@ -1,4 +1,4 @@
-import { DataSourceChip } from "@/components/DataSourceChip";
+import { DataSourceChip, type LiveTooltipPayload } from "@/components/DataSourceChip";
 import {
   SCENARIO_IMPACTS,
   type KriImpactRow,
