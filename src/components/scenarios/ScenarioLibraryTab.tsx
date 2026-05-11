@@ -2,13 +2,6 @@ import { useMemo, useState } from "react";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { DataSourceChip } from "@/components/DataSourceChip";
 import {
   SCENARIOS,
@@ -23,13 +16,20 @@ interface Props {
 }
 
 const SEVERITY_OPTIONS: Array<"All" | ScenarioSeverity> = ["All", "Critical", "Warning", "Watch"];
-const TYPE_OPTIONS: Array<"All" | ScenarioType> = [
-  "All",
-  "Workforce shock",
-  "Demand surge",
-  "Strategic",
-  "Compliance",
+const TYPE_OPTIONS: Array<{ value: "All" | ScenarioType; label: string }> = [
+  { value: "All", label: "All types" },
+  { value: "Demand surge", label: "Demand surge" },
+  { value: "Workforce shock", label: "Workforce shock" },
+  { value: "Compliance", label: "Compliance" },
+  { value: "Strategic", label: "Strategic" },
 ];
+
+const pillClass = (active: boolean) =>
+  `rounded-full px-3 py-1.5 text-xs font-medium transition-colors min-h-[36px] focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 ${
+    active
+      ? "bg-slate-900 text-white"
+      : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+  }`;
 
 export const ScenarioLibraryTab = ({ onLoadScenario }: Props) => {
   const [query, setQuery] = useState("");
@@ -74,35 +74,33 @@ export const ScenarioLibraryTab = ({ onLoadScenario }: Props) => {
               className="pl-9"
             />
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Severity filter">
             <span className="shrink-0 text-xs font-medium text-slate-500">Severity</span>
-            <Select value={severity} onValueChange={(v) => setSeverity(v as typeof severity)}>
-              <SelectTrigger className="w-full sm:w-[140px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {SEVERITY_OPTIONS.map((opt) => (
-                  <SelectItem key={opt} value={opt}>
-                    {opt}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            {SEVERITY_OPTIONS.map((opt) => (
+              <button
+                key={opt}
+                type="button"
+                onClick={() => setSeverity(opt)}
+                aria-pressed={severity === opt}
+                className={pillClass(severity === opt)}
+              >
+                {opt}
+              </button>
+            ))}
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Type filter">
             <span className="shrink-0 text-xs font-medium text-slate-500">Type</span>
-            <Select value={type} onValueChange={(v) => setType(v as typeof type)}>
-              <SelectTrigger className="w-full sm:w-[180px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {TYPE_OPTIONS.map((opt) => (
-                  <SelectItem key={opt} value={opt}>
-                    {opt}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            {TYPE_OPTIONS.map((opt) => (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => setType(opt.value)}
+                aria-pressed={type === opt.value}
+                className={pillClass(type === opt.value)}
+              >
+                {opt.label}
+              </button>
+            ))}
           </div>
         </div>
       </div>
