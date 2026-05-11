@@ -47,7 +47,7 @@ const LOWER_BETTER = new Set([
 const LIVE_KRIS = new Set(["Sickness Absence Rate", "Staff Vacancies"]);
 
 // Live tooltip payloads (illustrative editions for chip tooltip)
-const LIVE_PAYLOAD: Record<string, Parameters<typeof DataSourceChip>[0] extends { payload: infer P } ? P : never> = {
+const LIVE_PAYLOAD: Record<string, LiveTooltipPayload> = {
   "Sickness Absence Rate": {
     publicationName: "NHS Sickness Absence Rates",
     editionLabel: "January 2026",
