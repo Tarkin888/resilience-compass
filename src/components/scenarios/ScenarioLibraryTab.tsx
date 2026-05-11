@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Search, Info } from "lucide-react";
+import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,7 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { DataSourceChip } from "@/components/DataSourceChip";
 import {
   SCENARIOS,
   SCENARIO_SEVERITY_STYLES,
@@ -55,23 +55,7 @@ export const ScenarioLibraryTab = ({ onLoadScenario }: Props) => {
   return (
     <div className="space-y-5">
       <div className="flex flex-wrap items-center gap-3">
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <span
-              tabIndex={0}
-              role="button"
-              aria-describedby="library-mockup-tooltip"
-              className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
-            >
-              <Info size={12} aria-hidden />
-              Mockup — not yet live
-            </span>
-          </TooltipTrigger>
-          <TooltipContent id="library-mockup-tooltip" role="tooltip" className="max-w-xs">
-            This module is shown for the 14 May demo as a static preview. Functional build follows
-            post-demo.
-          </TooltipContent>
-        </Tooltip>
+        <DataSourceChip variant="mockup" />
       </div>
 
       <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">

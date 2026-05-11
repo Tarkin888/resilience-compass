@@ -61,6 +61,7 @@ export function buildAlertNarrative(
   capture: CaptureLite,
   threshold: ThresholdLite,
   lowerIsBetter = true,
+  sourceDetail = "",
 ): string {
   const unit = threshold.units === "percent" ? "%" : ` ${threshold.units}`;
   const value = capture.headline_value;
@@ -69,5 +70,6 @@ export function buildAlertNarrative(
       ? "no prior reading"
       : getTrend(value, capture.prior_value, lowerIsBetter);
   const qualifier = threshold.qualifier_label ? ` (${threshold.qualifier_label})` : "";
-  return `Source: ${publicationName}, ${capture.edition_label}. Target: <${threshold.threshold_value}${unit}${qualifier}. Actual: ${value.toFixed(1)}${unit}. Trend: ${trend}.`;
+  const detail = sourceDetail ? `, ${sourceDetail}` : "";
+  return `Source: ${publicationName}${detail} — ${capture.edition_label}. Target: <${threshold.threshold_value}${unit}${qualifier}. Actual: ${value.toFixed(1)}${unit}. Trend: ${trend}.`;
 }

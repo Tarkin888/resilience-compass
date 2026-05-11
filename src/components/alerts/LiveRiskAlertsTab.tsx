@@ -75,6 +75,10 @@ export const LiveRiskAlertsTab = () => {
         if (latest.prior_value != null) {
           trend = getTrend(value, Number(latest.prior_value), true);
         }
+        const SOURCE_DETAIL: Record<string, string> = {
+          sickness_absence: "England (NHS Digital), Table 1, England column",
+          vacancy: "England (NHS Digital), Table 1, England column",
+        };
         narrative = buildAlertNarrative(
           source?.publication_name ?? "NHS England",
           {
@@ -89,6 +93,7 @@ export const LiveRiskAlertsTab = () => {
             qualifier_label: threshold.qualifier_label,
           },
           true,
+          SOURCE_DETAIL[def.kri_id] ?? "",
         );
       } else {
         status = (def.illustrative_status as Status) ?? "OK";
@@ -175,10 +180,6 @@ export const LiveRiskAlertsTab = () => {
             }),
           )
         : [];
-      const anyOk = results.some((r) => r.status === "fulfilled");
-      if (anyOk) console.info("refresh:capture-ok", results);
-      else console.error("refresh:error", results);
-
       let newCount = 0;
       let noNewCount = 0;
       let hardFailCount = 0;
@@ -192,10 +193,17 @@ export const LiveRiskAlertsTab = () => {
         else hardFailCount++;
       });
 
+      const sources = liveKris;
+      if (hardFailCount > 0) {
+        console.error("refresh:capture-error", { newEditions: newCount, sources, failures: hardFailCount });
+      } else {
+        console.info("refresh:capture-ok", { newEditions: newCount, sources });
+      }
+
       let summary = "";
       if (newCount > 0) {
         summary = `${newCount} new edition${newCount === 1 ? "" : "s"} captured`;
-      } else if (hardFailCount === 0 && noNewCount > 0) {
+      } else if (hardFailCount === 0) {
         summary = "No new editions available yet";
       }
       setLastCheckedAt(new Date());
@@ -204,7 +212,7 @@ export const LiveRiskAlertsTab = () => {
       await refresh();
       console.info("refresh:rerender");
     } catch (e) {
-      console.error("refresh:error", e);
+      console.error("refresh:capture-error", e);
       setLastCheckedAt(new Date());
       setLastCheckSummary("");
     } finally {

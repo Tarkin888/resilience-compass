@@ -45,9 +45,10 @@ export const LiveDataStatusBanner = ({ lastRefreshed, onRefresh, refreshing, loa
             type="button"
             onClick={onRefresh}
             disabled={refreshing || loading}
+            aria-busy={refreshing}
             className="inline-flex min-h-[44px] items-center gap-2 rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white shadow-sm hover:opacity-90 disabled:opacity-60"
           >
-            <RefreshCw size={16} className={refreshing ? "animate-spin" : ""} />
+            <RefreshCw size={16} className={refreshing ? "animate-spin" : ""} aria-hidden />
             {refreshing ? "Refreshing…" : "Refresh"}
           </button>
           <Link
