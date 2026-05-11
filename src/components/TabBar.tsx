@@ -5,8 +5,8 @@ export type TabId = "alerts" | "library" | "visualiser" | "prediction";
 
 export const TABS: { id: TabId; label: string; icon: LucideIcon }[] = [
   { id: "alerts", label: "Live Risk Alerts", icon: Bell },
-  { id: "library", label: "Scenario Testing", icon: Layers },
-  { id: "visualiser", label: "Visualiser", icon: BarChart3 },
+  { id: "library", label: "Scenario Testing Library", icon: Layers },
+  { id: "visualiser", label: "Scenario Impact Visualiser", icon: BarChart3 },
   { id: "prediction", label: "AI Risk Prediction", icon: TrendingUp },
 ];
 
