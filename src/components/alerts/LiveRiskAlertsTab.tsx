@@ -75,6 +75,10 @@ export const LiveRiskAlertsTab = () => {
         if (latest.prior_value != null) {
           trend = getTrend(value, Number(latest.prior_value), true);
         }
+        const SOURCE_DETAIL: Record<string, string> = {
+          sickness_absence: "England (NHS Digital), Table 1, England column",
+          vacancy: "England (NHS Digital), Table 1, England column",
+        };
         narrative = buildAlertNarrative(
           source?.publication_name ?? "NHS England",
           {
@@ -89,6 +93,7 @@ export const LiveRiskAlertsTab = () => {
             qualifier_label: threshold.qualifier_label,
           },
           true,
+          SOURCE_DETAIL[def.kri_id] ?? "",
         );
       } else {
         status = (def.illustrative_status as Status) ?? "OK";
