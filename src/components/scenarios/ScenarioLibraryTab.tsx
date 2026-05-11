@@ -74,35 +74,33 @@ export const ScenarioLibraryTab = ({ onLoadScenario }: Props) => {
               className="pl-9"
             />
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Severity filter">
             <span className="shrink-0 text-xs font-medium text-slate-500">Severity</span>
-            <Select value={severity} onValueChange={(v) => setSeverity(v as typeof severity)}>
-              <SelectTrigger className="w-full sm:w-[140px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {SEVERITY_OPTIONS.map((opt) => (
-                  <SelectItem key={opt} value={opt}>
-                    {opt}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            {SEVERITY_OPTIONS.map((opt) => (
+              <button
+                key={opt}
+                type="button"
+                onClick={() => setSeverity(opt)}
+                aria-pressed={severity === opt}
+                className={pillClass(severity === opt)}
+              >
+                {opt}
+              </button>
+            ))}
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Type filter">
             <span className="shrink-0 text-xs font-medium text-slate-500">Type</span>
-            <Select value={type} onValueChange={(v) => setType(v as typeof type)}>
-              <SelectTrigger className="w-full sm:w-[180px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {TYPE_OPTIONS.map((opt) => (
-                  <SelectItem key={opt} value={opt}>
-                    {opt}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            {TYPE_OPTIONS.map((opt) => (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => setType(opt.value)}
+                aria-pressed={type === opt.value}
+                className={pillClass(type === opt.value)}
+              >
+                {opt.label}
+              </button>
+            ))}
           </div>
         </div>
       </div>
