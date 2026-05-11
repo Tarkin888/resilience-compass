@@ -71,5 +71,10 @@ export function buildAlertNarrative(
       : getTrend(value, capture.prior_value, lowerIsBetter);
   const qualifier = threshold.qualifier_label ? ` (${threshold.qualifier_label})` : "";
   const detail = sourceDetail ? `, ${sourceDetail}` : "";
-  return `Source: ${publicationName}${detail} — ${capture.edition_label}. Target: <${threshold.threshold_value}${unit}${qualifier}. Actual: ${value.toFixed(1)}${unit}. Trend: ${trend}.`;
+  return [
+    `Source: ${publicationName}${detail} — ${capture.edition_label}`,
+    `Target: <${threshold.threshold_value}${unit}${qualifier}`,
+    `Actual: ${value.toFixed(1)}${unit}`,
+    `Trend: ${trend}`,
+  ].join("\n");
 }
