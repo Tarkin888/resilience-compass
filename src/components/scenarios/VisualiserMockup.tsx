@@ -193,18 +193,6 @@ const LoadedView = ({
   );
 };
 
-const Pip = ({ score, label }: { score: number; label: string }) => (
-  <div
-    className="absolute -translate-x-1/2"
-    style={{ left: `${score}%` }}
-  >
-    <div className="mx-auto -mt-3 h-3 w-0.5 bg-slate-700" aria-hidden />
-    <div className="mt-0.5 whitespace-nowrap text-[11px] font-medium tabular-nums text-slate-700">
-      {label}
-    </div>
-  </div>
-);
-
 const KriRow = ({ row }: { row: KriImpactRow }) => {
   const delta = row.projected - row.current;
   const lowerBetter = LOWER_BETTER.has(row.kri);
