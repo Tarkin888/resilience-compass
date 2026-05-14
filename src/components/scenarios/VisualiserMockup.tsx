@@ -103,12 +103,9 @@ const LoadedView = ({
   const impact: ScenarioImpact | undefined = SCENARIO_IMPACTS[scenario.id];
   const projected = scenario.projectedScore;
   const delta = projected - BASELINE_SCORE;
-  const baseBand = bandForScore(BASELINE_SCORE);
-  const projBand = bandForScore(projected);
 
   const improving = delta > 0;
   const declining = delta < 0;
-  const arrowTone = improving ? "text-emerald-600" : declining ? "text-red-600" : "text-slate-500";
   const deltaTone = improving ? "text-emerald-700" : declining ? "text-red-700" : "text-slate-600";
   const sevPill = SCENARIO_SEVERITY_STYLES[scenario.severity].chip;
   const deltaSign = delta > 0 ? "+" : delta < 0 ? "-" : "";
