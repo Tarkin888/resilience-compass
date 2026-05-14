@@ -13,6 +13,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { DataSourceChip } from "@/components/DataSourceChip";
+import { ScoreScale } from "@/components/ScoreScale";
 
 interface Point {
   label: string;
@@ -150,6 +151,10 @@ export const AiRiskPredictionTab = () => {
                 Human Capital score trajectory
               </h2>
               <span className="text-xs text-slate-500">0–100 scale</span>
+            </div>
+
+            <div className="mb-4 rounded-lg border border-slate-200 bg-slate-50 p-4">
+              <ScoreScale score={CURRENT_SCORE} size="compact" label="Current score" />
             </div>
 
             <div

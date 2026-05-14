@@ -1,21 +1,8 @@
 import { useEffect, useState } from "react";
-import { Line, LineChart, ResponsiveContainer, Dot } from "recharts";
 import { AlertTriangle } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { ScoreScale } from "@/components/ScoreScale";
 import { supabase } from "@/integrations/supabase/client";
-
-const data = [
-  { q: "Q1", v: 62 },
-  { q: "Q2", v: 58 },
-  { q: "Q3", v: 56 },
-  { q: "Q4", v: 54 },
-];
-
-const LastDot = (props: any) => {
-  const { cx, cy, index } = props;
-  if (index !== data.length - 1) return null;
-  return <Dot cx={cx} cy={cy} r={5} fill="#B45309" stroke="#fff" strokeWidth={2} />;
-};
 
 const LIVE_KRIS = ["sickness_absence", "vacancy"];
 
@@ -50,11 +37,12 @@ export const ScoreCard = () => {
   return (
     <section className="px-4 py-4 sm:px-6 sm:py-6">
       <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-6">
-          <div className="sm:w-1/3 sm:shrink-0">
-            <div className="flex items-baseline gap-2">
-              <span className="text-5xl font-bold text-slate-900 leading-none sm:text-6xl">54</span>
-              <span className="text-2xl text-slate-500">/100</span>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-6">
+          <div className="sm:w-1/2 sm:shrink-0">
+            <div className="flex items-start gap-3">
+              <div className="min-w-0 flex-1">
+                <ScoreScale score={54} size="large" label="Human Capital score" />
+              </div>
               {stale && (
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -62,7 +50,7 @@ export const ScoreCard = () => {
                       tabIndex={0}
                       role="button"
                       aria-describedby="score-stale-tooltip"
-                      className="ml-1 inline-flex items-center text-amber-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 rounded"
+                      className="mt-1 inline-flex items-center text-amber-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 rounded"
                     >
                       <AlertTriangle size={20} aria-hidden />
                     </span>
@@ -73,8 +61,7 @@ export const ScoreCard = () => {
                 </Tooltip>
               )}
             </div>
-            <div className="mt-2 flex flex-wrap items-center gap-2 sm:gap-3">
-              <span className="text-sm font-medium text-slate-500">Human Capital Score</span>
+            <div className="mt-3">
               <span
                 className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold text-severity-warning ${
                   stale ? "stale-stripes" : "bg-amber-50"
@@ -94,3 +81,4 @@ export const ScoreCard = () => {
     </section>
   );
 };
+

@@ -1,4 +1,5 @@
 import { DataSourceChip, type LiveTooltipPayload } from "@/components/DataSourceChip";
+import { ScoreScale } from "@/components/ScoreScale";
 import {
   SCENARIO_IMPACTS,
   type KriImpactRow,
@@ -12,30 +13,6 @@ interface Props {
 }
 
 const BASELINE_SCORE = 54;
-
-// Tab 4 cut-offs
-type BandLabel = "Critical" | "At Risk" | "Stable" | "Strong";
-interface Band {
-  label: BandLabel;
-  min: number;
-  max: number;
-  fill: string;
-  text: string;
-  swatch: string;
-}
-const BANDS: Band[] = [
-  { label: "Critical", min: 0, max: 40, fill: "bg-red-400", text: "text-red-700", swatch: "bg-red-400" },
-  { label: "At Risk", min: 40, max: 60, fill: "bg-amber-400", text: "text-amber-700", swatch: "bg-amber-400" },
-  { label: "Stable", min: 60, max: 80, fill: "bg-emerald-400", text: "text-emerald-700", swatch: "bg-emerald-400" },
-  { label: "Strong", min: 80, max: 100, fill: "bg-emerald-600", text: "text-emerald-800", swatch: "bg-emerald-600" },
-];
-
-function bandForScore(score: number): Band {
-  if (score < 40) return BANDS[0];
-  if (score < 60) return BANDS[1];
-  if (score < 80) return BANDS[2];
-  return BANDS[3];
-}
 
 // KRIs where lower is better
 const LOWER_BETTER = new Set([
@@ -102,12 +79,9 @@ const LoadedView = ({
   const impact: ScenarioImpact | undefined = SCENARIO_IMPACTS[scenario.id];
   const projected = scenario.projectedScore;
   const delta = projected - BASELINE_SCORE;
-  const baseBand = bandForScore(BASELINE_SCORE);
-  const projBand = bandForScore(projected);
 
   const improving = delta > 0;
   const declining = delta < 0;
-  const arrowTone = improving ? "text-emerald-600" : declining ? "text-red-600" : "text-slate-500";
   const deltaTone = improving ? "text-emerald-700" : declining ? "text-red-700" : "text-slate-600";
   const sevPill = SCENARIO_SEVERITY_STYLES[scenario.severity].chip;
   const deltaSign = delta > 0 ? "+" : delta < 0 ? "-" : "";
@@ -142,54 +116,14 @@ const LoadedView = ({
 
       {/* Score impact strip */}
       <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
-        <div className="flex items-end justify-center gap-6 sm:gap-10">
-          <div className="text-center">
-            <div className="text-4xl font-medium tabular-nums text-slate-900 sm:text-5xl">{BASELINE_SCORE}</div>
-            <div className={`mt-1 text-xs font-medium ${baseBand.text}`}>{baseBand.label}</div>
-          </div>
-          <div className={`pb-6 text-3xl ${arrowTone}`} aria-hidden>
-            →
-          </div>
-          <div className="text-center">
-            <div className="text-4xl font-medium tabular-nums text-slate-900 sm:text-5xl">{projected}</div>
-            <div className={`mt-1 text-xs font-medium ${projBand.text}`}>{projBand.label}</div>
-          </div>
+        <div className="grid gap-6 sm:grid-cols-2 sm:gap-10">
+          <ScoreScale score={BASELINE_SCORE} size="compact" label="Baseline score" />
+          <ScoreScale score={projected} size="compact" label="Projected score" />
         </div>
-
-        {/* Band bar */}
-        <div className="mt-6">
-          <div className="relative h-3 w-full overflow-hidden rounded-full" aria-hidden>
-            <div className="absolute inset-0 flex">
-              {BANDS.map((b) => (
-                <div
-                  key={b.label}
-                  className={b.fill}
-                  style={{ width: `${b.max - b.min}%` }}
-                />
-              ))}
-            </div>
-          </div>
-          <div className="relative mt-1 h-5">
-            <Pip score={BASELINE_SCORE} label={`${BASELINE_SCORE} (${baseBand.label})`} />
-            <Pip score={projected} label={`${projected} (${projBand.label})`} />
-          </div>
-        </div>
-
-        {/* Monospace summary */}
-        <div className="mt-8 text-center">
+        <div className="mt-6 text-center">
           <span className={`font-mono text-sm ${deltaTone}`}>
             Estimated impact: {BASELINE_SCORE} → {projected} ({deltaSign}{deltaAbs})
           </span>
-        </div>
-
-        {/* Legend */}
-        <div className="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 text-xs text-slate-600">
-          {BANDS.map((b) => (
-            <span key={b.label} className="inline-flex items-center gap-1.5">
-              <span className={`inline-block h-2.5 w-2.5 rounded-sm ${b.swatch}`} aria-hidden />
-              {b.label}
-            </span>
-          ))}
         </div>
       </section>
 
@@ -234,18 +168,6 @@ const LoadedView = ({
     </>
   );
 };
-
-const Pip = ({ score, label }: { score: number; label: string }) => (
-  <div
-    className="absolute -translate-x-1/2"
-    style={{ left: `${score}%` }}
-  >
-    <div className="mx-auto -mt-3 h-3 w-0.5 bg-slate-700" aria-hidden />
-    <div className="mt-0.5 whitespace-nowrap text-[11px] font-medium tabular-nums text-slate-700">
-      {label}
-    </div>
-  </div>
-);
 
 const KriRow = ({ row }: { row: KriImpactRow }) => {
   const delta = row.projected - row.current;

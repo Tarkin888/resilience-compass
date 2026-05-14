@@ -3,6 +3,7 @@ import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { DataSourceChip } from "@/components/DataSourceChip";
+import { ScoreScale } from "@/components/ScoreScale";
 import {
   SCENARIOS,
   SCENARIO_SEVERITY_STYLES,
@@ -158,12 +159,15 @@ const ScenarioCard = ({ scenario, onLoad }: { scenario: Scenario; onLoad: () => 
         {scenario.description}
       </p>
 
-      <div className="mt-4 rounded-lg bg-slate-50 px-3 py-2">
+      <div className="mt-4 rounded-lg bg-slate-50 px-3 py-3">
         <div className="text-[11px] font-medium uppercase tracking-wide text-slate-500">
           Estimated score impact
         </div>
-        <div className="mt-1 font-mono text-sm tabular-nums text-slate-900">
-          {scenario.baseScore} → {scenario.projectedScore}{" "}
+        <div className="mt-2">
+          <ScoreScale score={scenario.projectedScore} size="compact" label="Projected score" />
+        </div>
+        <div className="mt-3 font-mono text-xs tabular-nums text-slate-600">
+          Baseline {scenario.baseScore} → {scenario.projectedScore}{" "}
           <span className={`font-semibold ${deltaColour}`}>({deltaText})</span>
         </div>
       </div>
