@@ -13,6 +13,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { DataSourceChip } from "@/components/DataSourceChip";
+import { ScoreScale } from "@/components/ScoreScale";
 
 interface Point {
   label: string;
