@@ -1,4 +1,5 @@
 import { DataSourceChip, type LiveTooltipPayload } from "@/components/DataSourceChip";
+import { ScoreScale } from "@/components/ScoreScale";
 import {
   SCENARIO_IMPACTS,
   type KriImpactRow,
