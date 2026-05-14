@@ -28,11 +28,11 @@ export const ThresholdPanel = ({
   const overrideAt = (threshold as Threshold & { trust_override_captured_at?: string | null }).trust_override_captured_at;
 
   return (
-    <div className="rounded-lg border border-slate-200 bg-slate-50">
+    <section className="border-t border-slate-200">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="flex w-full items-center justify-between px-4 py-3 text-left"
+        className="flex w-full items-center justify-between px-5 py-3 text-left"
         aria-expanded={open}
       >
         <span className="text-sm font-semibold text-slate-900">How this threshold was set</span>
@@ -42,7 +42,7 @@ export const ThresholdPanel = ({
         />
       </button>
       {open && (
-        <div className="space-y-3 border-t border-slate-200 px-4 py-3 text-sm text-slate-700">
+        <div className="space-y-3 border-t border-slate-200 px-5 py-4 text-sm text-slate-700">
           <div>
             <div className="text-xs font-medium uppercase tracking-wide text-slate-500">
               Threshold value
