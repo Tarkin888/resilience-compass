@@ -142,54 +142,14 @@ const LoadedView = ({
 
       {/* Score impact strip */}
       <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
-        <div className="flex items-end justify-center gap-6 sm:gap-10">
-          <div className="text-center">
-            <div className="text-4xl font-medium tabular-nums text-slate-900 sm:text-5xl">{BASELINE_SCORE}</div>
-            <div className={`mt-1 text-xs font-medium ${baseBand.text}`}>{baseBand.label}</div>
-          </div>
-          <div className={`pb-6 text-3xl ${arrowTone}`} aria-hidden>
-            →
-          </div>
-          <div className="text-center">
-            <div className="text-4xl font-medium tabular-nums text-slate-900 sm:text-5xl">{projected}</div>
-            <div className={`mt-1 text-xs font-medium ${projBand.text}`}>{projBand.label}</div>
-          </div>
+        <div className="grid gap-6 sm:grid-cols-2 sm:gap-10">
+          <ScoreScale score={BASELINE_SCORE} size="compact" label="Baseline score" />
+          <ScoreScale score={projected} size="compact" label="Projected score" />
         </div>
-
-        {/* Band bar */}
-        <div className="mt-6">
-          <div className="relative h-3 w-full overflow-hidden rounded-full" aria-hidden>
-            <div className="absolute inset-0 flex">
-              {BANDS.map((b) => (
-                <div
-                  key={b.label}
-                  className={b.fill}
-                  style={{ width: `${b.max - b.min}%` }}
-                />
-              ))}
-            </div>
-          </div>
-          <div className="relative mt-1 h-5">
-            <Pip score={BASELINE_SCORE} label={`${BASELINE_SCORE} (${baseBand.label})`} />
-            <Pip score={projected} label={`${projected} (${projBand.label})`} />
-          </div>
-        </div>
-
-        {/* Monospace summary */}
-        <div className="mt-8 text-center">
+        <div className="mt-6 text-center">
           <span className={`font-mono text-sm ${deltaTone}`}>
             Estimated impact: {BASELINE_SCORE} → {projected} ({deltaSign}{deltaAbs})
           </span>
-        </div>
-
-        {/* Legend */}
-        <div className="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 text-xs text-slate-600">
-          {BANDS.map((b) => (
-            <span key={b.label} className="inline-flex items-center gap-1.5">
-              <span className={`inline-block h-2.5 w-2.5 rounded-sm ${b.swatch}`} aria-hidden />
-              {b.label}
-            </span>
-          ))}
         </div>
       </section>
 
