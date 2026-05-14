@@ -14,30 +14,6 @@ interface Props {
 
 const BASELINE_SCORE = 54;
 
-// Tab 4 cut-offs
-type BandLabel = "Critical" | "At Risk" | "Stable" | "Strong";
-interface Band {
-  label: BandLabel;
-  min: number;
-  max: number;
-  fill: string;
-  text: string;
-  swatch: string;
-}
-const BANDS: Band[] = [
-  { label: "Critical", min: 0, max: 40, fill: "bg-red-400", text: "text-red-700", swatch: "bg-red-400" },
-  { label: "At Risk", min: 40, max: 60, fill: "bg-amber-400", text: "text-amber-700", swatch: "bg-amber-400" },
-  { label: "Stable", min: 60, max: 80, fill: "bg-emerald-400", text: "text-emerald-700", swatch: "bg-emerald-400" },
-  { label: "Strong", min: 80, max: 100, fill: "bg-emerald-600", text: "text-emerald-800", swatch: "bg-emerald-600" },
-];
-
-function bandForScore(score: number): Band {
-  if (score < 40) return BANDS[0];
-  if (score < 60) return BANDS[1];
-  if (score < 80) return BANDS[2];
-  return BANDS[3];
-}
-
 // KRIs where lower is better
 const LOWER_BETTER = new Set([
   "Sickness Absence Rate",
