@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Info, X } from "lucide-react";
+import { useId, useState } from "react";
+import { ChevronDown, Info, X } from "lucide-react";
 import {
   Popover,
   PopoverContent,
@@ -17,8 +17,10 @@ interface Props {
 type TopN = 3 | 5;
 
 export const PriorityInterventionsCard = ({ kriId }: Props) => {
+  const [open, setOpen] = useState(false);
   const [topN, setTopN] = useState<TopN>(3);
   const all = getInterventionsForKri(kriId);
+  const contentId = useId();
 
   if (all.length === 0) return null;
 
@@ -26,56 +28,70 @@ export const PriorityInterventionsCard = ({ kriId }: Props) => {
   const placeholderNeeded = topN > all.length;
 
   return (
-    <section className="border-t border-slate-200 px-5 py-4">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <h4 className="text-base font-medium text-slate-900">
-          Priority interventions
-        </h4>
-        <div
-          role="group"
-          aria-label="Number of interventions to show"
-          className="inline-flex items-center rounded-full bg-slate-100 p-0.5"
-        >
-          {([3, 5] as TopN[]).map((n) => (
-            <button
-              key={n}
-              type="button"
-              onClick={() => setTopN(n)}
-              aria-pressed={topN === n}
-              className={`rounded-full px-3 py-1 text-xs font-medium transition-colors min-h-[32px] ${
-                topN === n
-                  ? "bg-slate-900 text-white"
-                  : "text-slate-600 hover:text-slate-900"
-              }`}
+    <section className="border-t border-slate-200">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="flex w-full items-center justify-between px-5 py-3 text-left"
+        aria-expanded={open}
+        aria-controls={contentId}
+      >
+        <span className="text-sm font-semibold text-slate-900">Priority interventions</span>
+        <ChevronDown
+          size={16}
+          className={`text-slate-500 transition-transform ${open ? "rotate-180" : ""}`}
+        />
+      </button>
+      {open && (
+        <div id={contentId} className="border-t border-slate-200 px-5 py-4">
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            <div
+              role="group"
+              aria-label="Number of interventions to show"
+              className="inline-flex items-center rounded-full bg-slate-100 p-0.5"
             >
-              Top {n}
-            </button>
-          ))}
+              {([3, 5] as TopN[]).map((n) => (
+                <button
+                  key={n}
+                  type="button"
+                  onClick={() => setTopN(n)}
+                  aria-pressed={topN === n}
+                  className={`rounded-full px-3 py-1 text-xs font-medium transition-colors min-h-[32px] ${
+                    topN === n
+                      ? "bg-slate-900 text-white"
+                      : "text-slate-600 hover:text-slate-900"
+                  }`}
+                >
+                  Top {n}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="mt-3 flex items-start gap-2 rounded-md bg-slate-50 px-3 py-2">
+            <Info size={14} className="mt-0.5 shrink-0 text-slate-500" aria-hidden />
+            <p className="text-xs text-slate-600">
+              Ranked by expected uplift, with evidence weight and time-to-impact as
+              tiebreakers. Configured per pillar; not AI-generated.
+            </p>
+          </div>
+
+          <ol className="mt-3 space-y-2">
+            {visible.map((intervention, idx) => (
+              <InterventionRow
+                key={intervention.id}
+                rank={idx + 1}
+                intervention={intervention}
+              />
+            ))}
+            {placeholderNeeded && (
+              <li className="rounded-md border border-dashed border-slate-200 bg-slate-50 px-3 py-3 text-center text-xs text-slate-500">
+                Additional interventions to be added in the next iteration.
+              </li>
+            )}
+          </ol>
         </div>
-      </div>
-
-      <div className="mt-3 flex items-start gap-2 rounded-md bg-slate-50 px-3 py-2">
-        <Info size={14} className="mt-0.5 shrink-0 text-slate-500" aria-hidden />
-        <p className="text-xs text-slate-600">
-          Ranked by expected uplift, with evidence weight and time-to-impact as
-          tiebreakers. Configured per pillar; not AI-generated.
-        </p>
-      </div>
-
-      <ol className="mt-3 space-y-2">
-        {visible.map((intervention, idx) => (
-          <InterventionRow
-            key={intervention.id}
-            rank={idx + 1}
-            intervention={intervention}
-          />
-        ))}
-        {placeholderNeeded && (
-          <li className="rounded-md border border-dashed border-slate-200 bg-slate-50 px-3 py-3 text-center text-xs text-slate-500">
-            Additional interventions to be added in the next iteration.
-          </li>
-        )}
-      </ol>
+      )}
     </section>
   );
 };
