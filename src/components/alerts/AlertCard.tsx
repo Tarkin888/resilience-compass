@@ -144,16 +144,14 @@ export const AlertCard = ({
       {isFlagged && <PriorityInterventionsCard kriId={definition.kri_id} />}
 
       {threshold && (
-        <div className="border-t border-slate-200 px-5 py-4">
-          <ThresholdPanel
-            threshold={threshold}
-            source={source}
-            capturedAt={latest?.captured_at}
-            editionLabel={latest?.edition_label}
-            isLive={definition.is_live}
-            onViewEditions={definition.is_live ? () => setEditionsOpen(true) : undefined}
-          />
-        </div>
+        <ThresholdPanel
+          threshold={threshold}
+          source={source}
+          capturedAt={latest?.captured_at}
+          editionLabel={latest?.edition_label}
+          isLive={definition.is_live}
+          onViewEditions={definition.is_live ? () => setEditionsOpen(true) : undefined}
+        />
       )}
 
       {definition.is_live && (
