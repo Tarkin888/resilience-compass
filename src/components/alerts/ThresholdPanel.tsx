@@ -135,6 +135,6 @@ export const ThresholdPanel = ({
           )}
         </div>
       )}
-    </div>
+    </section>
   );
 };
