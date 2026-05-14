@@ -3,6 +3,7 @@ import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { DataSourceChip } from "@/components/DataSourceChip";
+import { ScoreScale } from "@/components/ScoreScale";
 import {
   SCENARIOS,
   SCENARIO_SEVERITY_STYLES,
