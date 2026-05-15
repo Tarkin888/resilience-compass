@@ -12,6 +12,7 @@ import { SEVERITY_STYLES, formatDate, formatDateTime, trendArrow } from "./sever
 import { ThresholdPanel } from "./ThresholdPanel";
 import { CapturedEditionsPanel } from "./CapturedEditionsPanel";
 import { DataSourceChip } from "@/components/DataSourceChip";
+import { getKriRationale } from "@/config/kriRationale";
 
 interface Props {
   definition: KriDefinition;
@@ -37,7 +38,9 @@ export const AlertCard = ({
   narrative,
 }: Props) => {
   const [whyOpen, setWhyOpen] = useState(false);
+  const [rationaleOpen, setRationaleOpen] = useState(false);
   const [editionsOpen, setEditionsOpen] = useState(false);
+  const rationale = getKriRationale(definition.kri_id);
   const sev = SEVERITY_STYLES[status];
   const arrow = trend ? trendArrow(trend) : null;
   const isFlagged = status !== "OK";
@@ -111,6 +114,28 @@ export const AlertCard = ({
         </div>
       </div>
 
+      {rationale && (
+        <div className="border-t border-slate-200">
+          <button
+            type="button"
+            onClick={() => setRationaleOpen((v) => !v)}
+            className="flex w-full items-center justify-between px-5 py-3 text-left"
+            aria-expanded={rationaleOpen}
+          >
+            <span className="text-sm font-semibold text-slate-900">Why this data point</span>
+            <ChevronDown
+              size={16}
+              className={`text-slate-500 transition-transform ${rationaleOpen ? "rotate-180" : ""}`}
+            />
+          </button>
+          {rationaleOpen && (
+            <div className="border-t border-slate-200 px-5 py-4 text-base text-slate-700">
+              <p>{rationale}</p>
+            </div>
+          )}
+        </div>
+      )}
+
       <div className="border-t border-slate-200">
         <button
           type="button"
@@ -118,7 +143,7 @@ export const AlertCard = ({
           className="flex w-full items-center justify-between px-5 py-3 text-left"
           aria-expanded={whyOpen}
         >
-          <span className="text-sm font-semibold text-slate-900">Why this is flagged</span>
+          <span className="text-sm font-semibold text-slate-900">Why it's flagged</span>
           <ChevronDown
             size={16}
             className={`text-slate-500 transition-transform ${whyOpen ? "rotate-180" : ""}`}
