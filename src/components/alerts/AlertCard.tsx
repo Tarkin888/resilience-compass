@@ -143,7 +143,7 @@ export const AlertCard = ({
           className="flex w-full items-center justify-between px-5 py-3 text-left"
           aria-expanded={whyOpen}
         >
-          <span className="text-sm font-semibold text-slate-900">Why it's flagged</span>
+          <span className="text-sm font-semibold text-slate-900">Why this is flagged</span>
           <ChevronDown
             size={16}
             className={`text-slate-500 transition-transform ${whyOpen ? "rotate-180" : ""}`}
