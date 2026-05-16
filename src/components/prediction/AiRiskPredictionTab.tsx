@@ -14,6 +14,8 @@ import {
 } from "recharts";
 import { DataSourceChip } from "@/components/DataSourceChip";
 import { ScoreScale } from "@/components/ScoreScale";
+import { TrendLabel } from "@/components/prediction/TrendLabel";
+import { assessTrend } from "@/lib/trendAssessment";
 
 interface Point {
   label: string;
@@ -102,6 +104,11 @@ export const AiRiskPredictionTab = () => {
   const [explainerOpen, setExplainerOpen] = useState(false);
   const [expanded, setExpanded] = useState<number | null>(null);
 
+  const historicalSeries = CHART_DATA.map((d) => d.historical).filter(
+    (v): v is number => typeof v === "number",
+  );
+  const compositeTrend = assessTrend(historicalSeries, { cadence: "quarters" });
+
   return (
     <div className="space-y-5">
       {/* Mockup chip */}
@@ -115,6 +122,41 @@ export const AiRiskPredictionTab = () => {
           Forward outlook for the next 6 months, based on current trend and modelled interventions
         </p>
       </div>
+
+      {/* Trend definition — strategic framing */}
+      <section
+        aria-label="How trend direction is assessed"
+        className="rounded-xl border border-slate-200 bg-slate-50/60 p-4 sm:p-5"
+      >
+        <div className="flex items-start gap-3">
+          <Info size={20} className="mt-0.5 shrink-0 text-slate-500" aria-hidden />
+          <div className="min-w-0 space-y-2 text-base leading-relaxed text-slate-700">
+            <h2 className="text-base font-semibold text-slate-900">
+              How trend direction is assessed
+            </h2>
+            <p>
+              This is a board / strategic view, not an operational dashboard. Short-term
+              fluctuations are expected and are not significant on their own.
+            </p>
+            <ul className="space-y-1.5">
+              <li>
+                <span className="font-semibold text-slate-900">Worsening</span> — the score
+                is moving away from the target (75) back towards the threshold (25),
+                assessed over the last six months.
+              </li>
+              <li>
+                <span className="font-semibold text-slate-900">Improving</span> — the score
+                is moving towards the target, assessed over the last six months.
+              </li>
+              <li>
+                <span className="font-semibold text-slate-900">Stable</span> — no
+                meaningful directional change (less than 2 points on the 0–100 scale) over
+                the last six months.
+              </li>
+            </ul>
+          </div>
+        </div>
+      </section>
 
       {/* Illustrative forecast disclaimer */}
       <div
@@ -154,6 +196,12 @@ export const AiRiskPredictionTab = () => {
             </div>
 
             <div className="mb-4 rounded-lg border border-slate-200 bg-slate-50 p-4">
+              <div className="mb-3 flex items-center justify-between gap-3">
+                <span className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
+                  Current trend
+                </span>
+                <TrendLabel assessment={compositeTrend} />
+              </div>
               <ScoreScale score={CURRENT_SCORE} size="compact" label="Current score" />
             </div>
 
