@@ -104,6 +104,11 @@ export const AiRiskPredictionTab = () => {
   const [explainerOpen, setExplainerOpen] = useState(false);
   const [expanded, setExpanded] = useState<number | null>(null);
 
+  const historicalSeries = CHART_DATA.map((d) => d.historical).filter(
+    (v): v is number => typeof v === "number",
+  );
+  const compositeTrend = assessTrend(historicalSeries, { cadence: "quarters" });
+
   return (
     <div className="space-y-5">
       {/* Mockup chip */}
