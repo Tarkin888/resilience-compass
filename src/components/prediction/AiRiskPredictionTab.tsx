@@ -14,6 +14,8 @@ import {
 } from "recharts";
 import { DataSourceChip } from "@/components/DataSourceChip";
 import { ScoreScale } from "@/components/ScoreScale";
+import { TrendLabel } from "@/components/prediction/TrendLabel";
+import { assessTrend } from "@/lib/trendAssessment";
 
 interface Point {
   label: string;
