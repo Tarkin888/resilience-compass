@@ -196,6 +196,12 @@ export const AiRiskPredictionTab = () => {
             </div>
 
             <div className="mb-4 rounded-lg border border-slate-200 bg-slate-50 p-4">
+              <div className="mb-3 flex items-center justify-between gap-3">
+                <span className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
+                  Current trend
+                </span>
+                <TrendLabel assessment={compositeTrend} />
+              </div>
               <ScoreScale score={CURRENT_SCORE} size="compact" label="Current score" />
             </div>
 
