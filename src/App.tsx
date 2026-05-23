@@ -8,6 +8,7 @@ import NotFound from "./pages/NotFound.tsx";
 import AdminSources from "./pages/AdminSources.tsx";
 import AdminStatus from "./pages/AdminStatus.tsx";
 import DemoReset from "./pages/DemoReset.tsx";
+import FiveCapitals from "./pages/FiveCapitals.tsx";
 
 const queryClient = new QueryClient();
 
@@ -18,7 +19,8 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Index />} />
+          <Route path="/" element={<FiveCapitals />} />
+          <Route path="/human" element={<Index />} />
           <Route path="/admin/sources" element={<AdminSources />} />
           <Route path="/admin/status" element={<AdminStatus />} />
           <Route path="/demo/reset" element={<DemoReset />} />
