@@ -8,6 +8,7 @@ import NotFound from "./pages/NotFound.tsx";
 import AdminSources from "./pages/AdminSources.tsx";
 import AdminStatus from "./pages/AdminStatus.tsx";
 import DemoReset from "./pages/DemoReset.tsx";
+import FiveCapitals from "./pages/FiveCapitals.tsx";
 
 const queryClient = new QueryClient();
 
