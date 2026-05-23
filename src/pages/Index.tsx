@@ -24,6 +24,15 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 text-sm leading-relaxed">
       <Header />
+      <div className="border-b border-slate-200 bg-white px-4 py-2 sm:px-6">
+        <Link
+          to="/"
+          className="inline-flex items-center gap-1 text-xs font-semibold text-brand hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-brand rounded"
+        >
+          <ChevronLeft size={14} aria-hidden />
+          Five Capitals
+        </Link>
+      </div>
       <ScoreCard />
       <TrendPanel />
       <TabBar active={active} onChange={setActive} />
