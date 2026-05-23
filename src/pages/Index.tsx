@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
+import { ChevronLeft } from "lucide-react";
 import { Header } from "@/components/Header";
 import { ScoreCard } from "@/components/ScoreCard";
 import { TrendPanel } from "@/components/TrendPanel";
