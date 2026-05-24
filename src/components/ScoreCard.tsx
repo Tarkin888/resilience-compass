@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, Info } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { ScoreScale } from "@/components/ScoreScale";
+import { MethodologyDialog } from "@/components/MethodologyDialog";
 import { supabase } from "@/integrations/supabase/client";
 
 const LIVE_KRIS = ["sickness_absence", "vacancy"];
