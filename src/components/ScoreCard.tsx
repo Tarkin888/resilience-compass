@@ -9,6 +9,7 @@ const LIVE_KRIS = ["sickness_absence", "vacancy"];
 
 export const ScoreCard = () => {
   const [stale, setStale] = useState(false);
+  const [methodologyOpen, setMethodologyOpen] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
