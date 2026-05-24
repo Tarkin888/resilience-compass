@@ -41,10 +41,18 @@ export const ScoreCard = () => {
       <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-6">
           <div className="sm:w-1/2 sm:shrink-0">
-            <div className="flex items-start gap-3">
+            <div className="flex items-start justify-between gap-3">
               <div className="min-w-0 flex-1">
                 <ScoreScale score={54} size="large" label="Human Capital score" />
               </div>
+              <button
+                type="button"
+                onClick={() => setMethodologyOpen(true)}
+                className="mt-1 inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-medium text-accent2 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent2"
+              >
+                <Info size={14} aria-hidden />
+                How scoring works
+              </button>
               {stale && (
                 <Tooltip>
                   <TooltipTrigger asChild>
