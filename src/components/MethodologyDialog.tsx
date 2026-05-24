@@ -4,7 +4,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Info } from "lucide-react";
 
 const RED = "#DC2626";
 const AMBER = "#F59E0B";
