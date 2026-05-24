@@ -88,6 +88,7 @@ export const ScoreCard = () => {
           </div>
         </div>
       </div>
+      <MethodologyDialog open={methodologyOpen} onOpenChange={setMethodologyOpen} />
     </section>
   );
 };
