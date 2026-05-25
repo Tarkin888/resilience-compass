@@ -222,7 +222,7 @@ export const ScoreScale = ({ score, size = "large", label, className = "" }: Pro
               className="absolute -translate-x-1/2 text-[10px] font-medium text-slate-600"
               style={{ left: `${THRESHOLD}%` }}
             >
-              Threshold
+              Min threshold
             </span>
             <span
               className="absolute -translate-x-1/2 text-[10px] font-medium text-slate-600"
