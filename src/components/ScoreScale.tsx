@@ -37,7 +37,7 @@ function tokensFor(score: number): ZoneTokens {
       caption: "text-red-700",
       pointer: "border-red-700",
       pointerFill: "fill-red-700",
-      phrase: "below threshold",
+      phrase: "below minimum threshold",
       relation: "action required",
     };
   }
