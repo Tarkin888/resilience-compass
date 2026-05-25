@@ -141,7 +141,7 @@ export const AiRiskPredictionTab = () => {
             <ul className="space-y-1.5">
               <li>
                 <span className="font-semibold text-slate-900">Worsening</span> — the score
-                is moving away from the target (75) back towards the threshold (25),
+                is moving away from the target (75) back towards the minimum threshold (25),
                 assessed over the last six months.
               </li>
               <li>
