@@ -198,7 +198,7 @@ export const ScoreScale = ({ score, size = "large", label, className = "" }: Pro
               style={{ left: `${THRESHOLD}%` }}
             >
               <div className="text-[11px] font-semibold text-slate-700">
-                Threshold (25)
+                Minimum threshold (25)
               </div>
               <div className="text-[10px] text-slate-500">
                 level we don't want to breach
