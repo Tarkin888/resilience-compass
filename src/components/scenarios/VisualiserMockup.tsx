@@ -57,7 +57,7 @@ const EmptyState = ({ onBrowse }: { onBrowse: () => void }) => (
     <h2 className="text-lg font-medium text-slate-900">No scenario loaded</h2>
     <p className="mt-3 max-w-2xl text-base leading-relaxed text-slate-600">
       Load a scenario from the Scenario Testing Library to visualise its projected impact on the
-      Human Capital score and the underlying KRIs.
+      Human Capital score and the underlying data points.
     </p>
     <button
       type="button"
