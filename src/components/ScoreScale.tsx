@@ -47,7 +47,7 @@ function tokensFor(score: number): ZoneTokens {
       caption: "text-amber-800",
       pointer: "border-amber-600",
       pointerFill: "fill-amber-600",
-      phrase: "within the operating band",
+      phrase: "within the operating range",
       relation: "below target",
     };
   }
