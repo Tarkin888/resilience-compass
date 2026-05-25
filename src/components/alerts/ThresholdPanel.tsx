@@ -89,14 +89,14 @@ export const ThresholdPanel = ({
           <div className="text-xs">
             {overrideValue != null ? (
               <span className="text-slate-700">
-                Trust-specific threshold in use: &lt; {overrideValue}
+                Trust-specific minimum threshold in use: &lt; {overrideValue}
                 {unit}
                 {overrideSource ? ` (set by ${overrideSource}` : ""}
                 {overrideAt ? `, ${formatDateTime(overrideAt)})` : overrideSource ? ")" : ""}
               </span>
             ) : (
               <span className="text-slate-500">
-                No trust-specific threshold supplied — using working benchmark.
+                No trust-specific minimum threshold supplied — using working benchmark.
               </span>
             )}
           </div>
