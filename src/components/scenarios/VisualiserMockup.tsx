@@ -134,7 +134,7 @@ const LoadedView = ({
             <table className="w-full border-collapse text-left">
               <thead>
                 <tr className="border-b border-slate-200 text-xs font-medium uppercase tracking-wide text-slate-500">
-                  <th className="py-2 pr-3">KRI</th>
+                  <th className="py-2 pr-3">Data point</th>
                   <th className="py-2 px-3">Current</th>
                   <th className="py-2 px-3">Projected</th>
                   <th className="py-2 px-3">Δ</th>
