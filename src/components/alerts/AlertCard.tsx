@@ -153,12 +153,12 @@ export const AlertCard = ({
           <div className="space-y-3 border-t border-slate-200 px-5 py-4 text-base text-slate-700">
             <p>
               {status === "OK"
-                ? `${definition.display_name} is currently within the working threshold.`
-                : `${definition.display_name} is sitting in the "${sev.label}" band against its working threshold. ${
+                ? `${definition.display_name} is currently within the working minimum threshold.`
+                : `${definition.display_name} is sitting in the "${sev.label}" band against its working minimum threshold. ${
                     arrow?.label === "worsening"
                       ? "The trend is worsening compared with the prior reading, which compounds the risk."
                       : arrow?.label === "improving"
-                        ? "The trend is improving, but the value remains above the working threshold."
+                        ? "The trend is improving, but the value remains above the working minimum threshold."
                         : "The reading is steady against the prior period."
                   }`}
             </p>
