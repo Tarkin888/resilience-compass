@@ -87,7 +87,7 @@ export default function AdminStatus() {
           <table className="w-full text-sm">
             <thead className="border-b border-slate-200 bg-slate-50">
               <tr className="text-left text-xs font-medium uppercase tracking-wide text-slate-500">
-                <th className="px-4 py-3">KRI</th>
+                <th className="px-4 py-3">Data point</th>
                 <th className="px-4 py-3">Last attempt</th>
                 <th className="px-4 py-3">Outcome</th>
                 <th className="px-4 py-3">Last successful capture</th>
