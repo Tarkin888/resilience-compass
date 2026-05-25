@@ -344,7 +344,7 @@ export const LiveRiskAlertsTab = () => {
         </div>
       ) : filtered.length === 0 ? (
         <div className="rounded-xl border border-slate-200 bg-white p-8 text-center text-sm text-slate-500">
-          No KRIs match the current filters.
+          No data points match the current filters.
         </div>
       ) : (
         <div className="space-y-3">
