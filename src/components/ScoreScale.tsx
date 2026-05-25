@@ -76,7 +76,7 @@ function buildAriaLabel(score: number, label?: string): string {
   const prefix = label ? `${label}: ` : "";
   const tail = t.relation ? `, ${t.relation}` : "";
   const overTarget = score >= 90 ? ". Review — above target." : "";
-  return `${prefix}${score} on a 0 to 100 scale. ${capitalise(t.phrase)}${tail}. Threshold 25, target 75.${overTarget}`;
+  return `${prefix}${score} on a 0 to 100 operating range. ${capitalise(t.phrase)}${tail}. Minimum threshold 25, target 75.${overTarget}`;
 }
 
 function capitalise(s: string): string {
