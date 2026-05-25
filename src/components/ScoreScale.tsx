@@ -37,7 +37,7 @@ function tokensFor(score: number): ZoneTokens {
       caption: "text-red-700",
       pointer: "border-red-700",
       pointerFill: "fill-red-700",
-      phrase: "below threshold",
+      phrase: "below minimum threshold",
       relation: "action required",
     };
   }
@@ -47,7 +47,7 @@ function tokensFor(score: number): ZoneTokens {
       caption: "text-amber-800",
       pointer: "border-amber-600",
       pointerFill: "fill-amber-600",
-      phrase: "within the operating band",
+      phrase: "within the operating range",
       relation: "below target",
     };
   }
@@ -76,7 +76,7 @@ function buildAriaLabel(score: number, label?: string): string {
   const prefix = label ? `${label}: ` : "";
   const tail = t.relation ? `, ${t.relation}` : "";
   const overTarget = score >= 90 ? ". Review — above target." : "";
-  return `${prefix}${score} on a 0 to 100 scale. ${capitalise(t.phrase)}${tail}. Threshold 25, target 75.${overTarget}`;
+  return `${prefix}${score} on a 0 to 100 operating range. ${capitalise(t.phrase)}${tail}. Minimum threshold 25, target 75.${overTarget}`;
 }
 
 function capitalise(s: string): string {
@@ -198,7 +198,7 @@ export const ScoreScale = ({ score, size = "large", label, className = "" }: Pro
               style={{ left: `${THRESHOLD}%` }}
             >
               <div className="text-[11px] font-semibold text-slate-700">
-                Threshold (25)
+                Minimum threshold (25)
               </div>
               <div className="text-[10px] text-slate-500">
                 level we don't want to breach
@@ -222,7 +222,7 @@ export const ScoreScale = ({ score, size = "large", label, className = "" }: Pro
               className="absolute -translate-x-1/2 text-[10px] font-medium text-slate-600"
               style={{ left: `${THRESHOLD}%` }}
             >
-              Threshold
+              Min threshold
             </span>
             <span
               className="absolute -translate-x-1/2 text-[10px] font-medium text-slate-600"

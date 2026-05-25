@@ -57,7 +57,7 @@ const EmptyState = ({ onBrowse }: { onBrowse: () => void }) => (
     <h2 className="text-lg font-medium text-slate-900">No scenario loaded</h2>
     <p className="mt-3 max-w-2xl text-base leading-relaxed text-slate-600">
       Load a scenario from the Scenario Testing Library to visualise its projected impact on the
-      Human Capital score and the underlying KRIs.
+      Human Capital score and the underlying data points.
     </p>
     <button
       type="button"
@@ -134,7 +134,7 @@ const LoadedView = ({
             <table className="w-full border-collapse text-left">
               <thead>
                 <tr className="border-b border-slate-200 text-xs font-medium uppercase tracking-wide text-slate-500">
-                  <th className="py-2 pr-3">KRI</th>
+                  <th className="py-2 pr-3">Data point</th>
                   <th className="py-2 px-3">Current</th>
                   <th className="py-2 px-3">Projected</th>
                   <th className="py-2 px-3">Δ</th>

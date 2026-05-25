@@ -215,7 +215,7 @@ export default function AdminSources() {
                 <div>
                   <h2 className="text-lg font-semibold">{s.publication_name}</h2>
                   <p className="text-xs text-slate-500 mt-1">
-                    KRI: <code>{s.kri_id}</code> · cadence: {s.update_cadence}
+                    Data point: <code>{s.kri_id}</code> · cadence: {s.update_cadence}
                   </p>
                   <p className="text-xs text-slate-500 mt-1">
                     Pattern: <code className="break-all">{s.edition_page_url_pattern}</code>

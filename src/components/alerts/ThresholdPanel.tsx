@@ -35,7 +35,7 @@ export const ThresholdPanel = ({
         className="flex w-full items-center justify-between px-5 py-3 text-left"
         aria-expanded={open}
       >
-        <span className="text-sm font-semibold text-slate-900">How this threshold was set</span>
+        <span className="text-sm font-semibold text-slate-900">How this minimum threshold was set</span>
         <ChevronDown
           size={16}
           className={`text-slate-500 transition-transform ${open ? "rotate-180" : ""}`}
@@ -45,7 +45,7 @@ export const ThresholdPanel = ({
         <div className="space-y-3 border-t border-slate-200 px-5 py-4 text-sm text-slate-700">
           <div>
             <div className="text-xs font-medium uppercase tracking-wide text-slate-500">
-              Threshold value
+              Minimum threshold value
             </div>
             <div className="mt-1">
               &lt; {threshold.threshold_value}
@@ -89,14 +89,14 @@ export const ThresholdPanel = ({
           <div className="text-xs">
             {overrideValue != null ? (
               <span className="text-slate-700">
-                Trust-specific threshold in use: &lt; {overrideValue}
+                Trust-specific minimum threshold in use: &lt; {overrideValue}
                 {unit}
                 {overrideSource ? ` (set by ${overrideSource}` : ""}
                 {overrideAt ? `, ${formatDateTime(overrideAt)})` : overrideSource ? ")" : ""}
               </span>
             ) : (
               <span className="text-slate-500">
-                No trust-specific threshold supplied — using working benchmark.
+                No trust-specific minimum threshold supplied — using working benchmark.
               </span>
             )}
           </div>

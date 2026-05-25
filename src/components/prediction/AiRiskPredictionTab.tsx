@@ -141,7 +141,7 @@ export const AiRiskPredictionTab = () => {
             <ul className="space-y-1.5">
               <li>
                 <span className="font-semibold text-slate-900">Worsening</span> — the score
-                is moving away from the target (75) back towards the threshold (25),
+                is moving away from the target (75) back towards the minimum threshold (25),
                 assessed over the last six months.
               </li>
               <li>
@@ -173,7 +173,7 @@ export const AiRiskPredictionTab = () => {
             <p className="mt-1.5 text-sm leading-relaxed text-blue-900/90">
               The 6-month forecast shown below is an illustrative projection generated to
               demonstrate the dashboard's predictive capability. In the production build, this
-              view will be driven by a rules-based engine combining per-KRI linear-trend
+              view will be driven by a rules-based engine combining per-data-point linear-trend
               projection, bounded historical ranges, pillar-weighted composite scoring, and
               intervention-uplift overlays. The agreed rule set will be documented and
               version-controlled alongside the methodology applied to the Human Capital

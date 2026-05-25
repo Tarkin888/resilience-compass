@@ -156,7 +156,7 @@ export const CapturedEditionsPanel = ({
 
         <div className="mt-6">
           {rows.length === 0 && !loading && (
-            <p className="py-12 text-center text-sm text-slate-500">No captures yet for this KRI.</p>
+            <p className="py-12 text-center text-sm text-slate-500">No captures yet for this data point.</p>
           )}
 
           {/* Desktop / wide table */}
