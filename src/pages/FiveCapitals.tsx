@@ -231,10 +231,10 @@ const FiveCapitals = () => {
               </span>
             </li>
             <li>
-              Each data point has a target and a threshold normalised so that <strong>threshold = 25</strong> and <strong>target = 75</strong>. Indicators roll up 3–5 data points.
+              Each data point sits on the 0–100 operating range, normalised so that <strong>minimum threshold = 25</strong> and <strong>target = 75</strong>. Indicators roll up 3–5 data points.
             </li>
             <li>
-              A downward trend arrow means an indicator is moving away from target back towards threshold.
+              A downward trend arrow means a score is moving away from target back towards the minimum threshold.
             </li>
           </ul>
         </section>
