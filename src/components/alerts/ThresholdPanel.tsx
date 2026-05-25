@@ -45,7 +45,7 @@ export const ThresholdPanel = ({
         <div className="space-y-3 border-t border-slate-200 px-5 py-4 text-sm text-slate-700">
           <div>
             <div className="text-xs font-medium uppercase tracking-wide text-slate-500">
-              Threshold value
+              Minimum threshold value
             </div>
             <div className="mt-1">
               &lt; {threshold.threshold_value}
