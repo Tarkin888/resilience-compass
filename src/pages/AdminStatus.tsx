@@ -150,7 +150,7 @@ export default function AdminStatus() {
           <div className="mt-3 space-y-3 text-base leading-relaxed text-slate-700">
             <p>
               This page is the operational view of the live NHS data feeds powering the Human
-              Capital dashboard. Each row corresponds to one Key Risk Indicator wired to a public
+              Capital dashboard. Each row corresponds to one data point wired to a public
               NHS data source. The Last attempt column shows the most recent capture attempt,
               regardless of outcome. Outcome is one of captured, no_new_edition, or
               capture_error. Last successful capture shows the timestamp of the most recent
@@ -158,7 +158,7 @@ export default function AdminStatus() {
               edition labels are derived from that capture. Time since success is highlighted
               amber when greater than seven days. Edition captured is the source publication's
               own edition label as parsed from the page; the dashboard's "Last updated" line on
-              each KRI card cites this edition verbatim. Headline value is the figure rendered on
+              each data point card cites this edition verbatim. Headline value is the figure rendered on
               the Tab 1 card.
             </p>
             <p>
