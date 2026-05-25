@@ -35,7 +35,7 @@ export const ThresholdPanel = ({
         className="flex w-full items-center justify-between px-5 py-3 text-left"
         aria-expanded={open}
       >
-        <span className="text-sm font-semibold text-slate-900">How this threshold was set</span>
+        <span className="text-sm font-semibold text-slate-900">How this minimum threshold was set</span>
         <ChevronDown
           size={16}
           className={`text-slate-500 transition-transform ${open ? "rotate-180" : ""}`}
