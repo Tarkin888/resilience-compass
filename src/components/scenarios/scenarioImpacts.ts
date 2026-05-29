@@ -117,7 +117,7 @@ export const SCENARIO_IMPACTS: Record<string, ScenarioImpact> = {
       row("Staff Engagement Score", 6.4, 5.9),
     ],
     narrative:
-      "Under this scenario, the Human Capital score falls from 54 to 47 — within the Amber band. Impact is contained by agency cover, but engagement and training compliance soften under the strain of stretched rotas.",
+      "Impact is contained by agency cover, but engagement and training compliance soften under the strain of stretched rotas.",
     horizon: "3-month horizon",
     inputs:
       "Multi-week junior doctor walkout impacting elective and emergency rotas. Agency cover deployed across affected specialties. Modelled across the five Human Capital data points using the agreed pillar weights.",
