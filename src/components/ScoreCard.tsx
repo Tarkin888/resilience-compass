@@ -1,15 +1,27 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AlertTriangle, Info } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { ScoreScale } from "@/components/ScoreScale";
 import { MethodologyDialog } from "@/components/MethodologyDialog";
 import { supabase } from "@/integrations/supabase/client";
+import { useHumanCapitalData } from "@/hooks/useHumanCapitalData";
+import { pillarScoreById } from "@/lib/pillarScores";
 
 const LIVE_KRIS = ["sickness_absence", "vacancy"];
 
 export const ScoreCard = () => {
   const [stale, setStale] = useState(false);
   const [methodologyOpen, setMethodologyOpen] = useState(false);
+  const { data } = useHumanCapitalData();
+
+  const humanScore = useMemo(() => {
+    const liveValues: Record<string, number | null> = {};
+    Object.entries(data.capturesByKri).forEach(([kriId, caps]) => {
+      const latest = caps[0];
+      liveValues[kriId] = latest ? Number(latest.headline_value) : null;
+    });
+    return pillarScoreById(liveValues, "human");
+  }, [data]);
 
   useEffect(() => {
     let cancelled = false;
