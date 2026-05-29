@@ -3,6 +3,8 @@ import { useSearchParams, Link } from "react-router-dom";
 import { AlertTriangle, X } from "lucide-react";
 import { useHumanCapitalData } from "@/hooks/useHumanCapitalData";
 import { buildAlertNarrative, getStatus, getTrend, type Status, type Trend } from "@/lib/calc";
+import { normaliseScore } from "@/lib/scoringEngine";
+import { TAB1_ENGINE_CONFIG } from "@/config/tab1EngineConfig";
 import { AlertCard } from "./AlertCard";
 import { LiveDataStatusBanner } from "./LiveDataStatusBanner";
 import { SEVERITY_RANK, formatDateTime } from "./severity";
