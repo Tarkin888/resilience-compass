@@ -16,8 +16,6 @@ export interface KriImpactRow {
 }
 
 export interface ScenarioImpact {
-  /** Projected Human Capital score for this scenario (0–100). */
-  projectedScore: number;
   rows: KriImpactRow[];
   /** Narrative body — the leading score-change sentence is generated at render time. */
   narrative: string;
