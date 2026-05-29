@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import type { Status, Trend } from "@/lib/calc";
+import { ScoreBadge } from "@/components/capitals/ScoreBadge";
+import { OperatingRangeBar } from "@/components/capitals/OperatingRangeBar";
 import { PriorityInterventionsCard } from "./PriorityInterventionsCard";
 import type {
   KriCapture,
