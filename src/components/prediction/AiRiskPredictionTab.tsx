@@ -297,10 +297,19 @@ export const AiRiskPredictionTab = () => {
               </ResponsiveContainer>
             </div>
 
-            <p className="mt-3 text-sm text-slate-700">
-              Projected score in 6 months: 43 (range 39–47), with the lower bound reaching into
-              the Red band (below the minimum threshold of 25).
-            </p>
+            {(() => {
+              const last = CHART_DATA[CHART_DATA.length - 1];
+              const forecast = last.forecast ?? 0;
+              const lower = last.lower ?? 0;
+              const upper = last.upper ?? 0;
+              const lowerBand = bandFor(lower);
+              return (
+                <p className="mt-3 text-sm text-slate-700">
+                  Projected score in 6 months: {forecast} (range {lower}–{upper}), with the
+                  lower bound at {lower} ({lowerBand.parenthetical}).
+                </p>
+              );
+            })()}
             <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
               <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
                 {BANDS.map((b) => (
