@@ -82,6 +82,9 @@ export const AlertCard = ({
             ) : (
               <DataSourceChip variant="illustrative" />
             )}
+            <div className="ml-auto">
+              <ScoreBadge score={engineScore} />
+            </div>
           </div>
 
           <div className="mt-2 flex flex-wrap items-baseline gap-x-4 gap-y-1">
