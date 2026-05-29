@@ -75,7 +75,7 @@ export const SCENARIO_IMPACTS: Record<string, ScenarioImpact> = {
       row("Staff Engagement Score", 6.4, 5.7),
     ],
     narrative:
-      "Under this scenario, the Human Capital score falls from 54 to 38 — crossing into the Red band (below the minimum threshold of 25). The primary driver is a 63% increase in sickness absence, with knock-on impacts on training compliance and staff engagement. Vacancy rate is held constant in this scenario.",
+      "The primary driver is a 63% increase in sickness absence, with knock-on impacts on training compliance and staff engagement. Vacancy rate is held constant in this scenario.",
     horizon: "3-month horizon",
     inputs:
       "High-flu winter season modelled across nursing and AHP roles. Sickness absence uplift applied over a 12-week peak period (Dec–Feb). Vacancy rate held at current level. Modelled across the five Human Capital data points using the agreed pillar weights.",
