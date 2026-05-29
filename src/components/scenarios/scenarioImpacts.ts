@@ -1,6 +1,6 @@
 export type KriUnit = "percent" | "score";
 export type KriSourceType = "live" | "illustrative";
-export type KriStatus = "Critical" | "Warning" | "Watch";
+export type Direction = "higherIsBetter" | "lowerIsBetter";
 
 export interface KriImpactRow {
   kri: string;
@@ -8,7 +8,6 @@ export interface KriImpactRow {
   source: KriSourceType;
   current: number;
   projected: number;
-  status: KriStatus;
 }
 
 export interface ScenarioImpact {
@@ -29,22 +28,21 @@ const KRI_ORDER = [
 
 const KRI_META: Record<
   (typeof KRI_ORDER)[number],
-  { unit: KriUnit; source: KriSourceType }
+  { unit: KriUnit; source: KriSourceType; target: number; minimumThreshold: number; direction: Direction }
 > = {
-  "Sickness Absence Rate": { unit: "percent", source: "live" },
-  "Staff Vacancies": { unit: "percent", source: "live" },
-  "Training Compliance": { unit: "percent", source: "illustrative" },
-  "Voluntary Turnover": { unit: "percent", source: "illustrative" },
-  "Staff Engagement Score": { unit: "score", source: "illustrative" },
+  "Sickness Absence Rate": { unit: "percent", source: "live", target: 4.2, minimumThreshold: 6.0, direction: "lowerIsBetter" },
+  "Staff Vacancies": { unit: "percent", source: "live", target: 5.0, minimumThreshold: 8.5, direction: "lowerIsBetter" },
+  "Training Compliance": { unit: "percent", source: "illustrative", target: 95, minimumThreshold: 60, direction: "higherIsBetter" },
+  "Voluntary Turnover": { unit: "percent", source: "illustrative", target: 10, minimumThreshold: 16, direction: "lowerIsBetter" },
+  "Staff Engagement Score": { unit: "score", source: "illustrative", target: 7.5, minimumThreshold: 5.0, direction: "higherIsBetter" },
 };
 
 function row(
   kri: (typeof KRI_ORDER)[number],
   current: number,
   projected: number,
-  status: KriStatus,
 ): KriImpactRow {
-  return { kri, ...KRI_META[kri], current, projected, status };
+  return { kri, ...KRI_META[kri], current, projected };
 }
 
 export const SCENARIO_IMPACTS: Record<string, ScenarioImpact> = {
