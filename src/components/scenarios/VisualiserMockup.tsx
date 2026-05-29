@@ -1,5 +1,6 @@
 import { DataSourceChip, type LiveTooltipPayload } from "@/components/DataSourceChip";
 import { ScoreScale } from "@/components/ScoreScale";
+import { normaliseScore, ragBand } from "@/lib/scoringEngine";
 import {
   SCENARIO_IMPACTS,
   type KriImpactRow,
@@ -192,11 +193,16 @@ const KriRow = ({ row }: { row: KriImpactRow }) => {
 
   const fmt = (v: number) => (row.unit === "percent" ? `${v.toFixed(1)}%` : v.toFixed(1));
 
-  const statusStyles: Record<string, string> = {
-    Critical: "bg-red-50 text-red-700 border-red-200",
-    Warning: "bg-amber-50 text-amber-800 border-amber-200",
-    Watch: "bg-blue-50 text-blue-700 border-blue-200",
+  const score = normaliseScore(row.projected, row.target, row.minimumThreshold);
+  const band = score != null ? ragBand(score) : null;
+
+  const bandStyles: Record<string, string> = {
+    red: "bg-red-50 text-red-700 border-red-200",
+    amber: "bg-amber-50 text-amber-800 border-amber-200",
+    green: "bg-emerald-50 text-emerald-700 border-emerald-200",
   };
+
+  const bandLabel = band ? band.charAt(0).toUpperCase() + band.slice(1) : "—";
 
   const isLive = LIVE_KRIS.has(row.kri);
 
@@ -216,11 +222,15 @@ const KriRow = ({ row }: { row: KriImpactRow }) => {
       <td className="py-3 px-3 text-base tabular-nums text-slate-700">{fmt(row.projected)}</td>
       <td className={`py-3 px-3 font-mono text-sm ${deltaTone}`}>{deltaText}</td>
       <td className="py-3 pl-3">
-        <span
-          className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold ${statusStyles[row.status]}`}
-        >
-          {row.status}
-        </span>
+        {band ? (
+          <span
+            className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold ${bandStyles[band]}`}
+          >
+            {bandLabel}
+          </span>
+        ) : (
+          <span className="text-xs text-slate-400">—</span>
+        )}
       </td>
     </tr>
   );
