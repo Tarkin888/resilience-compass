@@ -16,6 +16,7 @@ import { DataSourceChip } from "@/components/DataSourceChip";
 import { ScoreScale } from "@/components/ScoreScale";
 import { TrendLabel } from "@/components/prediction/TrendLabel";
 import { assessTrend } from "@/lib/trendAssessment";
+import { bandFor } from "@/lib/scoringEngine";
 
 interface Point {
   label: string;
