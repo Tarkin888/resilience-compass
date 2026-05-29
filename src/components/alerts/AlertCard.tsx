@@ -107,6 +107,10 @@ export const AlertCard = ({
             )}
           </div>
 
+          <div className="mt-3">
+            <OperatingRangeBar score={engineScore} name={definition.display_name} />
+          </div>
+
           <div className="mt-2 space-y-1 text-sm text-slate-700">
             {narrative.split("\n").map((line, i) => (
               <p key={i}>{line}</p>
