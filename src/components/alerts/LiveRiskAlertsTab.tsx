@@ -375,6 +375,7 @@ export const LiveRiskAlertsTab = () => {
               source={r.source}
               captures={r.captures}
               narrative={r.narrative}
+              engineScore={r.engineScore}
             />
           ))}
         </div>
