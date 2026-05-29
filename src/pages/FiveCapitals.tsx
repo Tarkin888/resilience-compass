@@ -116,7 +116,7 @@ const FiveCapitals = () => {
                       </div>
                       <div className="mt-1 flex items-baseline gap-2">
                         <span className="text-2xl font-bold tabular-nums" style={{ color: NAVY }}>
-                          {p.score}
+                          {p.score ?? "—"}
                         </span>
                         <span className="text-xs text-slate-500">/100</span>
                         <span className="ml-2 inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-600">
