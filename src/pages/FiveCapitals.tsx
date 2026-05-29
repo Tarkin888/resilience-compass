@@ -6,19 +6,18 @@ import { Footer } from "@/components/Footer";
 import { PillarDial } from "@/components/capitals/PillarDial";
 import { IndicatorRangeBar } from "@/components/capitals/IndicatorRangeBar";
 import { useHumanCapitalData } from "@/hooks/useHumanCapitalData";
-import { PILLAR_CONFIG, resolveDataPoints } from "@/config/dataPoints";
-import { displayScore, rollupIndicator } from "@/lib/scoringEngine";
+import { computePillarScores } from "@/lib/pillarScores";
 
 const NAVY = "#001D57";
 
-// Pillar-level display is left unchanged — header score is parked pending the
-// composite-score review (see Prompt 12 "Leave unchanged" clause).
-const PILLAR_HEADER: Record<string, { score: number; trend: "up" | "down" | "flat"; trendLabel: string; status: "live" | "preview" }> = {
-  financial: { score: 68, trend: "flat", trendLabel: "Steady", status: "preview" },
-  operational: { score: 72, trend: "up", trendLabel: "Improving", status: "preview" },
-  human: { score: 54, trend: "down", trendLabel: "Worsening", status: "live" },
-  reputational: { score: 81, trend: "up", trendLabel: "Improving", status: "preview" },
-  environmental: { score: 45, trend: "flat", trendLabel: "Steady", status: "preview" },
+// Trend chips and live/preview status remain hand-set; a historical engine is out
+// of scope for this prompt (OQ-14 Option B).
+const PILLAR_META: Record<string, { trend: "up" | "down" | "flat"; trendLabel: string; status: "live" | "preview" }> = {
+  financial: { trend: "flat", trendLabel: "Steady", status: "preview" },
+  operational: { trend: "up", trendLabel: "Improving", status: "preview" },
+  human: { trend: "down", trendLabel: "Worsening", status: "live" },
+  reputational: { trend: "up", trendLabel: "Improving", status: "preview" },
+  environmental: { trend: "flat", trendLabel: "Steady", status: "preview" },
 };
 
 const FiveCapitals = () => {
@@ -38,19 +37,16 @@ const FiveCapitals = () => {
   }, [data]);
 
   const pillars = useMemo(() => {
-    return PILLAR_CONFIG.map((p) => {
-      const header = PILLAR_HEADER[p.id];
+    return computePillarScores(liveValues).map((p) => {
+      const meta = PILLAR_META[p.id];
       const indicators = p.indicators.map((ind) => {
-        const dps = resolveDataPoints(ind, liveValues);
-        const roll = rollupIndicator(dps);
-        const score = displayScore(roll.score);
         const sublabel =
-          dps.length === 0
+          ind.totalCount === 0
             ? ind.description
-            : `${roll.scoredCount} of ${roll.totalCount} data points scored · ${ind.description}`;
-        return { name: ind.name, score, sublabel };
+            : `${ind.scoredCount} of ${ind.totalCount} data points scored · ${ind.description}`;
+        return { name: ind.name, score: ind.score, sublabel };
       });
-      return { ...p, ...header, indicators };
+      return { ...p, ...meta, indicators };
     });
   }, [liveValues]);
 
@@ -120,7 +116,7 @@ const FiveCapitals = () => {
                       </div>
                       <div className="mt-1 flex items-baseline gap-2">
                         <span className="text-2xl font-bold tabular-nums" style={{ color: NAVY }}>
-                          {p.score}
+                          {p.score ?? "—"}
                         </span>
                         <span className="text-xs text-slate-500">/100</span>
                         <span className="ml-2 inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-600">

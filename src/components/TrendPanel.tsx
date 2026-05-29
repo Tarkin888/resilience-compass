@@ -38,8 +38,13 @@ export const TrendPanel = () => {
   return (
     <section className="w-full px-4 pt-2 pb-4 sm:px-6">
       <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
-        <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">
-          12-month trend
+        <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+          <div className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">
+            12-month trend
+          </div>
+          <span className="inline-flex items-center rounded-full border border-slate-300 bg-slate-50 px-2 py-0.5 text-[11px] font-medium text-slate-500">
+            Illustrative trend — historical engine in development
+          </span>
         </div>
 
         <div className="h-28 w-full sm:h-32">

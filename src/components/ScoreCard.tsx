@@ -1,15 +1,27 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AlertTriangle, Info } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { ScoreScale } from "@/components/ScoreScale";
 import { MethodologyDialog } from "@/components/MethodologyDialog";
 import { supabase } from "@/integrations/supabase/client";
+import { useHumanCapitalData } from "@/hooks/useHumanCapitalData";
+import { pillarScoreById } from "@/lib/pillarScores";
 
 const LIVE_KRIS = ["sickness_absence", "vacancy"];
 
 export const ScoreCard = () => {
   const [stale, setStale] = useState(false);
   const [methodologyOpen, setMethodologyOpen] = useState(false);
+  const { data } = useHumanCapitalData();
+
+  const humanScore = useMemo(() => {
+    const liveValues: Record<string, number | null> = {};
+    Object.entries(data.capturesByKri).forEach(([kriId, caps]) => {
+      const latest = caps[0];
+      liveValues[kriId] = latest ? Number(latest.headline_value) : null;
+    });
+    return pillarScoreById(liveValues, "human");
+  }, [data]);
 
   useEffect(() => {
     let cancelled = false;
@@ -43,7 +55,7 @@ export const ScoreCard = () => {
           <div className="sm:w-1/2 sm:shrink-0">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0 flex-1">
-                <ScoreScale score={54} size="large" label="Human Capital score" />
+                <ScoreScale score={humanScore ?? 0} size="large" label="Human Capital score" />
               </div>
               <button
                 type="button"
