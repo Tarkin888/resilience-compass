@@ -1,6 +1,8 @@
+import { TAB1_ENGINE_CONFIG } from "@/config/tab1EngineConfig";
+import type { Direction } from "@/lib/scoringEngine";
+
 export type KriUnit = "percent" | "score";
 export type KriSourceType = "live" | "illustrative";
-export type Direction = "higherIsBetter" | "lowerIsBetter";
 
 export interface KriImpactRow {
   kri: string;
@@ -14,13 +16,19 @@ export interface KriImpactRow {
 }
 
 export interface ScenarioImpact {
+  /** Projected Human Capital score for this scenario (0–100). */
+  projectedScore: number;
   rows: KriImpactRow[];
+  /** Narrative body — the leading score-change sentence is generated at render time. */
   narrative: string;
   horizon: string;
   inputs: string;
 }
 
-// Sort order matches Tab 1: Sickness → Vacancies → Training → Turnover → Engagement
+// Sort order matches Tab 1: Sickness → Vacancies → Training → Turnover → Engagement.
+// Each display name is mapped to its Tab 1 kri_id, so {target, minimumThreshold,
+// direction} are read from TAB1_ENGINE_CONFIG — the single source of truth shared
+// with the Tab 1 badge.
 const KRI_ORDER = [
   "Sickness Absence Rate",
   "Staff Vacancies",
@@ -29,15 +37,15 @@ const KRI_ORDER = [
   "Staff Engagement Score",
 ] as const;
 
-const KRI_META: Record<
+const KRI_DISPLAY_META: Record<
   (typeof KRI_ORDER)[number],
-  { unit: KriUnit; source: KriSourceType; target: number; minimumThreshold: number; direction: Direction }
+  { unit: KriUnit; source: KriSourceType; kriId: keyof typeof TAB1_ENGINE_CONFIG }
 > = {
-  "Sickness Absence Rate": { unit: "percent", source: "live", target: 4.2, minimumThreshold: 6.0, direction: "lowerIsBetter" },
-  "Staff Vacancies": { unit: "percent", source: "live", target: 5.0, minimumThreshold: 8.5, direction: "lowerIsBetter" },
-  "Training Compliance": { unit: "percent", source: "illustrative", target: 95, minimumThreshold: 60, direction: "higherIsBetter" },
-  "Voluntary Turnover": { unit: "percent", source: "illustrative", target: 10, minimumThreshold: 16, direction: "lowerIsBetter" },
-  "Staff Engagement Score": { unit: "score", source: "illustrative", target: 7.5, minimumThreshold: 5.0, direction: "higherIsBetter" },
+  "Sickness Absence Rate": { unit: "percent", source: "live", kriId: "sickness_absence" },
+  "Staff Vacancies": { unit: "percent", source: "live", kriId: "vacancy" },
+  "Training Compliance": { unit: "percent", source: "illustrative", kriId: "training_compliance" },
+  "Voluntary Turnover": { unit: "percent", source: "illustrative", kriId: "voluntary_turnover" },
+  "Staff Engagement Score": { unit: "score", source: "illustrative", kriId: "staff_engagement_score" },
 };
 
 function row(
@@ -45,7 +53,18 @@ function row(
   current: number,
   projected: number,
 ): KriImpactRow {
-  return { kri, ...KRI_META[kri], current, projected };
+  const meta = KRI_DISPLAY_META[kri];
+  const engine = TAB1_ENGINE_CONFIG[meta.kriId];
+  return {
+    kri,
+    unit: meta.unit,
+    source: meta.source,
+    current,
+    projected,
+    target: engine.target,
+    minimumThreshold: engine.minimumThreshold,
+    direction: engine.direction,
+  };
 }
 
 export const SCENARIO_IMPACTS: Record<string, ScenarioImpact> = {
