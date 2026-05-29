@@ -4,7 +4,7 @@ type Trend = "up" | "down" | "flat";
 
 interface Props {
   name: string;
-  score: number;
+  score: number | null;
   trend: Trend;
   trendLabel: string;
   onViewDetails: () => void;
@@ -14,8 +14,10 @@ const RED = "#DC2626";
 const AMBER = "#F59E0B";
 const GREEN = "#16A34A";
 const NAVY = "#001D57";
+const GREY = "#94A3B8";
 
-function ragColor(score: number) {
+function ragColor(score: number | null) {
+  if (score == null) return GREY;
   if (score < 25) return RED;
   if (score < 75) return AMBER;
   return GREEN;
