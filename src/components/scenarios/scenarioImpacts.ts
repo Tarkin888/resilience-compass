@@ -145,7 +145,7 @@ export const SCENARIO_IMPACTS: Record<string, ScenarioImpact> = {
       row("Staff Engagement Score", 6.4, 7.0),
     ],
     narrative:
-      "Under this scenario, the Human Capital score rises from 54 to 60 — moving into the Amber band. Improvements span vacancy, sickness, training and engagement as the new workforce plan takes effect.",
+      "Improvements span vacancy, sickness, training and engagement as the new workforce plan takes effect.",
     horizon: "12-month horizon",
     inputs:
       "Revised establishment levels and skill-mix targets phased in across 12 months. Bank-staff framework deployed across 60% of departments. Improvements modelled across the five Human Capital data points using the agreed pillar weights.",
