@@ -55,6 +55,21 @@ export function ragBand(score: number): Rag {
   return "green";
 }
 
+export interface BandInfo {
+  name: "Red" | "Amber" | "Green";
+  parenthetical: string;
+}
+
+/**
+ * Returns the Rick band for a 0–100 score, with a short parenthetical
+ * explanation suitable for narrative copy.
+ */
+export function bandFor(score: number): BandInfo {
+  if (score < 25) return { name: "Red", parenthetical: "below the minimum threshold of 25" };
+  if (score < 75) return { name: "Amber", parenthetical: "within the operating range, below target" };
+  return { name: "Green", parenthetical: "at or above target" };
+}
+
 export interface DataPointScore {
   config: DataPoint;
   score: number | null; // null = not scored (missing value or invalid config)
