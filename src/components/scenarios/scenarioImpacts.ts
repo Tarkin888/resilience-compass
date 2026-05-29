@@ -8,6 +8,9 @@ export interface KriImpactRow {
   source: KriSourceType;
   current: number;
   projected: number;
+  target: number;
+  minimumThreshold: number;
+  direction: Direction;
 }
 
 export interface ScenarioImpact {
