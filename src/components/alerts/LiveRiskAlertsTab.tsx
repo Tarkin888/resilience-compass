@@ -3,6 +3,8 @@ import { useSearchParams, Link } from "react-router-dom";
 import { AlertTriangle, X } from "lucide-react";
 import { useHumanCapitalData } from "@/hooks/useHumanCapitalData";
 import { buildAlertNarrative, getStatus, getTrend, type Status, type Trend } from "@/lib/calc";
+import { normaliseScore } from "@/lib/scoringEngine";
+import { TAB1_ENGINE_CONFIG } from "@/config/tab1EngineConfig";
 import { AlertCard } from "./AlertCard";
 import { LiveDataStatusBanner } from "./LiveDataStatusBanner";
 import { SEVERITY_RANK, formatDateTime } from "./severity";
@@ -61,12 +63,14 @@ export const LiveRiskAlertsTab = () => {
       const latest = captures[0];
       const threshold = data.thresholdsByKri[def.kri_id];
       const source = data.sourcesByKri[def.kri_id];
+      const engineConfig = TAB1_ENGINE_CONFIG[def.kri_id];
 
       let status: Status;
       let trend: Trend | null = null;
       let value: number | null = null;
       let unit = "percent";
       let narrative = def.description ?? "";
+      let engineScore: number | null = null;
 
       if (def.is_live && latest && threshold) {
         value = Number(latest.headline_value);
@@ -95,6 +99,12 @@ export const LiveRiskAlertsTab = () => {
           true,
           SOURCE_DETAIL[def.kri_id] ?? "",
         );
+
+        // Compute engine score from live value
+        if (engineConfig) {
+          const target = Number(threshold.threshold_value);
+          engineScore = normaliseScore(value, target, engineConfig.minimumThreshold);
+        }
       } else {
         status = (def.illustrative_status as Status) ?? "OK";
         trend = (def.illustrative_trend as Trend) ?? null;
@@ -104,9 +114,14 @@ export const LiveRiskAlertsTab = () => {
         else unit = "percent";
         const unitSymbol = unit === "percent" ? "%" : ` ${unit}`;
         narrative = `Illustrative reading: ${value?.toFixed(1)}${unitSymbol} against an illustrative target of ${target}${unitSymbol}. Not from a public data source.`;
+
+        // Compute engine score from illustrative value
+        if (engineConfig && value != null && target != null) {
+          engineScore = normaliseScore(value, target, engineConfig.minimumThreshold);
+        }
       }
 
-      return { def, captures, threshold, source, status, trend, value, unit, narrative };
+      return { def, captures, threshold, source, status, trend, value, unit, narrative, engineScore };
     });
   }, [data]);
 
@@ -360,6 +375,7 @@ export const LiveRiskAlertsTab = () => {
               source={r.source}
               captures={r.captures}
               narrative={r.narrative}
+              engineScore={r.engineScore}
             />
           ))}
         </div>

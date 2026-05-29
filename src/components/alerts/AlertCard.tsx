@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import type { Status, Trend } from "@/lib/calc";
+import { ScoreBadge } from "@/components/capitals/ScoreBadge";
+import { OperatingRangeBar } from "@/components/capitals/OperatingRangeBar";
 import { PriorityInterventionsCard } from "./PriorityInterventionsCard";
 import type {
   KriCapture,
@@ -24,6 +26,7 @@ interface Props {
   source?: Source;
   captures?: KriCapture[];
   narrative: string;
+  engineScore?: number | null;
 }
 
 export const AlertCard = ({
@@ -36,6 +39,7 @@ export const AlertCard = ({
   source,
   captures = [],
   narrative,
+  engineScore,
 }: Props) => {
   const [whyOpen, setWhyOpen] = useState(false);
   const [rationaleOpen, setRationaleOpen] = useState(false);
@@ -78,6 +82,9 @@ export const AlertCard = ({
             ) : (
               <DataSourceChip variant="illustrative" />
             )}
+            <div className="ml-auto">
+              <ScoreBadge score={engineScore} />
+            </div>
           </div>
 
           <div className="mt-2 flex flex-wrap items-baseline gap-x-4 gap-y-1">
@@ -98,6 +105,10 @@ export const AlertCard = ({
                 {arrow.label}
               </span>
             )}
+          </div>
+
+          <div className="mt-3">
+            <OperatingRangeBar score={engineScore} name={definition.display_name} />
           </div>
 
           <div className="mt-2 space-y-1 text-sm text-slate-700">
