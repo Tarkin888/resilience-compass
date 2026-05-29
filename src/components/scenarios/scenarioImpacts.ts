@@ -133,7 +133,7 @@ export const SCENARIO_IMPACTS: Record<string, ScenarioImpact> = {
 };
 
 
-export type ScoreBandLabel = "Critical" | "At Risk" | "Stable" | "Strong";
+export type ScoreBandLabel = "Red" | "Amber" | "Green";
 
 export interface ScoreBand {
   label: ScoreBandLabel;
@@ -145,10 +145,9 @@ export interface ScoreBand {
 }
 
 export const SCORE_BANDS: ScoreBand[] = [
-  { label: "Critical", min: 0, max: 40, fill: "bg-red-100", text: "text-red-700", swatch: "bg-red-400" },
-  { label: "At Risk", min: 41, max: 55, fill: "bg-amber-100", text: "text-amber-800", swatch: "bg-amber-400" },
-  { label: "Stable", min: 56, max: 70, fill: "bg-blue-100", text: "text-blue-700", swatch: "bg-blue-400" },
-  { label: "Strong", min: 71, max: 100, fill: "bg-emerald-100", text: "text-emerald-700", swatch: "bg-emerald-400" },
+  { label: "Red", min: 0, max: 24, fill: "bg-red-100", text: "text-red-700", swatch: "bg-red-400" },
+  { label: "Amber", min: 25, max: 74, fill: "bg-amber-100", text: "text-amber-800", swatch: "bg-amber-400" },
+  { label: "Green", min: 75, max: 100, fill: "bg-emerald-100", text: "text-emerald-700", swatch: "bg-emerald-400" },
 ];
 
 export function bandForScore(score: number): ScoreBand {
