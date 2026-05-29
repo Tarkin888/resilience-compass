@@ -103,7 +103,7 @@ export const SCENARIO_IMPACTS: Record<string, ScenarioImpact> = {
       row("Staff Engagement Score", 6.4, 4.9),
     ],
     narrative:
-      "Under this scenario, the Human Capital score falls from 54 to 35 — Red band. Voluntary turnover reaches 18% across mid-career clinical staff, pulling vacancy and engagement sharply down and compromising training compliance.",
+      "Voluntary turnover reaches 18% across mid-career clinical staff, pulling vacancy and engagement sharply down and compromising training compliance.",
     horizon: "12-month horizon",
     inputs:
       "Retention failure concentrated in mid-career clinical staff. Voluntary turnover modelled at 18% over the year. Vacancy backfill assumed to lag attrition by one quarter. All five Human Capital data points reweighted under the agreed pillar weights.",
