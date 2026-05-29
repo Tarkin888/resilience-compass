@@ -1,98 +1,58 @@
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { PillarDial } from "@/components/capitals/PillarDial";
 import { IndicatorRangeBar } from "@/components/capitals/IndicatorRangeBar";
+import { useHumanCapitalData } from "@/hooks/useHumanCapitalData";
+import { PILLAR_CONFIG, resolveDataPoints } from "@/config/dataPoints";
+import { displayScore, rollupIndicator } from "@/lib/scoringEngine";
 
 const NAVY = "#001D57";
 
-type Indicator = { name: string; score: number; sublabel: string };
-
-type Pillar = {
-  id: "financial" | "operational" | "human" | "reputational" | "environmental";
-  name: string;
-  score: number;
-  trend: "up" | "down" | "flat";
-  trendLabel: string;
-  status: "live" | "preview";
-  indicators: Indicator[];
+// Pillar-level display is left unchanged — header score is parked pending the
+// composite-score review (see Prompt 12 "Leave unchanged" clause).
+const PILLAR_HEADER: Record<string, { score: number; trend: "up" | "down" | "flat"; trendLabel: string; status: "live" | "preview" }> = {
+  financial: { score: 68, trend: "flat", trendLabel: "Steady", status: "preview" },
+  operational: { score: 72, trend: "up", trendLabel: "Improving", status: "preview" },
+  human: { score: 54, trend: "down", trendLabel: "Worsening", status: "live" },
+  reputational: { score: 81, trend: "up", trendLabel: "Improving", status: "preview" },
+  environmental: { score: 45, trend: "flat", trendLabel: "Steady", status: "preview" },
 };
-
-const PILLARS: Pillar[] = [
-  {
-    id: "financial",
-    name: "Financial",
-    score: 68,
-    trend: "flat",
-    trendLabel: "Steady",
-    status: "preview",
-    indicators: [
-      { name: "Liquidity Headroom", score: 72, sublabel: "3 data points · cash reserves, working capital, credit facility" },
-      { name: "Cost Base Flexibility", score: 64, sublabel: "4 data points · fixed vs variable, supplier terms, pay mix, agency spend" },
-      { name: "Capital Investment Capacity", score: 70, sublabel: "3 data points · CDEL utilisation, backlog maintenance, project pipeline" },
-    ],
-  },
-  {
-    id: "operational",
-    name: "Operational",
-    score: 72,
-    trend: "up",
-    trendLabel: "Improving",
-    status: "preview",
-    indicators: [
-      { name: "Service Continuity", score: 76, sublabel: "4 data points · downtime, BCP coverage, single points of failure, recovery time" },
-      { name: "Supply Chain Resilience", score: 68, sublabel: "3 data points · supplier concentration, stockholding, lead times" },
-      { name: "Estate & Asset Reliability", score: 72, sublabel: "3 data points · critical asset age, planned maintenance, incident rate" },
-    ],
-  },
-  {
-    id: "human",
-    name: "Human (Workforce)",
-    score: 54,
-    trend: "down",
-    trendLabel: "Worsening",
-    status: "live",
-    indicators: [
-      { name: "Workforce of the Future", score: 58, sublabel: "4 data points · headcount vs forecast, talent attraction, talent retention, internal movement" },
-      { name: "Job Distribution", score: 62, sublabel: "based on the future skills plan (data points to be confirmed)" },
-      { name: "People Resilience", score: 42, sublabel: "5 data points · absence, health & wellbeing, eNPS, engagement, change & innovation" },
-      { name: "Continuity of Critical Skills", score: 54, sublabel: "3 data points · role fulfilment, talent attraction, talent attrition" },
-    ],
-  },
-  {
-    id: "reputational",
-    name: "Reputational",
-    score: 81,
-    trend: "up",
-    trendLabel: "Improving",
-    status: "preview",
-    indicators: [
-      { name: "Stakeholder Trust", score: 84, sublabel: "3 data points · regulator standing, public sentiment, partner relationships" },
-      { name: "Brand & Media Position", score: 78, sublabel: "3 data points · share of voice, sentiment trend, crisis exposure" },
-      { name: "Patient & Staff Voice", score: 80, sublabel: "3 data points · FFT, complaints, staff survey advocacy" },
-    ],
-  },
-  {
-    id: "environmental",
-    name: "Environmental",
-    score: 45,
-    trend: "flat",
-    trendLabel: "Steady",
-    status: "preview",
-    indicators: [
-      { name: "Carbon & Energy", score: 48, sublabel: "3 data points · scope 1+2, energy intensity, renewable share" },
-      { name: "Climate Adaptation", score: 42, sublabel: "3 data points · flood/heat exposure, adaptation plan, critical site risk" },
-      { name: "Resource & Waste", score: 46, sublabel: "3 data points · waste intensity, recycling rate, water use" },
-    ],
-  },
-];
 
 const FiveCapitals = () => {
   const navigate = useNavigate();
   const cardRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const [highlight, setHighlight] = useState<string | null>(null);
+  const { data } = useHumanCapitalData();
+
+  // Latest live values keyed by kri_id.
+  const liveValues = useMemo<Record<string, number | null>>(() => {
+    const out: Record<string, number | null> = {};
+    Object.entries(data.capturesByKri).forEach(([kriId, caps]) => {
+      const latest = caps[0];
+      out[kriId] = latest ? Number(latest.headline_value) : null;
+    });
+    return out;
+  }, [data]);
+
+  const pillars = useMemo(() => {
+    return PILLAR_CONFIG.map((p) => {
+      const header = PILLAR_HEADER[p.id];
+      const indicators = p.indicators.map((ind) => {
+        const dps = resolveDataPoints(ind, liveValues);
+        const roll = rollupIndicator(dps);
+        const score = displayScore(roll.score);
+        const sublabel =
+          dps.length === 0
+            ? ind.description
+            : `${roll.scoredCount} of ${roll.totalCount} data points scored · ${ind.description}`;
+        return { name: ind.name, score, sublabel };
+      });
+      return { ...p, ...header, indicators };
+    });
+  }, [liveValues]);
 
   const scrollToPillar = (id: string) => {
     const el = cardRefs.current[id];
@@ -115,7 +75,6 @@ const FiveCapitals = () => {
       </div>
 
       <main className="px-4 py-6 sm:px-6">
-        {/* Title */}
         <section>
           <h1 className="text-2xl font-bold sm:text-3xl" style={{ color: NAVY }}>
             Five Capitals Health Score
@@ -125,9 +84,8 @@ const FiveCapitals = () => {
           </p>
         </section>
 
-        {/* Dials */}
         <section className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-          {PILLARS.map((p) => (
+          {pillars.map((p) => (
             <PillarDial
               key={p.id}
               name={p.name}
@@ -139,13 +97,12 @@ const FiveCapitals = () => {
           ))}
         </section>
 
-        {/* Pillar detail */}
         <section className="mt-8">
           <h2 className="text-lg font-bold" style={{ color: NAVY }}>
             Pillar detail — indicator composition
           </h2>
           <div className="mt-4 grid gap-4 lg:grid-cols-2">
-            {PILLARS.map((p) => {
+            {pillars.map((p) => {
               const isLive = p.status === "live";
               const isHighlighted = highlight === p.id;
               return (
@@ -179,9 +136,35 @@ const FiveCapitals = () => {
                   </div>
 
                   <div className="mt-3 divide-y divide-slate-100">
-                    {p.indicators.map((ind) => (
-                      <IndicatorRangeBar key={ind.name} {...ind} />
-                    ))}
+                    {p.indicators.map((ind) =>
+                      ind.score == null ? (
+                        <div key={ind.name} className="py-3">
+                          <div className="flex items-start gap-3">
+                            <div
+                              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-dashed border-slate-300 text-[10px] font-semibold text-slate-400"
+                              aria-hidden
+                            >
+                              n/a
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <div className="text-sm font-bold" style={{ color: NAVY }}>
+                                {ind.name}
+                              </div>
+                              <div className="text-xs text-slate-500">
+                                Not yet scored · {ind.sublabel}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                        <IndicatorRangeBar
+                          key={ind.name}
+                          name={ind.name}
+                          score={ind.score}
+                          sublabel={ind.sublabel}
+                        />
+                      ),
+                    )}
                   </div>
 
                   <div className="mt-4">
@@ -206,7 +189,6 @@ const FiveCapitals = () => {
           </div>
         </section>
 
-        {/* How to read */}
         <section className="mt-8 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
           <h2 className="text-base font-bold" style={{ color: NAVY }}>
             How to read this view
@@ -231,7 +213,7 @@ const FiveCapitals = () => {
               </span>
             </li>
             <li>
-              Each data point sits on the 0–100 operating range, normalised so that <strong>minimum threshold = 25</strong> and <strong>target = 75</strong>. Indicators roll up 3–5 data points.
+              Each data point sits on the 0–100 operating range, normalised so that <strong>minimum threshold = 25</strong> and <strong>target = 75</strong>. Indicator scores are the unweighted average of their data-point scores.
             </li>
             <li>
               A downward trend arrow means a score is moving away from target back towards the minimum threshold.
