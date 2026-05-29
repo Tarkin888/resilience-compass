@@ -43,10 +43,9 @@ const CHART_DATA: Point[] = [
 ];
 
 const BANDS = [
-  { label: "Critical", min: 0, max: 40, swatch: "bg-red-400" },
-  { label: "At Risk", min: 40, max: 60, swatch: "bg-amber-400" },
-  { label: "Stable", min: 60, max: 80, swatch: "bg-blue-400" },
-  { label: "Strong", min: 80, max: 100, swatch: "bg-emerald-400" },
+  { label: "Red", min: 0, max: 24, swatch: "bg-red-400" },
+  { label: "Amber", min: 25, max: 74, swatch: "bg-amber-400" },
+  { label: "Green", min: 75, max: 100, swatch: "bg-emerald-400" },
 ];
 
 interface Intervention {
@@ -174,10 +173,10 @@ export const AiRiskPredictionTab = () => {
               The 6-month forecast shown below is an illustrative projection generated to
               demonstrate the dashboard's predictive capability. In the production build, this
               view will be driven by a rules-based engine combining per-data-point linear-trend
-              projection, bounded historical ranges, pillar-weighted composite scoring, and
+              projection, bounded historical ranges, indicator-level scoring, and
               intervention-uplift overlays. The agreed rule set will be documented and
               version-controlled alongside the methodology applied to the Human Capital
-              composite score.
+              indicator scores.
             </p>
           </div>
         </div>
@@ -215,10 +214,9 @@ export const AiRiskPredictionTab = () => {
                   data={CHART_DATA}
                   margin={{ top: 16, right: 24, left: 0, bottom: 8 }}
                 >
-                  <ReferenceArea y1={0} y2={40} fill="#dc2626" fillOpacity={0.05} />
-                  <ReferenceArea y1={40} y2={60} fill="#f59e0b" fillOpacity={0.05} />
-                  <ReferenceArea y1={60} y2={80} fill="#3b82f6" fillOpacity={0.05} />
-                  <ReferenceArea y1={80} y2={100} fill="#10b981" fillOpacity={0.05} />
+                  <ReferenceArea y1={0} y2={24} fill="#dc2626" fillOpacity={0.05} />
+                  <ReferenceArea y1={25} y2={74} fill="#f59e0b" fillOpacity={0.05} />
+                  <ReferenceArea y1={75} y2={100} fill="#10b981" fillOpacity={0.05} />
 
                   <CartesianGrid stroke="#e2e8f0" strokeDasharray="2 4" vertical={false} />
                   <XAxis
@@ -301,7 +299,7 @@ export const AiRiskPredictionTab = () => {
 
             <p className="mt-3 text-sm text-slate-700">
               Projected score in 6 months: 43 (range 39–47), with the lower bound reaching into
-              Critical.
+              the Red band (below the minimum threshold of 25).
             </p>
             <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
               <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
