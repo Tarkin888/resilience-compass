@@ -55,7 +55,7 @@ export const ScoreCard = () => {
           <div className="sm:w-1/2 sm:shrink-0">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0 flex-1">
-                <ScoreScale score={54} size="large" label="Human Capital score" />
+                <ScoreScale score={humanScore ?? 0} size="large" label="Human Capital score" />
               </div>
               <button
                 type="button"
