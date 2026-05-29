@@ -89,7 +89,7 @@ export const SCENARIO_IMPACTS: Record<string, ScenarioImpact> = {
       row("Staff Engagement Score", 6.4, 5.5),
     ],
     narrative:
-      "Under this scenario, the Human Capital score falls from 54 to 41 — at the lower edge of the Amber band. The vacancy rate breaches 12%, driving sharp deteriorations in voluntary turnover and engagement as remaining staff carry the gap.",
+      "The vacancy rate breaches 12%, driving sharp deteriorations in voluntary turnover and engagement as remaining staff carry the gap.",
     horizon: "6-month horizon",
     inputs:
       "International recruitment pipeline disrupted for two consecutive quarters. Agency reliance assumed at twice baseline. Vacancy rate breaches 12%; knock-on effects modelled through turnover and engagement using the agreed pillar weights.",
