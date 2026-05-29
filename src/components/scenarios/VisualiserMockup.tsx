@@ -1,6 +1,6 @@
 import { DataSourceChip, type LiveTooltipPayload } from "@/components/DataSourceChip";
 import { ScoreScale } from "@/components/ScoreScale";
-import { normaliseScore, ragBand } from "@/lib/scoringEngine";
+import { bandFor, normaliseScore, ragBand } from "@/lib/scoringEngine";
 import {
   SCENARIO_IMPACTS,
   type KriImpactRow,
