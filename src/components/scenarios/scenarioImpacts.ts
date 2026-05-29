@@ -131,7 +131,7 @@ export const SCENARIO_IMPACTS: Record<string, ScenarioImpact> = {
       row("Staff Engagement Score", 6.4, 6.2),
     ],
     narrative:
-      "Under this scenario, the Human Capital score falls from 54 to 49 — Amber band. Training compliance drops below 70%, triggering CQC scrutiny and a statutory training catch-up obligation.",
+      "Training compliance drops below 70%, triggering CQC scrutiny and a statutory training catch-up obligation.",
     horizon: "6-month horizon",
     inputs:
       "Training compliance falls below 70% across statutory modules. CQC scrutiny triggered; catch-up obligation applied. Other data points held at baseline. Modelled across the five Human Capital data points using the agreed pillar weights.",
