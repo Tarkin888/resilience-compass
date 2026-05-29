@@ -27,7 +27,8 @@ export const PillarDial = ({ name, score, trend, trendLabel, onViewDetails }: Pr
   const color = ragColor(score);
   const radius = 42;
   const circumference = 2 * Math.PI * radius;
-  const offset = circumference * (1 - score / 100);
+  const pct = score == null ? 0 : Math.max(0, Math.min(100, score));
+  const offset = circumference * (1 - pct / 100);
 
   const TrendIcon = trend === "down" ? TrendingDown : trend === "up" ? TrendingUp : Minus;
   const trendColor =
@@ -41,18 +42,20 @@ export const PillarDial = ({ name, score, trend, trendLabel, onViewDetails }: Pr
       <div className="relative mt-2">
         <svg width="110" height="110" viewBox="0 0 110 110">
           <circle cx="55" cy="55" r={radius} fill="none" stroke="#E5E7EB" strokeWidth="10" />
-          <circle
-            cx="55"
-            cy="55"
-            r={radius}
-            fill="none"
-            stroke={color}
-            strokeWidth="10"
-            strokeLinecap="round"
-            strokeDasharray={circumference}
-            strokeDashoffset={offset}
-            transform="rotate(-90 55 55)"
-          />
+          {score != null && (
+            <circle
+              cx="55"
+              cy="55"
+              r={radius}
+              fill="none"
+              stroke={color}
+              strokeWidth="10"
+              strokeLinecap="round"
+              strokeDasharray={circumference}
+              strokeDashoffset={offset}
+              transform="rotate(-90 55 55)"
+            />
+          )}
           <text
             x="55"
             y="58"
@@ -60,9 +63,9 @@ export const PillarDial = ({ name, score, trend, trendLabel, onViewDetails }: Pr
             dominantBaseline="middle"
             fontSize="22"
             fontWeight="700"
-            fill={NAVY}
+            fill={color}
           >
-            {score}
+            {score ?? "—"}
           </text>
           <text x="55" y="76" textAnchor="middle" fontSize="10" fill="#64748B">
             /100
