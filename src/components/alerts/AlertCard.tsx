@@ -26,6 +26,7 @@ interface Props {
   source?: Source;
   captures?: KriCapture[];
   narrative: string;
+  engineScore?: number | null;
 }
 
 export const AlertCard = ({
@@ -38,6 +39,7 @@ export const AlertCard = ({
   source,
   captures = [],
   narrative,
+  engineScore,
 }: Props) => {
   const [whyOpen, setWhyOpen] = useState(false);
   const [rationaleOpen, setRationaleOpen] = useState(false);
