@@ -158,7 +158,9 @@ const LoadedView = ({
           <div className="text-xs font-medium uppercase tracking-wider text-slate-500">
             Why this projection
           </div>
-          <p className="mt-2 text-base leading-relaxed text-slate-700">{impact.narrative}</p>
+          <p className="mt-2 text-base leading-relaxed text-slate-700">
+            {buildScoreSentence(BASELINE_SCORE, projected)} {impact.narrative}
+          </p>
           <p className="mt-4 text-sm italic text-slate-500">
             Projected values are illustrative for the 14 May demo. Calculation logic is built
             post-demo using the same rules-based engine as the AI Risk Prediction tab, with
@@ -169,6 +171,26 @@ const LoadedView = ({
     </>
   );
 };
+
+function buildScoreSentence(baseline: number, projected: number): string {
+  const baseBand = bandFor(baseline);
+  const projBand = bandFor(projected);
+  const sameBand = baseBand.name === projBand.name;
+  const verb = projected < baseline ? "falls" : projected > baseline ? "rises" : "holds";
+
+  let transition: string;
+  if (projected === baseline) {
+    transition = `staying within the ${projBand.name} band (${projBand.parenthetical})`;
+  } else if (sameBand) {
+    transition = projected < baseline
+      ? `moving deeper into the ${projBand.name} band (${projBand.parenthetical})`
+      : `strengthening within the ${projBand.name} band (${projBand.parenthetical})`;
+  } else {
+    transition = `moving from the ${baseBand.name} band into the ${projBand.name} band (${projBand.parenthetical})`;
+  }
+
+  return `Under this scenario, the Human Capital score ${verb} from ${baseline} to ${projected} — ${transition}.`;
+}
 
 const KriRow = ({ row }: { row: KriImpactRow }) => {
   const delta = row.projected - row.current;
