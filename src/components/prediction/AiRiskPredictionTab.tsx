@@ -107,7 +107,7 @@ export const AiRiskPredictionTab = () => {
   const historicalSeries = CHART_DATA.map((d) => d.historical).filter(
     (v): v is number => typeof v === "number",
   );
-  const compositeTrend = assessTrend(historicalSeries, { cadence: "quarters" });
+  const humanScoreTrend = assessTrend(historicalSeries, { cadence: "quarters" });
 
   return (
     <div className="space-y-5">
@@ -200,7 +200,7 @@ export const AiRiskPredictionTab = () => {
                 <span className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
                   Current trend
                 </span>
-                <TrendLabel assessment={compositeTrend} />
+                <TrendLabel assessment={humanScoreTrend} />
               </div>
               <ScoreScale score={CURRENT_SCORE} size="compact" label="Current score" />
             </div>
