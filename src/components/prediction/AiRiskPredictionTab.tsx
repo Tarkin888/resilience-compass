@@ -401,7 +401,7 @@ export const AiRiskPredictionTab = () => {
             This projection extrapolates the current trend in vacancy rate and sickness absence
             forward 6 months and assumes no new interventions are taken. The shaded band reflects
             modelled uncertainty. Interventions on the right are ranked by expected uplift on the
-            composite score; the ranking is rule-based for the demo and will be replaced with a
+            Human Capital indicator scores; the ranking is rule-based for the demo and will be replaced with a
             model-driven recommendation engine post-demo.
           </div>
         )}
