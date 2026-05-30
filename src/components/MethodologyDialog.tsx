@@ -70,21 +70,27 @@ function StaticRangeBar() {
 interface MethodologyDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  returnFocusRef?: React.RefObject<HTMLElement>;
 }
 
-export const MethodologyDialog = ({ open, onOpenChange }: MethodologyDialogProps) => {
+export const MethodologyDialog = ({ open, onOpenChange, returnFocusRef }: MethodologyDialogProps) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         className="max-h-[90vh] overflow-y-auto sm:max-w-xl"
-        onEscapeKeyDown={() => onOpenChange(false)}
+        onCloseAutoFocus={(e) => {
+          if (returnFocusRef?.current) {
+            e.preventDefault();
+            returnFocusRef.current.focus();
+          }
+        }}
       >
         <DialogHeader>
           <DialogTitle style={{ color: NAVY }}>How resilience scoring works</DialogTitle>
-          <DialogDescription className="sr-only">
-            Explains how ResilienceC produces its 0–100 resilience scores.
-          </DialogDescription>
         </DialogHeader>
+        <DialogDescription className="sr-only">
+          Explains how ResilienceC produces its 0–100 resilience scores.
+        </DialogDescription>
 
         <div className="space-y-6 text-sm leading-relaxed" style={{ color: NAVY }}>
           {/* Section 1 */}

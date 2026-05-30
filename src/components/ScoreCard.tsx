@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AlertTriangle, Info } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { ScoreScale } from "@/components/ScoreScale";
@@ -12,6 +12,7 @@ const LIVE_KRIS = ["sickness_absence", "vacancy"];
 export const ScoreCard = () => {
   const [stale, setStale] = useState(false);
   const [methodologyOpen, setMethodologyOpen] = useState(false);
+  const methodologyTriggerRef = useRef<HTMLButtonElement>(null);
   const { data } = useHumanCapitalData();
 
   const humanScore = useMemo(() => {
@@ -58,6 +59,7 @@ export const ScoreCard = () => {
                 <ScoreScale score={humanScore ?? 0} size="large" label="Human Capital score" />
               </div>
               <button
+                ref={methodologyTriggerRef}
                 type="button"
                 onClick={() => setMethodologyOpen(true)}
                 className="mt-1 inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-medium text-accent2 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent2"
@@ -91,7 +93,11 @@ export const ScoreCard = () => {
           </div>
         </div>
       </div>
-      <MethodologyDialog open={methodologyOpen} onOpenChange={setMethodologyOpen} />
+      <MethodologyDialog
+        open={methodologyOpen}
+        onOpenChange={setMethodologyOpen}
+        returnFocusRef={methodologyTriggerRef}
+      />
     </section>
   );
 };
