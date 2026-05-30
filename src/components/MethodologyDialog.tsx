@@ -1,6 +1,7 @@
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -74,9 +75,15 @@ interface MethodologyDialogProps {
 export const MethodologyDialog = ({ open, onOpenChange }: MethodologyDialogProps) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-xl">
+      <DialogContent
+        className="max-h-[90vh] overflow-y-auto sm:max-w-xl"
+        onEscapeKeyDown={() => onOpenChange(false)}
+      >
         <DialogHeader>
           <DialogTitle style={{ color: NAVY }}>How resilience scoring works</DialogTitle>
+          <DialogDescription className="sr-only">
+            Explains how ResilienceC produces its 0–100 resilience scores.
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6 text-sm leading-relaxed" style={{ color: NAVY }}>
