@@ -194,39 +194,14 @@ export const LiveRiskAlertsTab = () => {
     console.info("refresh:start");
     setRefreshing(true);
     try {
-      const adminPassword = sessionStorage.getItem("rc_admin_session") ?? "";
       const liveKris = rows.filter((r) => r.def.is_live).map((r) => r.def.kri_id);
-      const results = adminPassword
-        ? await Promise.allSettled(
-            liveKris.map((kri) => {
-              const fn = FN_MAP[kri];
-              if (!fn) return Promise.resolve({ data: { skipped: true }, error: null });
-              return supabase.functions.invoke(fn, {
-                body: {},
-                headers: { "x-admin-password": adminPassword },
-              });
-            }),
-          )
-        : [];
-      let newCount = 0;
-      let noNewCount = 0;
-      let hardFailCount = 0;
-      results.forEach((res) => {
-        if (res.status !== "fulfilled") { hardFailCount++; return; }
-        const payload = (res.value as { data?: { outcome?: string; skipped?: boolean } } | undefined)?.data;
-        const outcome = payload?.outcome;
-        if (payload?.skipped) return;
-        if (outcome === "success") newCount++;
-        else if (outcome === "no_new_edition") noNewCount++;
-        else hardFailCount++;
-      });
-
+      // Public refresh re-reads the latest captured data from the database.
+      // Triggering new privileged scrapes is only possible from the admin pages.
+      const newCount = 0;
+      const hardFailCount = 0;
       const sources = liveKris;
-      if (hardFailCount > 0) {
-        console.error("refresh:capture-error", { newEditions: newCount, sources, failures: hardFailCount });
-      } else {
-        console.info("refresh:capture-ok", { newEditions: newCount, sources });
-      }
+      console.info("refresh:capture-ok", { newEditions: newCount, sources });
+
 
       let summary = "";
       if (newCount > 0) {
