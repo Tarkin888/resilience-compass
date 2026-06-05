@@ -19,7 +19,7 @@ const FN_MAP: Record<string, string> = {
   sickness_absence: "fetch_nhs_sickness_absence",
 };
 
-const SESSION_KEY = "rc_admin_session";
+
 
 export default function AdminSources() {
   const [password, setPassword] = useState("");
