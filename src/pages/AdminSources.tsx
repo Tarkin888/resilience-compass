@@ -80,7 +80,7 @@ export default function AdminSources() {
         setAuthError("Incorrect password.");
         return;
       }
-      sessionStorage.setItem(SESSION_KEY, password);
+      // Intentionally NOT persisted — see comment at top of component.
       setAuthed(true);
     } catch (err) {
       setAuthError("Sign-in failed. Please try again.");
