@@ -8,7 +8,7 @@ import { TAB1_ENGINE_CONFIG } from "@/config/tab1EngineConfig";
 import { AlertCard } from "./AlertCard";
 import { LiveDataStatusBanner } from "./LiveDataStatusBanner";
 import { SEVERITY_RANK, formatDateTime } from "./severity";
-import { supabase } from "@/integrations/supabase/client";
+
 
 type SeverityFilter = "All" | "Critical" | "Warning" | "Watch";
 type SourceFilter = "all" | "live" | "illustrative";
@@ -53,10 +53,6 @@ const FAILURE_REASONS: Record<string, string> = {
   no_new_edition: "No new edition published yet",
 };
 
-const FN_MAP: Record<string, string> = {
-  vacancy: "fetch_nhs_vacancy",
-  sickness_absence: "fetch_nhs_sickness_absence",
-};
 
 export const LiveRiskAlertsTab = () => {
   const { data, loading, error, refresh } = useHumanCapitalData();
