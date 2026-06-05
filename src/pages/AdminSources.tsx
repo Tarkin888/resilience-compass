@@ -22,27 +22,14 @@ const FN_MAP: Record<string, string> = {
 const SESSION_KEY = "rc_admin_session";
 
 export default function AdminSources() {
-  const stored = typeof window !== "undefined" ? sessionStorage.getItem(SESSION_KEY) : null;
   const [password, setPassword] = useState("");
   const [authed, setAuthed] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
 
-  // Re-verify any persisted session token on mount; never trust sessionStorage alone.
-  useEffect(() => {
-    if (!stored) return;
-    (async () => {
-      const { data, error } = await supabase.functions.invoke("admin_action", {
-        body: { action: "verify" },
-        headers: { "x-admin-password": stored },
-      });
-      if (!error && (data as { ok?: boolean })?.ok) {
-        setPassword(stored);
-        setAuthed(true);
-      } else {
-        sessionStorage.removeItem(SESSION_KEY);
-      }
-    })();
-  }, [stored]);
+  // Admin password is held only in component state for the lifetime of the tab.
+  // We deliberately do NOT persist it (sessionStorage/localStorage) so that an
+  // XSS payload in any other page cannot exfiltrate it.
+
 
   const [sources, setSources] = useState<SourceRow[]>([]);
   const [latestCaps, setLatestCaps] = useState<Record<string, CaptureRow>>({});
