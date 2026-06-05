@@ -197,20 +197,12 @@ export const LiveRiskAlertsTab = () => {
       const liveKris = rows.filter((r) => r.def.is_live).map((r) => r.def.kri_id);
       // Public refresh re-reads the latest captured data from the database.
       // Triggering new privileged scrapes is only possible from the admin pages.
-      const newCount = 0;
-      const hardFailCount = 0;
       const sources = liveKris;
-      console.info("refresh:capture-ok", { newEditions: newCount, sources });
+      console.info("refresh:capture-ok", { sources });
 
-
-      let summary = "";
-      if (newCount > 0) {
-        summary = `${newCount} new edition${newCount === 1 ? "" : "s"} captured`;
-      } else if (hardFailCount === 0) {
-        summary = "No new editions available yet";
-      }
       setLastCheckedAt(new Date());
-      setLastCheckSummary(summary);
+      setLastCheckSummary("Refreshed from latest captured data");
+
 
       await refresh();
       console.info("refresh:rerender");
