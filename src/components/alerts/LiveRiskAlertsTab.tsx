@@ -28,6 +28,19 @@ const FAILURE_OUTCOMES = new Set([
 
 const BENIGN_OUTCOMES = new Set(["ok", "success", "no_new_edition"]);
 
+// Display-only nesting of data points under their parent indicator
+// (Rick's case study pp. 6–8, confirmed in Prompt_12 Change 3).
+// Job Distribution has no confirmed data points yet; Training Compliance is
+// unassigned until Rick confirms its parent indicator (decision D6 —
+// untraceable assumptions must be flagged).
+const INDICATOR_GROUPS: { id: string; name: string; kris: string[] }[] = [
+  { id: "workforce_of_the_future", name: "Workforce of the Future", kris: ["vacancy"] },
+  { id: "people_resilience", name: "People Resilience", kris: ["sickness_absence", "staff_engagement_score"] },
+  { id: "continuity_critical_skills", name: "Continuity of Critical Skills", kris: ["voluntary_turnover"] },
+  { id: "job_distribution", name: "Job Distribution", kris: [] },
+  { id: "unassigned", name: "Unassigned — parent indicator to be confirmed with Rick", kris: ["training_compliance"] },
+];
+
 const FAILURE_REASONS: Record<string, string> = {
   page_not_found: "Edition URL pattern did not resolve to a published page",
   html_parse_failed: "Edition page parsed but no data file link was found",
