@@ -194,16 +194,6 @@ const InterventionRow = ({
               </dd>
             </div>
           </dl>
-          <div className="border-t border-slate-200 px-4 py-3">
-            <a
-              href={intervention.readMoreUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 text-sm font-medium text-blue-600 hover:underline"
-            >
-              Read more →
-            </a>
-          </div>
         </PopoverContent>
       </Popover>
     </li>
