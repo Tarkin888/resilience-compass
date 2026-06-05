@@ -28,6 +28,19 @@ const FAILURE_OUTCOMES = new Set([
 
 const BENIGN_OUTCOMES = new Set(["ok", "success", "no_new_edition"]);
 
+// Display-only nesting of data points under their parent indicator
+// (Rick's case study pp. 6–8, confirmed in Prompt_12 Change 3).
+// Job Distribution has no confirmed data points yet; Training Compliance is
+// unassigned until Rick confirms its parent indicator (decision D6 —
+// untraceable assumptions must be flagged).
+const INDICATOR_GROUPS: { id: string; name: string; kris: string[] }[] = [
+  { id: "workforce_of_the_future", name: "Workforce of the Future", kris: ["vacancy"] },
+  { id: "people_resilience", name: "People Resilience", kris: ["sickness_absence", "staff_engagement_score"] },
+  { id: "continuity_critical_skills", name: "Continuity of Critical Skills", kris: ["voluntary_turnover"] },
+  { id: "job_distribution", name: "Job Distribution", kris: [] },
+  { id: "unassigned", name: "Unassigned — parent indicator to be confirmed with Rick", kris: ["training_compliance"] },
+];
+
 const FAILURE_REASONS: Record<string, string> = {
   page_not_found: "Edition URL pattern did not resolve to a published page",
   html_parse_failed: "Edition page parsed but no data file link was found",
@@ -357,27 +370,63 @@ export const LiveRiskAlertsTab = () => {
         <div className="rounded-xl border border-slate-200 bg-white p-8 text-center text-sm text-slate-500">
           Loading alerts…
         </div>
-      ) : filtered.length === 0 ? (
-        <div className="rounded-xl border border-slate-200 bg-white p-8 text-center text-sm text-slate-500">
-          No data points match the current filters.
-        </div>
       ) : (
-        <div className="space-y-3">
-          {filtered.map((r) => (
-            <AlertCard
-              key={r.def.id}
-              definition={r.def}
-              status={r.status}
-              trend={r.trend}
-              value={r.value}
-              unit={r.unit}
-              threshold={r.threshold}
-              source={r.source}
-              captures={r.captures}
-              narrative={r.narrative}
-              engineScore={r.engineScore}
-            />
-          ))}
+        <div className="space-y-6">
+          {INDICATOR_GROUPS.map((group) => {
+            const groupRowsAll = rows.filter((r) => group.kris.includes(r.def.kri_id));
+            const groupRowsVisible = filtered.filter((r) => group.kris.includes(r.def.kri_id));
+            const scoredCount = groupRowsAll.filter((r) => r.engineScore != null).length;
+            const totalCount = groupRowsAll.length;
+            const isJobDist = group.id === "job_distribution";
+            const isUnassigned = group.id === "unassigned";
+
+            return (
+              <section key={group.id} aria-label={group.name}>
+                <div className="mb-2 flex flex-wrap items-baseline justify-between gap-2 border-b border-slate-200 pb-1.5">
+                  <h2
+                    className={`text-sm font-bold uppercase tracking-wide ${
+                      isUnassigned ? "text-amber-700" : "text-[#001D57]"
+                    }`}
+                  >
+                    {group.name}
+                  </h2>
+                  <span className="text-[11px] font-medium text-slate-500">
+                    {isJobDist
+                      ? "Not yet scored — data points to be confirmed by Rick"
+                      : `${scoredCount} of ${totalCount} data point${totalCount === 1 ? "" : "s"} scored`}
+                  </span>
+                </div>
+
+                {isJobDist ? (
+                  <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-5 text-sm text-slate-500">
+                    No data points defined for this indicator yet.
+                  </div>
+                ) : groupRowsVisible.length === 0 ? (
+                  <div className="rounded-xl border border-slate-200 bg-white p-5 text-center text-xs text-slate-500">
+                    No matching data points under the current filters.
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {groupRowsVisible.map((r) => (
+                      <AlertCard
+                        key={r.def.id}
+                        definition={r.def}
+                        status={r.status}
+                        trend={r.trend}
+                        value={r.value}
+                        unit={r.unit}
+                        threshold={r.threshold}
+                        source={r.source}
+                        captures={r.captures}
+                        narrative={r.narrative}
+                        engineScore={r.engineScore}
+                      />
+                    ))}
+                  </div>
+                )}
+              </section>
+            );
+          })}
         </div>
       )}
     </div>
