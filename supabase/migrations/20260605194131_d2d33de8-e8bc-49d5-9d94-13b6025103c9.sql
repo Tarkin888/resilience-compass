@@ -1,0 +1,1 @@
+REVOKE SELECT (simulate_failure) ON public.sources FROM anon, authenticated;
