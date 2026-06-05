@@ -25,56 +25,59 @@ export interface PillarConfig {
 // -----------------------------
 // Human (Workforce) — Rick's case study pp. 6–8
 // -----------------------------
+// Human pillar — one indicator per Tab 1 KRI so the pillar dial, pillar-card
+// header and dashboard header are computed from the same five KRI engine
+// scores the user sees in Live Risk Alerts. Job Distribution is intentionally
+// unscored (no data points) so the average excludes it.
 const human: PillarConfig = {
   id: "human",
   name: "Human (Workforce)",
   indicators: [
     {
-      id: "workforce_of_the_future",
-      name: "Workforce of the Future",
-      description: "Headcount vs forecast, talent attraction, retention, internal movement",
+      id: "staff_vacancies",
+      name: "Staff Vacancies",
+      description: "Vacancy rate (live, NHS England)",
       dataPoints: [
-        { id: "roles_filled_vs_forecast", name: "% of roles filled against forecast", target: 98, minimumThreshold: 92, unit: "%", direction: "higherIsBetter", source: "Illustrative", illustrativeValue: 94 },
-        { id: "roles_open_45d", name: "% of roles open 45+ working days", target: 2, minimumThreshold: 8, unit: "%", direction: "lowerIsBetter", source: "Illustrative", illustrativeValue: 6 },
-        { id: "retention_high_perf", name: "Retention rate (high performers)", target: 92, minimumThreshold: 80, unit: "%", direction: "higherIsBetter", source: "Illustrative", illustrativeValue: 85 },
-        { id: "retention_3yr", name: "Retention rate (3+ years' service)", target: 88, minimumThreshold: 75, unit: "%", direction: "higherIsBetter", source: "Illustrative", illustrativeValue: 80 },
-        { id: "internal_fill", name: "% roles filled by internal candidates", target: 40, minimumThreshold: 20, unit: "%", direction: "higherIsBetter", source: "Illustrative", illustrativeValue: 28 },
-        { id: "internal_high_growth", name: "% internal candidates moved into high-growth roles", target: 25, minimumThreshold: 10, unit: "%", direction: "higherIsBetter", source: "Illustrative", illustrativeValue: 15 },
+        { id: "vacancy", name: "Vacancy rate", target: 8.5, minimumThreshold: 12, unit: "%", direction: "lowerIsBetter", source: "Live", liveKriId: "vacancy" },
+      ],
+    },
+    {
+      id: "sickness_absence",
+      name: "Sickness Absence Rate",
+      description: "Quarterly absence rate (live, NHS England)",
+      dataPoints: [
+        { id: "sickness_absence", name: "Sickness absence rate", target: 4.2, minimumThreshold: 6.0, unit: "%", direction: "lowerIsBetter", source: "Live", liveKriId: "sickness_absence" },
+      ],
+    },
+    {
+      id: "staff_engagement",
+      name: "Staff Engagement Score",
+      description: "Illustrative staff-survey score",
+      dataPoints: [
+        { id: "staff_engagement_score", name: "Staff engagement score", target: 7.5, minimumThreshold: 5.0, unit: "score", direction: "higherIsBetter", source: "Illustrative", illustrativeValue: 6.4 },
+      ],
+    },
+    {
+      id: "voluntary_turnover",
+      name: "Voluntary Turnover",
+      description: "Illustrative annualised turnover",
+      dataPoints: [
+        { id: "voluntary_turnover", name: "Voluntary turnover", target: 10, minimumThreshold: 16, unit: "%", direction: "lowerIsBetter", source: "Illustrative", illustrativeValue: 13.1 },
+      ],
+    },
+    {
+      id: "training_compliance",
+      name: "Training Compliance",
+      description: "Illustrative mandatory-training compliance",
+      dataPoints: [
+        { id: "training_compliance", name: "Training compliance", target: 95, minimumThreshold: 60, unit: "%", direction: "higherIsBetter", source: "Illustrative", illustrativeValue: 78 },
       ],
     },
     {
       id: "job_distribution",
       name: "Job Distribution",
       description: "Based on the future skills plan (data points to be confirmed)",
-      dataPoints: [], // not yet defined by Rick
-    },
-    {
-      id: "people_resilience",
-      name: "People Resilience",
-      description: "Absence, wellbeing, eNPS, engagement, change & innovation",
-      dataPoints: [
-        // LIVE: sickness absence (lower is better). Target = working pre-pandemic mean (D-07).
-        // Minimum threshold illustrative pending Rick (8 June agenda).
-        { id: "quarterly_absence", name: "Quarterly absence rate", target: 4.2, minimumThreshold: 6.0, unit: "%", direction: "lowerIsBetter", source: "Live", liveKriId: "sickness_absence" },
-        { id: "long_term_sick", name: "% employees on long-term sick", target: 1.0, minimumThreshold: 2.5, unit: "%", direction: "lowerIsBetter", source: "Illustrative", illustrativeValue: 2.1 },
-        { id: "wellbeing_survey", name: "Wellbeing people-survey score", target: 75, minimumThreshold: 55, unit: "score", direction: "higherIsBetter", source: "Illustrative", illustrativeValue: 58 },
-        { id: "mh_referrals", name: "Quarterly mental-health referrals", target: 10, minimumThreshold: 25, unit: "count", direction: "lowerIsBetter", source: "Illustrative", illustrativeValue: 22 },
-        { id: "enps", name: "eNPS", target: 30, minimumThreshold: 0, unit: "score", direction: "higherIsBetter", source: "Illustrative", illustrativeValue: 8 },
-        { id: "engagement", name: "Engagement staff-survey score", target: 75, minimumThreshold: 55, unit: "score", direction: "higherIsBetter", source: "Illustrative", illustrativeValue: 62 },
-        { id: "change_innovation", name: "Change & innovation staff-survey score", target: 70, minimumThreshold: 50, unit: "score", direction: "higherIsBetter", source: "Illustrative", illustrativeValue: 54 },
-      ],
-    },
-    {
-      id: "continuity_critical_skills",
-      name: "Continuity of Critical Skills",
-      description: "Role fulfilment, talent attraction, talent attrition",
-      dataPoints: [
-        { id: "critical_roles_filled", name: "% of critical roles currently filled", target: 98, minimumThreshold: 90, unit: "%", direction: "higherIsBetter", source: "Illustrative", illustrativeValue: 93 },
-        // LIVE proxy: vacancy rate stands in for "critical roles open 45+ working days" at the trust level.
-        // Target = working pre-pandemic mean (D-06). Minimum threshold illustrative pending Rick.
-        { id: "critical_roles_open_45d", name: "Critical roles open 45+ working days (vacancy proxy)", target: 8.5, minimumThreshold: 12, unit: "%", direction: "lowerIsBetter", source: "Live", liveKriId: "vacancy" },
-        { id: "attrition_5yr", name: "Attrition rate (5+ years' service)", target: 5, minimumThreshold: 10, unit: "%", direction: "lowerIsBetter", source: "Illustrative", illustrativeValue: 8 },
-      ],
+      dataPoints: [], // unscored — excluded from pillar average
     },
   ],
 };
