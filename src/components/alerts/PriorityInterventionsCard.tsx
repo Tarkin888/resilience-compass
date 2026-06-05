@@ -1,5 +1,5 @@
 import { useId, useState } from "react";
-import { ChevronDown, Info, X } from "lucide-react";
+import { ChevronDown, X } from "lucide-react";
 import {
   Popover,
   PopoverContent,
@@ -68,8 +68,7 @@ export const PriorityInterventionsCard = ({ kriId }: Props) => {
             </div>
           </div>
 
-          <div className="mt-3 flex items-start gap-2 rounded-md bg-slate-50 px-3 py-2">
-            <Info size={14} className="mt-0.5 shrink-0 text-slate-500" aria-hidden />
+          <div className="mt-3 rounded-md bg-slate-50 px-3 py-2">
             <p className="text-xs text-slate-600">
               Ranked by expected uplift, with evidence weight and time-to-impact as
               tiebreakers. Configured per pillar; not AI-generated.
@@ -171,7 +170,12 @@ const InterventionRow = ({
               <dt className="text-[11px] font-medium uppercase tracking-wide text-slate-500">
                 Reference
               </dt>
-              <dd className="mt-0.5 text-slate-800">{intervention.reference}</dd>
+              <dd className="mt-0.5 text-slate-800">
+                {intervention.reference}
+                <span className="ml-2 inline-flex items-center rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-700 ring-1 ring-inset ring-amber-200">
+                  Illustrative — source to be confirmed
+                </span>
+              </dd>
             </div>
             <div>
               <dt className="text-[11px] font-medium uppercase tracking-wide text-slate-500">
@@ -190,16 +194,6 @@ const InterventionRow = ({
               </dd>
             </div>
           </dl>
-          <div className="border-t border-slate-200 px-4 py-3">
-            <a
-              href={intervention.readMoreUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 text-sm font-medium text-blue-600 hover:underline"
-            >
-              Read more →
-            </a>
-          </div>
         </PopoverContent>
       </Popover>
     </li>
