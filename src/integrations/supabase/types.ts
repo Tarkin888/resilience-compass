@@ -60,7 +60,9 @@ export type Database = {
           headline_unit: string | null
           headline_value: number | null
           id: string
+          is_backfill: boolean
           kri_id: string
+          period_date: string | null
           prior_value: number | null
           raw_extract: Json | null
           source_id: string
@@ -75,7 +77,9 @@ export type Database = {
           headline_unit?: string | null
           headline_value?: number | null
           id?: string
+          is_backfill?: boolean
           kri_id: string
+          period_date?: string | null
           prior_value?: number | null
           raw_extract?: Json | null
           source_id: string
@@ -90,7 +94,9 @@ export type Database = {
           headline_unit?: string | null
           headline_value?: number | null
           id?: string
+          is_backfill?: boolean
           kri_id?: string
+          period_date?: string | null
           prior_value?: number | null
           raw_extract?: Json | null
           source_id?: string
@@ -141,6 +147,48 @@ export type Database = {
           illustrative_value?: number | null
           is_live?: boolean
           kri_id?: string
+        }
+        Relationships: []
+      }
+      score_history: {
+        Row: {
+          computed_at: string
+          entity_id: string
+          entity_type: string
+          id: string
+          method_version: string
+          min_threshold: number | null
+          normalised_score: number
+          rag_band: string
+          raw_value: number | null
+          snapshot_date: string
+          target: number | null
+        }
+        Insert: {
+          computed_at?: string
+          entity_id: string
+          entity_type: string
+          id?: string
+          method_version?: string
+          min_threshold?: number | null
+          normalised_score: number
+          rag_band: string
+          raw_value?: number | null
+          snapshot_date: string
+          target?: number | null
+        }
+        Update: {
+          computed_at?: string
+          entity_id?: string
+          entity_type?: string
+          id?: string
+          method_version?: string
+          min_threshold?: number | null
+          normalised_score?: number
+          rag_band?: string
+          raw_value?: number | null
+          snapshot_date?: string
+          target?: number | null
         }
         Relationships: []
       }
@@ -206,6 +254,8 @@ export type Database = {
           trust_override_value: number | null
           units: string
           updated_at: string
+          valid_from: string
+          valid_to: string | null
         }
         Insert: {
           effective_from?: string
@@ -226,6 +276,8 @@ export type Database = {
           trust_override_value?: number | null
           units?: string
           updated_at?: string
+          valid_from?: string
+          valid_to?: string | null
         }
         Update: {
           effective_from?: string
@@ -246,6 +298,8 @@ export type Database = {
           trust_override_value?: number | null
           units?: string
           updated_at?: string
+          valid_from?: string
+          valid_to?: string | null
         }
         Relationships: [
           {
