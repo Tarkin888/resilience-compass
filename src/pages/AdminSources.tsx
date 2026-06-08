@@ -37,6 +37,20 @@ export default function AdminSources() {
   const [overrideInputs, setOverrideInputs] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState<Record<string, boolean>>({});
   const [results, setResults] = useState<Record<string, string>>({});
+  const [backfillBusy, setBackfillBusy] = useState(false);
+  const [backfillResult, setBackfillResult] = useState<string | null>(null);
+
+  const runBackfill = async () => {
+    setBackfillBusy(true);
+    setBackfillResult("Running — fetching 24 months of NHS history and recomputing the score engine…");
+    const { data, error } = await supabase.functions.invoke("backfill_kri_history", {
+      body: {},
+      headers: { "x-admin-password": password },
+    });
+    setBackfillBusy(false);
+    setBackfillResult(error ? `Error: ${error.message}` : JSON.stringify(data, null, 2));
+    load();
+  };
 
   const load = async () => {
     const { data: sResp } = await supabase.functions.invoke("admin_action", {
@@ -187,6 +201,30 @@ export default function AdminSources() {
         </div>
         <h1 className="text-xl font-bold">Admin — Data Sources</h1>
         <p className="text-sm text-slate-500">NHS England public data ingestion controls</p>
+
+        <div className="mt-4 rounded-md border border-slate-200 bg-slate-50 p-4">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="text-sm font-semibold text-slate-900">Historical score engine</p>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Backfills 24 months of NHS England history for Staff Vacancies and Sickness Absence, then recomputes the score history that drives the header trend chart.
+              </p>
+            </div>
+            <button
+              type="button"
+              disabled={backfillBusy}
+              onClick={runBackfill}
+              className="rounded-md bg-brand px-4 py-2 text-sm font-medium text-white hover:opacity-90 disabled:opacity-50"
+            >
+              {backfillBusy ? "Backfilling…" : "Backfill score history"}
+            </button>
+          </div>
+          {backfillResult && (
+            <pre className="mt-3 max-h-64 overflow-auto rounded-md bg-slate-900 p-3 text-xs text-slate-100 whitespace-pre-wrap">
+{backfillResult}
+            </pre>
+          )}
+        </div>
       </header>
       <main className="px-4 py-6 space-y-6 sm:px-6">
         {sources.map((s) => {
