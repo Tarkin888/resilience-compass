@@ -37,6 +37,20 @@ export default function AdminSources() {
   const [overrideInputs, setOverrideInputs] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState<Record<string, boolean>>({});
   const [results, setResults] = useState<Record<string, string>>({});
+  const [backfillBusy, setBackfillBusy] = useState(false);
+  const [backfillResult, setBackfillResult] = useState<string | null>(null);
+
+  const runBackfill = async () => {
+    setBackfillBusy(true);
+    setBackfillResult("Running — fetching 24 months of NHS history and recomputing the score engine…");
+    const { data, error } = await supabase.functions.invoke("backfill_kri_history", {
+      body: {},
+      headers: { "x-admin-password": password },
+    });
+    setBackfillBusy(false);
+    setBackfillResult(error ? `Error: ${error.message}` : JSON.stringify(data, null, 2));
+    load();
+  };
 
   const load = async () => {
     const { data: sResp } = await supabase.functions.invoke("admin_action", {
