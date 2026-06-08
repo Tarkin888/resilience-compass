@@ -319,7 +319,7 @@ Deno.serve(async (req) => {
           headline_unit: "percent",
           period_date: p.period_date,
           is_backfill: true,
-        }, { onConflict: "id" }); // captures table has no unique on period yet — manual dedupe below
+        }, { onConflict: "kri_id,period_date" });
       }
     }
 
