@@ -136,6 +136,11 @@ export const TrendPanel = () => {
               Source: NHS England, {firstLabel} – {lastLabel}. {series.length} data points.
               Trend classified using NHS Making Data Count (XmR) rules.
             </p>
+            <p className="mt-1 text-[11px] italic text-slate-500">
+              Trend reflects movement in the two live measures (staff vacancies,
+              sickness absence); other indicators held at current levels pending
+              historical data.
+            </p>
           </>
         )}
       </div>
