@@ -350,6 +350,32 @@ export default function AdminSources() {
                 </div>
               </div>
 
+              <div className="mt-4">
+                <label className="text-xs font-medium text-slate-500 uppercase">
+                  Backfill file URL (direct link to historical time-series xlsx)
+                </label>
+                <p className="text-[11px] text-slate-500 mt-0.5">
+                  Used by “Backfill score history”. Paste the published time-series file if auto-discovery from the landing page fails.
+                </p>
+                <div className="mt-1 flex gap-2">
+                  <input
+                    type="url"
+                    value={backfillInputs[s.kri_id] ?? ""}
+                    onChange={(e) => setBackfillInputs((o) => ({ ...o, [s.kri_id]: e.target.value }))}
+                    placeholder="https://.../time-series.xlsx"
+                    className="flex-1 rounded-md border border-slate-300 px-3 py-2 text-sm"
+                  />
+                  <button
+                    type="button"
+                    disabled={busy[s.kri_id]}
+                    onClick={() => saveBackfillUrl(s.kri_id)}
+                    className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium hover:bg-slate-50"
+                  >
+                    Save
+                  </button>
+                </div>
+              </div>
+
               {results[s.kri_id] && (
                 <pre className="mt-4 max-h-64 overflow-auto rounded-md bg-slate-900 p-3 text-xs text-slate-100 whitespace-pre-wrap">
 {results[s.kri_id]}
