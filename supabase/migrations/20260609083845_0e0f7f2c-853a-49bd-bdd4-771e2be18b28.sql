@@ -1,0 +1,1 @@
+ALTER TABLE public.sources ADD COLUMN IF NOT EXISTS backfill_file_url text;
