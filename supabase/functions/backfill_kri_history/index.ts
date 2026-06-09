@@ -424,13 +424,46 @@ Deno.serve(async (req) => {
     }
   }
 
-  // 5. Roll up Human pillar + dashboard. Null-excluding average across whatever
-  //    scored indicators exist at that snapshot — no fabricated lines for
-  //    periods where neither source has data.
-  for (const [period, scores] of Object.entries(periodToKriScores)) {
-    const vals = Object.values(scores);
-    if (vals.length === 0) continue;
-    const avg = Math.round(vals.reduce((a, b) => a + b, 0) / vals.length);
+  // 5. Roll up Human pillar + dashboard using the flat-hold method so the
+  //    historical trend reconciles with the live pillar score:
+  //      - live indicators with history (vacancy, sickness): per-period score,
+  //        with vacancy carried forward (LOCF) across months between its
+  //        quarterly publications;
+  //      - illustrative indicators without history (engagement, turnover,
+  //        training compliance): held flat at their current live score across
+  //        the whole window.
+  //    Average is still null-excluding — periods before sickness history
+  //    begins simply omit sickness from that period's denominator.
+  const ILLUSTRATIVE_FLAT: Record<string, number> = {
+    staff_engagement: 53,
+    voluntary_turnover: 49,
+    training_compliance: 51,
+  };
+  const allPeriods = Array.from(
+    new Set(Object.keys(periodToKriScores)),
+  ).sort();
+  const vacancyByPeriod = Object.fromEntries(
+    Object.entries(periodToKriScores)
+      .filter(([, s]) => "vacancy" in s)
+      .map(([p, s]) => [p, s.vacancy]),
+  );
+  const vacancyDates = Object.keys(vacancyByPeriod).sort();
+  const locfVacancy = (period: string): number | null => {
+    let last: number | null = null;
+    for (const d of vacancyDates) {
+      if (d <= period) last = vacancyByPeriod[d];
+      else break;
+    }
+    return last;
+  };
+  for (const period of allPeriods) {
+    const parts: number[] = [...Object.values(ILLUSTRATIVE_FLAT)];
+    const v = locfVacancy(period);
+    if (v != null) parts.push(v);
+    const sick = periodToKriScores[period]?.sickness_absence;
+    if (sick != null) parts.push(sick);
+    if (parts.length === 0) continue;
+    const avg = Math.round(parts.reduce((a, b) => a + b, 0) / parts.length);
     for (const entity_id of ["human", "dashboard"]) {
       const entity_type = entity_id === "dashboard" ? "dashboard" : "pillar";
       await supabase.from("score_history").upsert({
