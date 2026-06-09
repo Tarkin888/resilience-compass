@@ -36,6 +36,7 @@ export default function AdminSources() {
   const [latestCaps, setLatestCaps] = useState<Record<string, CaptureRow>>({});
   const [latestLogs, setLatestLogs] = useState<Record<string, LogRow>>({});
   const [overrideInputs, setOverrideInputs] = useState<Record<string, string>>({});
+  const [backfillInputs, setBackfillInputs] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState<Record<string, boolean>>({});
   const [results, setResults] = useState<Record<string, string>>({});
   const [backfillBusy, setBackfillBusy] = useState(false);
