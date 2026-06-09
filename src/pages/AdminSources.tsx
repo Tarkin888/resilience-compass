@@ -62,8 +62,13 @@ export default function AdminSources() {
     const s = (sResp as { sources?: SourceRow[] } | null)?.sources ?? [];
     setSources(s as SourceRow[]);
     const init: Record<string, string> = {};
-    s.forEach((r: SourceRow) => { init[r.kri_id] = r.last_known_file_url ?? ""; });
+    const initBackfill: Record<string, string> = {};
+    s.forEach((r: SourceRow) => {
+      init[r.kri_id] = r.last_known_file_url ?? "";
+      initBackfill[r.kri_id] = r.backfill_file_url ?? "";
+    });
     setOverrideInputs(init);
+    setBackfillInputs(initBackfill);
 
     const { data: caps } = await supabase
       .from("kri_captures").select("kri_id,captured_at,edition_label,headline_value")
