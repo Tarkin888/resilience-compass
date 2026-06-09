@@ -135,6 +135,17 @@ export default function AdminSources() {
     load();
   };
 
+  const saveBackfillUrl = async (kri_id: string) => {
+    setBusy((b) => ({ ...b, [kri_id]: true }));
+    const { error } = await supabase.functions.invoke("admin_action", {
+      body: { action: "set_backfill_url", kri_id, backfill_file_url: backfillInputs[kri_id] || null },
+      headers: { "x-admin-password": password },
+    });
+    setBusy((b) => ({ ...b, [kri_id]: false }));
+    setResults((r) => ({ ...r, [kri_id]: error ? `Save failed: ${error.message}` : "Backfill file URL saved." }));
+    load();
+  };
+
   const runCapture = async (kri_id: string) => {
     setBusy((b) => ({ ...b, [kri_id]: true }));
     setResults((r) => ({ ...r, [kri_id]: "Running…" }));
