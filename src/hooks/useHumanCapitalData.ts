@@ -6,7 +6,7 @@ export type KriDefinition = Tables<"kri_definitions">;
 export type KriCapture = Tables<"kri_captures">;
 export type Threshold = Tables<"thresholds">;
 export type CaptureLog = Pick<Tables<"capture_log">, "id" | "kri_id" | "outcome" | "attempt_at">;
-export type Source = Omit<Tables<"sources">, "simulate_failure">;
+export type Source = Omit<Tables<"sources">, "simulate_failure" | "backfill_file_url">;
 
 export interface HumanCapitalData {
   definitions: KriDefinition[];

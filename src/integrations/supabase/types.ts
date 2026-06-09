@@ -194,6 +194,7 @@ export type Database = {
       }
       sources: {
         Row: {
+          backfill_file_url: string | null
           edition_page_url_pattern: string
           file_format: string
           id: string
@@ -207,6 +208,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          backfill_file_url?: string | null
           edition_page_url_pattern: string
           file_format?: string
           id?: string
@@ -220,6 +222,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          backfill_file_url?: string | null
           edition_page_url_pattern?: string
           file_format?: string
           id?: string

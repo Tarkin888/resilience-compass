@@ -8,6 +8,7 @@ interface SourceRow {
   publication_name: string;
   edition_page_url_pattern: string;
   last_known_file_url: string | null;
+  backfill_file_url: string | null;
   update_cadence: string;
   simulate_failure?: boolean;
 }
@@ -35,6 +36,7 @@ export default function AdminSources() {
   const [latestCaps, setLatestCaps] = useState<Record<string, CaptureRow>>({});
   const [latestLogs, setLatestLogs] = useState<Record<string, LogRow>>({});
   const [overrideInputs, setOverrideInputs] = useState<Record<string, string>>({});
+  const [backfillInputs, setBackfillInputs] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState<Record<string, boolean>>({});
   const [results, setResults] = useState<Record<string, string>>({});
   const [backfillBusy, setBackfillBusy] = useState(false);
@@ -60,8 +62,13 @@ export default function AdminSources() {
     const s = (sResp as { sources?: SourceRow[] } | null)?.sources ?? [];
     setSources(s as SourceRow[]);
     const init: Record<string, string> = {};
-    s.forEach((r: SourceRow) => { init[r.kri_id] = r.last_known_file_url ?? ""; });
+    const initBackfill: Record<string, string> = {};
+    s.forEach((r: SourceRow) => {
+      init[r.kri_id] = r.last_known_file_url ?? "";
+      initBackfill[r.kri_id] = r.backfill_file_url ?? "";
+    });
     setOverrideInputs(init);
+    setBackfillInputs(initBackfill);
 
     const { data: caps } = await supabase
       .from("kri_captures").select("kri_id,captured_at,edition_label,headline_value")
@@ -125,6 +132,17 @@ export default function AdminSources() {
     });
     setBusy((b) => ({ ...b, [kri_id]: false }));
     setResults((r) => ({ ...r, [kri_id]: error ? `Save failed: ${error.message}` : "Override URL saved." }));
+    load();
+  };
+
+  const saveBackfillUrl = async (kri_id: string) => {
+    setBusy((b) => ({ ...b, [kri_id]: true }));
+    const { error } = await supabase.functions.invoke("admin_action", {
+      body: { action: "set_backfill_url", kri_id, backfill_file_url: backfillInputs[kri_id] || null },
+      headers: { "x-admin-password": password },
+    });
+    setBusy((b) => ({ ...b, [kri_id]: false }));
+    setResults((r) => ({ ...r, [kri_id]: error ? `Save failed: ${error.message}` : "Backfill file URL saved." }));
     load();
   };
 
@@ -325,6 +343,32 @@ export default function AdminSources() {
                     type="button"
                     disabled={busy[s.kri_id]}
                     onClick={() => saveOverride(s.kri_id)}
+                    className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium hover:bg-slate-50"
+                  >
+                    Save
+                  </button>
+                </div>
+              </div>
+
+              <div className="mt-4">
+                <label className="text-xs font-medium text-slate-500 uppercase">
+                  Backfill file URL (direct link to historical time-series xlsx)
+                </label>
+                <p className="text-[11px] text-slate-500 mt-0.5">
+                  Used by “Backfill score history”. Paste the published time-series file if auto-discovery from the landing page fails.
+                </p>
+                <div className="mt-1 flex gap-2">
+                  <input
+                    type="url"
+                    value={backfillInputs[s.kri_id] ?? ""}
+                    onChange={(e) => setBackfillInputs((o) => ({ ...o, [s.kri_id]: e.target.value }))}
+                    placeholder="https://.../time-series.xlsx"
+                    className="flex-1 rounded-md border border-slate-300 px-3 py-2 text-sm"
+                  />
+                  <button
+                    type="button"
+                    disabled={busy[s.kri_id]}
+                    onClick={() => saveBackfillUrl(s.kri_id)}
                     className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium hover:bg-slate-50"
                   >
                     Save

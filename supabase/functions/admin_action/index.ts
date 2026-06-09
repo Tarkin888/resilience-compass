@@ -19,7 +19,7 @@ Deno.serve(async (req) => {
     });
   }
 
-  let body: { action?: string; kri_id?: string; last_known_file_url?: string; simulate_failure?: boolean } = {};
+  let body: { action?: string; kri_id?: string; last_known_file_url?: string; backfill_file_url?: string; simulate_failure?: boolean } = {};
   try { body = await req.json(); } catch { /* ignore */ }
 
   const supabase = createClient(
@@ -42,6 +42,26 @@ Deno.serve(async (req) => {
     const { error } = await supabase
       .from("sources")
       .update({ last_known_file_url: body.last_known_file_url || null })
+      .eq("kri_id", body.kri_id);
+    if (error) {
+      return new Response(JSON.stringify({ ok: false, error: error.message }), {
+        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    return new Response(JSON.stringify({ ok: true }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
+  if (body.action === "set_backfill_url") {
+    if (!body.kri_id) {
+      return new Response(JSON.stringify({ ok: false, error: "kri_id required" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const { error } = await supabase
+      .from("sources")
+      .update({ backfill_file_url: body.backfill_file_url || null })
       .eq("kri_id", body.kri_id);
     if (error) {
       return new Response(JSON.stringify({ ok: false, error: error.message }), {
