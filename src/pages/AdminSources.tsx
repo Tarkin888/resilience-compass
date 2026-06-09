@@ -8,6 +8,7 @@ interface SourceRow {
   publication_name: string;
   edition_page_url_pattern: string;
   last_known_file_url: string | null;
+  backfill_file_url: string | null;
   update_cadence: string;
   simulate_failure?: boolean;
 }
