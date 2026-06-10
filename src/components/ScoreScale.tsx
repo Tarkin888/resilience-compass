@@ -12,6 +12,10 @@ interface Props {
 const THRESHOLD = 25;
 const TARGET = 75;
 
+/** Continuous 0→100 gradient used for both the headline gauge and sub-metric bars. */
+const TRACK_GRADIENT =
+  "linear-gradient(to right, #DC2626 0%, #EA580C 25%, #F59E0B 50%, #84CC16 75%, #16A34A 100%)";
+
 type Zone = "below" | "operating" | "ontarget";
 
 function zoneFor(score: number): Zone {
