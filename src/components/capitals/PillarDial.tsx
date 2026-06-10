@@ -14,7 +14,7 @@ interface Props {
 const NAVY = "#001D57";
 
 export const PillarDial = ({ name, score, trend, trendLabel, onViewDetails }: Props) => {
-  const color = ragColor(score);
+  const color = scoreBandColor(score);
   const radius = 42;
   const circumference = 2 * Math.PI * radius;
   const pct = score == null ? 0 : Math.max(0, Math.min(100, score));
