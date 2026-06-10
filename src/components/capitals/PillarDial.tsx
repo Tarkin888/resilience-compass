@@ -1,4 +1,5 @@
 import { TrendingDown, TrendingUp, Minus } from "lucide-react";
+import { scoreBandColor } from "@/lib/scoreBand";
 
 type Trend = "up" | "down" | "flat";
 
@@ -10,18 +11,7 @@ interface Props {
   onViewDetails: () => void;
 }
 
-const RED = "#DC2626";
-const AMBER = "#F59E0B";
-const GREEN = "#16A34A";
 const NAVY = "#001D57";
-const GREY = "#94A3B8";
-
-function ragColor(score: number | null) {
-  if (score == null) return GREY;
-  if (score < 25) return RED;
-  if (score < 75) return AMBER;
-  return GREEN;
-}
 
 export const PillarDial = ({ name, score, trend, trendLabel, onViewDetails }: Props) => {
   const color = ragColor(score);
