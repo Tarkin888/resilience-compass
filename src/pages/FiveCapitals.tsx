@@ -7,17 +7,18 @@ import { PillarDial } from "@/components/capitals/PillarDial";
 import { IndicatorRangeBar } from "@/components/capitals/IndicatorRangeBar";
 import { useHumanCapitalData } from "@/hooks/useHumanCapitalData";
 import { computePillarScores } from "@/lib/pillarScores";
+import { scoreBandColor } from "@/lib/scoreBand";
 
 const NAVY = "#001D57";
 
 // Trend chips and live/preview status remain hand-set; a historical engine is out
 // of scope for this prompt (OQ-14 Option B).
 const PILLAR_META: Record<string, { trend: "up" | "down" | "flat"; trendLabel: string; status: "live" | "preview" }> = {
-  financial: { trend: "flat", trendLabel: "Steady", status: "preview" },
-  operational: { trend: "up", trendLabel: "Improving", status: "preview" },
+  financial: { trend: "down", trendLabel: "Worsening", status: "preview" },
+  operational: { trend: "down", trendLabel: "Worsening", status: "preview" },
   human: { trend: "down", trendLabel: "Worsening", status: "live" },
   reputational: { trend: "up", trendLabel: "Improving", status: "preview" },
-  environmental: { trend: "flat", trendLabel: "Steady", status: "preview" },
+  environmental: { trend: "up", trendLabel: "Improving", status: "preview" },
 };
 
 const FiveCapitals = () => {
@@ -115,7 +116,7 @@ const FiveCapitals = () => {
                         {isLive ? "Live build 3 of 5" : "Preview"} · {p.name}
                       </div>
                       <div className="mt-1 flex items-baseline gap-2">
-                        <span className="text-2xl font-bold tabular-nums" style={{ color: NAVY }}>
+                        <span className="text-2xl font-bold tabular-nums" style={{ color: scoreBandColor(p.score) }}>
                           {p.score ?? "—"}
                         </span>
                         <span className="text-xs text-slate-500">/100</span>
