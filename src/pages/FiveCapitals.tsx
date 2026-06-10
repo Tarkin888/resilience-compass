@@ -116,7 +116,7 @@ const FiveCapitals = () => {
                         {isLive ? "Live build 3 of 5" : "Preview"} · {p.name}
                       </div>
                       <div className="mt-1 flex items-baseline gap-2">
-                        <span className="text-2xl font-bold tabular-nums" style={{ color: NAVY }}>
+                        <span className="text-2xl font-bold tabular-nums" style={{ color: scoreBandColor(p.score) }}>
                           {p.score ?? "—"}
                         </span>
                         <span className="text-xs text-slate-500">/100</span>
