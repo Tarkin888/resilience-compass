@@ -12,6 +12,10 @@ interface Props {
 const THRESHOLD = 25;
 const TARGET = 75;
 
+/** Continuous 0→100 gradient used for both the headline gauge and sub-metric bars. */
+const TRACK_GRADIENT =
+  "linear-gradient(to right, #DC2626 0%, #EA580C 25%, #F59E0B 50%, #84CC16 75%, #16A34A 100%)";
+
 type Zone = "below" | "operating" | "ontarget";
 
 function zoneFor(score: number): Zone {
@@ -130,20 +134,12 @@ export const ScoreScale = ({ score, size = "large", label, className = "" }: Pro
       {/* Track */}
       <div className={isLarge ? "mt-5" : "mt-3"}>
         <div className="relative">
-          {/* Zones */}
+          {/* Continuous gradient track */}
           <div
             className={`relative ${trackHeight} w-full overflow-hidden rounded-full`}
+            style={{ background: TRACK_GRADIENT }}
             aria-hidden
           >
-            <div className="absolute inset-y-0 left-0 bg-red-200" style={{ width: `${THRESHOLD}%` }} />
-            <div
-              className="absolute inset-y-0 bg-amber-200"
-              style={{ left: `${THRESHOLD}%`, width: `${TARGET - THRESHOLD}%` }}
-            />
-            <div
-              className="absolute inset-y-0 bg-emerald-200"
-              style={{ left: `${TARGET}%`, width: `${100 - TARGET}%` }}
-            />
             {/* Threshold + target rules */}
             <div
               className="absolute inset-y-0 w-px bg-slate-700/60"
