@@ -15,47 +15,10 @@ import { ScoreScale } from "@/components/ScoreScale";
 import { useScoreHistory } from "@/hooks/useScoreHistory";
 import { useDashboardForecast } from "@/hooks/useDashboardForecast";
 import { classifyTrend, spcChipClasses } from "@/lib/spc";
+import { bandFor } from "@/lib/scoringEngine";
+import { useAIInterventions } from "@/hooks/useAIInterventions";
 
 const FORECAST_COLOR = "#6366F1"; // matches TrendPanel
-
-interface Intervention {
-  rank: number;
-  title: string;
-  detail: string;
-}
-
-const INTERVENTIONS: Intervention[] = [
-  {
-    rank: 1,
-    title: "Activate temporary staffing framework for nursing and AHP roles",
-    detail:
-      "Pre-vetted agency frameworks have been shown to close vacancy-rate gaps of 2–4 percentage points within three to six months in NHS-comparable settings, particularly in nursing and Allied Health Professional (AHP) roles, by reducing time-to-hire and stabilising rotas.",
-  },
-  {
-    rank: 2,
-    title: "Stand up winter pressures workforce response group",
-    detail:
-      "Winter pressures response groups coordinate cross-directorate redeployment, occupational-health surge capacity, and absence management. Comparable trusts have reduced sickness absence rates by 0.5–1.5 percentage points across a winter.",
-  },
-  {
-    rank: 3,
-    title: "Stay-interview programme for hard-to-fill roles",
-    detail:
-      "Stay-interview programmes have been shown to reduce voluntary turnover by 1–2 percentage points over six months in NHS-comparable settings.",
-  },
-  {
-    rank: 4,
-    title: "Mandatory training catch-up campaign",
-    detail:
-      "30-day mandatory training campaigns with directorate-level accountability have lifted compliance by 10–20 percentage points in NHS-comparable settings, reducing Care Quality Commission (CQC) scrutiny risk and supporting a safer skill-mix.",
-  },
-  {
-    rank: 5,
-    title: "Local team listening sessions, exec-sponsored",
-    detail:
-      "Exec-sponsored team listening sessions in low-engagement directorates have been shown to lift engagement scores by 0.2–0.4 over six months, primarily by closing the perceived voice gap between staff and leadership.",
-  },
-];
 
 function formatPeriod(iso: string): string {
   const d = new Date(iso);
@@ -64,7 +27,6 @@ function formatPeriod(iso: string): string {
 
 export const AiRiskPredictionTab = () => {
   const [explainerOpen, setExplainerOpen] = useState(false);
-  const [expanded, setExpanded] = useState<number | null>(null);
 
   const { points, loading } = useScoreHistory("dashboard", "dashboard");
   const forecast = useDashboardForecast();
