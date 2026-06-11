@@ -15,47 +15,10 @@ import { ScoreScale } from "@/components/ScoreScale";
 import { useScoreHistory } from "@/hooks/useScoreHistory";
 import { useDashboardForecast } from "@/hooks/useDashboardForecast";
 import { classifyTrend, spcChipClasses } from "@/lib/spc";
+import { bandFor } from "@/lib/scoringEngine";
+import { useAIInterventions } from "@/hooks/useAIInterventions";
 
 const FORECAST_COLOR = "#6366F1"; // matches TrendPanel
-
-interface Intervention {
-  rank: number;
-  title: string;
-  detail: string;
-}
-
-const INTERVENTIONS: Intervention[] = [
-  {
-    rank: 1,
-    title: "Activate temporary staffing framework for nursing and AHP roles",
-    detail:
-      "Pre-vetted agency frameworks have been shown to close vacancy-rate gaps of 2–4 percentage points within three to six months in NHS-comparable settings, particularly in nursing and Allied Health Professional (AHP) roles, by reducing time-to-hire and stabilising rotas.",
-  },
-  {
-    rank: 2,
-    title: "Stand up winter pressures workforce response group",
-    detail:
-      "Winter pressures response groups coordinate cross-directorate redeployment, occupational-health surge capacity, and absence management. Comparable trusts have reduced sickness absence rates by 0.5–1.5 percentage points across a winter.",
-  },
-  {
-    rank: 3,
-    title: "Stay-interview programme for hard-to-fill roles",
-    detail:
-      "Stay-interview programmes have been shown to reduce voluntary turnover by 1–2 percentage points over six months in NHS-comparable settings.",
-  },
-  {
-    rank: 4,
-    title: "Mandatory training catch-up campaign",
-    detail:
-      "30-day mandatory training campaigns with directorate-level accountability have lifted compliance by 10–20 percentage points in NHS-comparable settings, reducing Care Quality Commission (CQC) scrutiny risk and supporting a safer skill-mix.",
-  },
-  {
-    rank: 5,
-    title: "Local team listening sessions, exec-sponsored",
-    detail:
-      "Exec-sponsored team listening sessions in low-engagement directorates have been shown to lift engagement scores by 0.2–0.4 over six months, primarily by closing the perceived voice gap between staff and leadership.",
-  },
-];
 
 function formatPeriod(iso: string): string {
   const d = new Date(iso);
@@ -64,7 +27,6 @@ function formatPeriod(iso: string): string {
 
 export const AiRiskPredictionTab = () => {
   const [explainerOpen, setExplainerOpen] = useState(false);
-  const [expanded, setExpanded] = useState<number | null>(null);
 
   const { points, loading } = useScoreHistory("dashboard", "dashboard");
   const forecast = useDashboardForecast();
@@ -86,6 +48,13 @@ export const AiRiskPredictionTab = () => {
   }, [forecast]);
 
   const forecastAvailable = forecastChartData.length > 0;
+
+  const ragBandName = currentScore != null ? bandFor(currentScore).name : null;
+  const {
+    interventions,
+    loading: interventionsLoading,
+    error: interventionsError,
+  } = useAIInterventions({ score: currentScore, ragBand: ragBandName });
 
   return (
     <div className="space-y-5">
@@ -240,45 +209,45 @@ export const AiRiskPredictionTab = () => {
           <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
             <h3 className="text-base font-semibold text-slate-900">Priority interventions</h3>
             <p className="mt-1 text-xs italic text-slate-500">
-              Interventions are illustrative — AI-generated recommendations coming soon.
+              AI-generated recommendations · Based on current score and RAG band · Not a substitute for professional judgement
             </p>
-            <ul className="mt-4 space-y-3">
-              {INTERVENTIONS.map((i) => {
-                const open = expanded === i.rank;
-                return (
+
+            {interventionsLoading ? (
+              <ul className="mt-4 space-y-3" aria-label="Loading recommendations">
+                {[0, 1, 2, 3].map((i) => (
+                  <li
+                    key={i}
+                    className="flex items-start gap-3 rounded-lg border border-slate-200 bg-white p-4"
+                  >
+                    <div className="h-7 w-7 shrink-0 animate-pulse rounded-full bg-slate-200" />
+                    <div className="flex-1 space-y-2">
+                      <div className="h-3 w-5/6 animate-pulse rounded bg-slate-200" />
+                      <div className="h-3 w-2/3 animate-pulse rounded bg-slate-200" />
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            ) : interventionsError ? (
+              <p className="mt-4 text-sm text-slate-600">
+                Recommendations unavailable — please try refreshing the page.
+              </p>
+            ) : (
+              <ol className="mt-4 space-y-3">
+                {interventions.map((i) => (
                   <li
                     key={i.rank}
-                    className="rounded-lg border border-slate-200 bg-white"
+                    className="flex items-start gap-3 rounded-lg border border-slate-200 bg-white p-4"
                   >
-                    <button
-                      type="button"
-                      onClick={() => setExpanded(open ? null : i.rank)}
-                      aria-expanded={open}
-                      className="flex w-full items-start gap-3 p-4 text-left"
-                    >
-                      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-900 text-xs font-semibold text-white">
-                        {i.rank}
-                      </span>
-                      <div className="min-w-0 flex-1">
-                        <div className="font-semibold text-slate-900">{i.title}</div>
-                      </div>
-                      <ChevronDown
-                        size={16}
-                        className={`mt-1 shrink-0 text-slate-500 transition-transform ${
-                          open ? "rotate-180" : ""
-                        }`}
-                        aria-hidden
-                      />
-                    </button>
-                    {open && (
-                      <div className="border-t border-slate-200 px-4 py-3 text-base leading-relaxed text-slate-700">
-                        {i.detail}
-                      </div>
-                    )}
+                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-900 text-xs font-semibold text-white">
+                      {i.rank}
+                    </span>
+                    <div className="min-w-0 flex-1 text-sm leading-relaxed text-slate-800">
+                      {i.action}
+                    </div>
                   </li>
-                );
-              })}
-            </ul>
+                ))}
+              </ol>
+            )}
           </div>
         </div>
       </div>
