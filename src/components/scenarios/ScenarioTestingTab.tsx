@@ -173,7 +173,7 @@ export const ScenarioTestingTab = ({ onViewImpact }: { onViewImpact: () => void 
     <div className="space-y-5">
       <div className="rounded-xl border border-slate-200 bg-white p-4 sm:p-5">
         <p className="text-sm text-slate-700">
-          Adjust one or more KRI values below to model a hypothetical scenario. Changes are
+          Adjust one or more data point values below to model a hypothetical scenario. Changes are
           illustrative only and do not affect live data.
         </p>
         <p className="mt-1 text-xs font-semibold uppercase tracking-wide text-amber-700">

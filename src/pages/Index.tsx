@@ -7,22 +7,13 @@ import { TrendPanel } from "@/components/TrendPanel";
 import { Footer } from "@/components/Footer";
 import { TabBar, TabId, tabButtonId, tabPanelId } from "@/components/TabBar";
 import { LiveRiskAlertsTab } from "@/components/alerts/LiveRiskAlertsTab";
-import { ScenarioLibraryTab } from "@/components/scenarios/ScenarioLibraryTab";
-import { VisualiserMockup } from "@/components/scenarios/VisualiserMockup";
 import { ScenarioTestingTab } from "@/components/scenarios/ScenarioTestingTab";
 import { ScenarioImpactTab } from "@/components/scenarios/ScenarioImpactTab";
 import { AiRiskPredictionTab } from "@/components/prediction/AiRiskPredictionTab";
 import { ScenarioProvider } from "@/contexts/ScenarioContext";
-import type { Scenario } from "@/components/scenarios/scenarios";
 
 const Index = () => {
   const [active, setActive] = useState<TabId>("alerts");
-  const [loadedScenario, setLoadedScenario] = useState<Scenario | null>(null);
-
-  const handleLoadScenario = (s: Scenario) => {
-    setLoadedScenario(s);
-    setActive("visualiser");
-  };
 
   return (
     <ScenarioProvider>
@@ -52,17 +43,6 @@ const Index = () => {
         <div role="tabpanel" id={tabPanelId("scenario_impact")} aria-labelledby={tabButtonId("scenario_impact")} hidden={active !== "scenario_impact"}>
           {active === "scenario_impact" && (
             <ScenarioImpactTab onBack={() => setActive("scenario_testing")} />
-          )}
-        </div>
-        <div role="tabpanel" id={tabPanelId("library")} aria-labelledby={tabButtonId("library")} hidden={active !== "library"}>
-          {active === "library" && <ScenarioLibraryTab onLoadScenario={handleLoadScenario} />}
-        </div>
-        <div role="tabpanel" id={tabPanelId("visualiser")} aria-labelledby={tabButtonId("visualiser")} hidden={active !== "visualiser"}>
-          {active === "visualiser" && (
-            <VisualiserMockup
-              scenario={loadedScenario}
-              onBrowseScenarios={() => setActive("library")}
-            />
           )}
         </div>
         <div role="tabpanel" id={tabPanelId("prediction")} aria-labelledby={tabButtonId("prediction")} hidden={active !== "prediction"}>
