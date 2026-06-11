@@ -113,6 +113,11 @@ export const ThresholdPanel = ({
                     , <em>Table 1, England column</em>
                   </>
                 )}
+                {source.kri_id === "vacancy" && (
+                  <>
+                    , <em>Total workforce % vacancy rate — Grand Total</em>
+                  </>
+                )}
                 {editionLabel ? <span className="text-slate-500"> · {editionLabel}</span> : null}
               </div>
               <div className="text-xs text-slate-500">{source.publisher}</div>

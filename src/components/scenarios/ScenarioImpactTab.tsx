@@ -1,6 +1,6 @@
 // Tab 3 — Scenario Impact Visualiser.
 // Before/after pillar dials driven by the scenario overlay. Live overlay only.
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ChevronLeft } from "lucide-react";
 import { useHumanCapitalData } from "@/hooks/useHumanCapitalData";
 import { useScenario } from "@/contexts/ScenarioContext";
@@ -63,6 +63,9 @@ function Delta({ delta }: { delta: number | null }) {
 }
 
 export const ScenarioImpactTab = ({ onBack }: { onBack: () => void }) => {
+  const [ready, setReady] = useState(false);
+  useEffect(() => { setReady(true); }, []);
+
   const { data } = useHumanCapitalData();
   const { overrides, hasRun } = useScenario();
 
@@ -96,6 +99,14 @@ export const ScenarioImpactTab = ({ onBack }: { onBack: () => void }) => {
     return (
       <div className="rounded-xl border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">
         Run a scenario on the Scenario Testing tab to see its impact here.
+      </div>
+    );
+  }
+
+  if (!ready) {
+    return (
+      <div className="rounded-xl border border-slate-200 bg-white p-8 text-center text-sm text-slate-500">
+        Loading impact…
       </div>
     );
   }
