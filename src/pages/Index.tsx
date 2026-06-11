@@ -9,7 +9,10 @@ import { TabBar, TabId, tabButtonId, tabPanelId } from "@/components/TabBar";
 import { LiveRiskAlertsTab } from "@/components/alerts/LiveRiskAlertsTab";
 import { ScenarioLibraryTab } from "@/components/scenarios/ScenarioLibraryTab";
 import { VisualiserMockup } from "@/components/scenarios/VisualiserMockup";
+import { ScenarioTestingTab } from "@/components/scenarios/ScenarioTestingTab";
+import { ScenarioImpactTab } from "@/components/scenarios/ScenarioImpactTab";
 import { AiRiskPredictionTab } from "@/components/prediction/AiRiskPredictionTab";
+import { ScenarioProvider } from "@/contexts/ScenarioContext";
 import type { Scenario } from "@/components/scenarios/scenarios";
 
 const Index = () => {
@@ -22,6 +25,7 @@ const Index = () => {
   };
 
   return (
+    <ScenarioProvider>
     <div className="min-h-screen bg-slate-50 text-slate-900 text-sm leading-relaxed">
       <Header />
       <div className="border-b border-slate-200 bg-white px-4 py-2 sm:px-6">
@@ -40,6 +44,16 @@ const Index = () => {
         <div role="tabpanel" id={tabPanelId("alerts")} aria-labelledby={tabButtonId("alerts")} hidden={active !== "alerts"}>
           {active === "alerts" && <LiveRiskAlertsTab />}
         </div>
+        <div role="tabpanel" id={tabPanelId("scenario_testing")} aria-labelledby={tabButtonId("scenario_testing")} hidden={active !== "scenario_testing"}>
+          {active === "scenario_testing" && (
+            <ScenarioTestingTab onViewImpact={() => setActive("scenario_impact")} />
+          )}
+        </div>
+        <div role="tabpanel" id={tabPanelId("scenario_impact")} aria-labelledby={tabButtonId("scenario_impact")} hidden={active !== "scenario_impact"}>
+          {active === "scenario_impact" && (
+            <ScenarioImpactTab onBack={() => setActive("scenario_testing")} />
+          )}
+        </div>
         <div role="tabpanel" id={tabPanelId("library")} aria-labelledby={tabButtonId("library")} hidden={active !== "library"}>
           {active === "library" && <ScenarioLibraryTab onLoadScenario={handleLoadScenario} />}
         </div>
@@ -57,6 +71,7 @@ const Index = () => {
       </main>
       <Footer />
     </div>
+    </ScenarioProvider>
   );
 };
 
