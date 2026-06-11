@@ -7,22 +7,13 @@ import { TrendPanel } from "@/components/TrendPanel";
 import { Footer } from "@/components/Footer";
 import { TabBar, TabId, tabButtonId, tabPanelId } from "@/components/TabBar";
 import { LiveRiskAlertsTab } from "@/components/alerts/LiveRiskAlertsTab";
-import { ScenarioLibraryTab } from "@/components/scenarios/ScenarioLibraryTab";
-import { VisualiserMockup } from "@/components/scenarios/VisualiserMockup";
 import { ScenarioTestingTab } from "@/components/scenarios/ScenarioTestingTab";
 import { ScenarioImpactTab } from "@/components/scenarios/ScenarioImpactTab";
 import { AiRiskPredictionTab } from "@/components/prediction/AiRiskPredictionTab";
 import { ScenarioProvider } from "@/contexts/ScenarioContext";
-import type { Scenario } from "@/components/scenarios/scenarios";
 
 const Index = () => {
   const [active, setActive] = useState<TabId>("alerts");
-  const [loadedScenario, setLoadedScenario] = useState<Scenario | null>(null);
-
-  const handleLoadScenario = (s: Scenario) => {
-    setLoadedScenario(s);
-    setActive("visualiser");
-  };
 
   return (
     <ScenarioProvider>
