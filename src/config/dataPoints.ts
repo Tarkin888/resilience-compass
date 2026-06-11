@@ -95,20 +95,20 @@ const financial: PillarConfig = {
   name: "Financial",
   indicators: [
     { id: "liquidity", name: "Liquidity Headroom", description: "Cash reserves, working capital, credit facility", dataPoints: [
-      ill("cash_reserves_days", "Cash reserves (days)", 60, 20, "days", "higherIsBetter", 46),
-      ill("working_capital_ratio", "Working capital ratio", 2.0, 1.0, "ratio", "higherIsBetter", 1.66),
-      ill("credit_facility_used", "Credit facility utilisation", 20, 80, "%", "lowerIsBetter", 40),
+      ill("cash_reserves_days", "Cash reserves (days)", 60, 20, "days", "higherIsBetter", 26),
+      ill("working_capital_ratio", "Working capital ratio", 2.0, 1.0, "ratio", "higherIsBetter", 1.14),
+      ill("credit_facility_used", "Credit facility utilisation", 20, 80, "%", "lowerIsBetter", 72),
     ]},
     { id: "cost_flex", name: "Cost Base Flexibility", description: "Fixed vs variable, supplier terms, pay mix, agency spend", dataPoints: [
-      ill("variable_cost_share", "Variable cost share", 45, 25, "%", "higherIsBetter", 38),
-      ill("supplier_terms_days", "Avg supplier payment terms", 60, 30, "days", "higherIsBetter", 50),
-      ill("agency_pay_share", "Agency pay share", 4, 10, "%", "lowerIsBetter", 6),
-      ill("pay_mix_flex", "Pay mix flexibility index", 70, 40, "score", "higherIsBetter", 60),
+      ill("variable_cost_share", "Variable cost share", 45, 25, "%", "higherIsBetter", 28),
+      ill("supplier_terms_days", "Avg supplier payment terms", 60, 30, "days", "higherIsBetter", 34),
+      ill("agency_pay_share", "Agency pay share", 4, 10, "%", "lowerIsBetter", 9.2),
+      ill("pay_mix_flex", "Pay mix flexibility index", 70, 40, "score", "higherIsBetter", 44),
     ]},
     { id: "capex", name: "Capital Investment Capacity", description: "CDEL utilisation, backlog maintenance, project pipeline", dataPoints: [
-      ill("cdel_utilisation", "CDEL utilisation", 95, 70, "%", "higherIsBetter", 86),
-      ill("backlog_maintenance", "Backlog maintenance (£m)", 5, 30, "£m", "lowerIsBetter", 13.5),
-      ill("pipeline_coverage", "Project pipeline coverage", 110, 80, "%", "higherIsBetter", 100),
+      ill("cdel_utilisation", "CDEL utilisation", 95, 70, "%", "higherIsBetter", 73),
+      ill("backlog_maintenance", "Backlog maintenance (£m)", 5, 30, "£m", "lowerIsBetter", 27),
+      ill("pipeline_coverage", "Project pipeline coverage", 110, 80, "%", "higherIsBetter", 84),
     ]},
   ],
 };
@@ -141,19 +141,19 @@ const reputational: PillarConfig = {
   name: "Reputational",
   indicators: [
     { id: "stakeholder_trust", name: "Stakeholder Trust", description: "Regulator standing, public sentiment, partner relationships", dataPoints: [
-      ill("regulator_rating", "Regulator standing", 4, 2, "rating 0-4", "higherIsBetter", 3.4),
-      ill("public_sentiment", "Public sentiment index", 70, 40, "score", "higherIsBetter", 62),
-      ill("partner_health", "Partner relationship health", 80, 50, "score", "higherIsBetter", 72),
+      ill("regulator_rating", "Regulator standing", 4, 2, "rating 0-4", "higherIsBetter", 3.8),
+      ill("public_sentiment", "Public sentiment index", 70, 40, "score", "higherIsBetter", 68),
+      ill("partner_health", "Partner relationship health", 80, 50, "score", "higherIsBetter", 78),
     ]},
     { id: "brand_media", name: "Brand & Media Position", description: "Share of voice, sentiment trend, crisis exposure", dataPoints: [
-      ill("share_of_voice", "Share of voice", 25, 10, "%", "higherIsBetter", 21),
-      ill("media_sentiment", "Media sentiment trend", 65, 40, "score", "higherIsBetter", 58),
-      ill("crisis_exposure", "Crisis exposure incidents", 1, 6, "count", "lowerIsBetter", 2),
+      ill("share_of_voice", "Share of voice", 25, 10, "%", "higherIsBetter", 24),
+      ill("media_sentiment", "Media sentiment trend", 65, 40, "score", "higherIsBetter", 63),
+      ill("crisis_exposure", "Crisis exposure incidents", 1, 6, "count", "lowerIsBetter", 1.4),
     ]},
     { id: "voice", name: "Patient & Staff Voice", description: "FFT, complaints, staff survey advocacy", dataPoints: [
-      ill("fft_score", "Friends & Family Test", 95, 80, "%", "higherIsBetter", 91),
-      ill("complaints_rate", "Complaints per 1,000 contacts", 1, 5, "rate", "lowerIsBetter", 2.1),
-      ill("staff_advocacy", "Staff survey advocacy", 70, 45, "%", "higherIsBetter", 63),
+      ill("fft_score", "Friends & Family Test", 95, 80, "%", "higherIsBetter", 94),
+      ill("complaints_rate", "Complaints per 1,000 contacts", 1, 5, "rate", "lowerIsBetter", 1.3),
+      ill("staff_advocacy", "Staff survey advocacy", 70, 45, "%", "higherIsBetter", 68),
     ]},
   ],
 };
