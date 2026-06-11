@@ -11,9 +11,14 @@ import { ScenarioTestingTab } from "@/components/scenarios/ScenarioTestingTab";
 import { ScenarioImpactTab } from "@/components/scenarios/ScenarioImpactTab";
 import { AiRiskPredictionTab } from "@/components/prediction/AiRiskPredictionTab";
 import { ScenarioProvider } from "@/contexts/ScenarioContext";
+import { ResilienceChatPanel } from "@/components/ResilienceChatPanel";
+import { useChatContext } from "@/hooks/useChatContext";
 
 const Index = () => {
   const [active, setActive] = useState<TabId>("alerts");
+  const { context, loading: chatContextLoading } = useChatContext();
+
+
 
   return (
     <ScenarioProvider>
@@ -50,6 +55,7 @@ const Index = () => {
         </div>
       </main>
       <Footer />
+      <ResilienceChatPanel context={context} loading={chatContextLoading} />
     </div>
     </ScenarioProvider>
   );
