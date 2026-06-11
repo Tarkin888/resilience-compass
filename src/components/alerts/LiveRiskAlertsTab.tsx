@@ -90,7 +90,7 @@ export const LiveRiskAlertsTab = () => {
         }
         const SOURCE_DETAIL: Record<string, string> = {
           sickness_absence: "England (NHS Digital), Table 1, England column",
-          vacancy: "England (NHS Digital), Table 1, England column",
+          vacancy: "Total workforce % vacancy rate — Grand Total",
         };
         narrative = buildAlertNarrative(
           source?.publication_name ?? "NHS England",
