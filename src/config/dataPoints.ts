@@ -141,19 +141,19 @@ const reputational: PillarConfig = {
   name: "Reputational",
   indicators: [
     { id: "stakeholder_trust", name: "Stakeholder Trust", description: "Regulator standing, public sentiment, partner relationships", dataPoints: [
-      ill("regulator_rating", "Regulator standing", 4, 2, "rating 0-4", "higherIsBetter", 4.0),
-      ill("public_sentiment", "Public sentiment index", 70, 40, "score", "higherIsBetter", 76),
-      ill("partner_health", "Partner relationship health", 80, 50, "score", "higherIsBetter", 86),
+      ill("regulator_rating", "Regulator standing", 4, 2, "rating 0-4", "higherIsBetter", 3.4),
+      ill("public_sentiment", "Public sentiment index", 70, 40, "score", "higherIsBetter", 62),
+      ill("partner_health", "Partner relationship health", 80, 50, "score", "higherIsBetter", 72),
     ]},
     { id: "brand_media", name: "Brand & Media Position", description: "Share of voice, sentiment trend, crisis exposure", dataPoints: [
-      ill("share_of_voice", "Share of voice", 25, 10, "%", "higherIsBetter", 27),
-      ill("media_sentiment", "Media sentiment trend", 65, 40, "score", "higherIsBetter", 68),
-      ill("crisis_exposure", "Crisis exposure incidents", 1, 6, "count", "lowerIsBetter", 0),
+      ill("share_of_voice", "Share of voice", 25, 10, "%", "higherIsBetter", 21),
+      ill("media_sentiment", "Media sentiment trend", 65, 40, "score", "higherIsBetter", 58),
+      ill("crisis_exposure", "Crisis exposure incidents", 1, 6, "count", "lowerIsBetter", 2),
     ]},
     { id: "voice", name: "Patient & Staff Voice", description: "FFT, complaints, staff survey advocacy", dataPoints: [
-      ill("fft_score", "Friends & Family Test", 95, 80, "%", "higherIsBetter", 97),
-      ill("complaints_rate", "Complaints per 1,000 contacts", 1, 5, "rate", "lowerIsBetter", 0.5),
-      ill("staff_advocacy", "Staff survey advocacy", 70, 45, "%", "higherIsBetter", 73),
+      ill("fft_score", "Friends & Family Test", 95, 80, "%", "higherIsBetter", 91),
+      ill("complaints_rate", "Complaints per 1,000 contacts", 1, 5, "rate", "lowerIsBetter", 2.1),
+      ill("staff_advocacy", "Staff survey advocacy", 70, 45, "%", "higherIsBetter", 63),
     ]},
   ],
 };
