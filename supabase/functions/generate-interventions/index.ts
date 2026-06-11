@@ -78,7 +78,13 @@ Deno.serve(async (req) => {
     }
 
     const data = await anthropicRes.json();
-    const text = data?.content?.[0]?.text ?? "";
+    const rawText: string = data?.content?.[0]?.text ?? "";
+    // Strip markdown code fences if the model wraps its JSON despite instructions.
+    const text = rawText
+      .trim()
+      .replace(/^```(?:json)?\s*/i, "")
+      .replace(/\s*```$/, "")
+      .trim();
     const interventions = JSON.parse(text);
 
     if (!Array.isArray(interventions) || interventions.length === 0) {
