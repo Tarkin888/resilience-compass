@@ -118,20 +118,20 @@ const operational: PillarConfig = {
   name: "Operational",
   indicators: [
     { id: "service_continuity", name: "Service Continuity", description: "Downtime, BCP coverage, single points of failure, recovery time", dataPoints: [
-      ill("downtime_hours", "Unplanned downtime (hrs/mo)", 2, 12, "hrs", "lowerIsBetter", 13),
-      ill("bcp_coverage", "BCP coverage of critical services", 100, 80, "%", "higherIsBetter", 79),
-      ill("spof_count", "Single points of failure", 0, 8, "count", "lowerIsBetter", 9),
-      ill("recovery_time_h", "Mean recovery time", 2, 12, "hrs", "lowerIsBetter", 13),
+      ill("downtime_hours", "Unplanned downtime (hrs/mo)", 2, 12, "hrs", "lowerIsBetter", 5.4),
+      ill("bcp_coverage", "BCP coverage of critical services", 100, 80, "%", "higherIsBetter", 93),
+      ill("spof_count", "Single points of failure", 0, 8, "count", "lowerIsBetter", 3),
+      ill("recovery_time_h", "Mean recovery time", 2, 12, "hrs", "lowerIsBetter", 5.4),
     ]},
     { id: "supply_chain", name: "Supply Chain Resilience", description: "Supplier concentration, stockholding, lead times", dataPoints: [
-      ill("supplier_concentration", "Top-3 supplier concentration", 30, 70, "%", "lowerIsBetter", 72),
-      ill("stockholding_days", "Critical stockholding", 30, 7, "days", "higherIsBetter", 6),
-      ill("lead_time_days", "Avg supplier lead time", 7, 30, "days", "lowerIsBetter", 31),
+      ill("supplier_concentration", "Top-3 supplier concentration", 30, 70, "%", "lowerIsBetter", 44),
+      ill("stockholding_days", "Critical stockholding", 30, 7, "days", "higherIsBetter", 22),
+      ill("lead_time_days", "Avg supplier lead time", 7, 30, "days", "lowerIsBetter", 15),
     ]},
     { id: "estate", name: "Estate & Asset Reliability", description: "Critical asset age, planned maintenance, incident rate", dataPoints: [
-      ill("asset_age", "Critical asset average age", 8, 20, "yrs", "lowerIsBetter", 21),
-      ill("planned_maint_pct", "Planned vs reactive maintenance", 80, 50, "%", "higherIsBetter", 48),
-      ill("estate_incident_rate", "Estate incidents per quarter", 2, 12, "count", "lowerIsBetter", 13),
+      ill("asset_age", "Critical asset average age", 8, 20, "yrs", "lowerIsBetter", 12),
+      ill("planned_maint_pct", "Planned vs reactive maintenance", 80, 50, "%", "higherIsBetter", 70),
+      ill("estate_incident_rate", "Estate incidents per quarter", 2, 12, "count", "lowerIsBetter", 5),
     ]},
   ],
 };
