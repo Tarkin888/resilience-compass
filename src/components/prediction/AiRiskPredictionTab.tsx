@@ -14,9 +14,10 @@ import {
 import { ScoreScale } from "@/components/ScoreScale";
 import { useScoreHistory } from "@/hooks/useScoreHistory";
 import { useDashboardForecast } from "@/hooks/useDashboardForecast";
+import { useHumanCapitalData } from "@/hooks/useHumanCapitalData";
 import { classifyTrend, spcChipClasses } from "@/lib/spc";
 import { bandFor } from "@/lib/scoringEngine";
-import { useAIInterventions } from "@/hooks/useAIInterventions";
+import { useAIInterventions, type KRI } from "@/hooks/useAIInterventions";
 
 const FORECAST_COLOR = "#6366F1"; // matches TrendPanel
 
@@ -50,11 +51,42 @@ export const AiRiskPredictionTab = () => {
   const forecastAvailable = forecastChartData.length > 0;
 
   const ragBandName = currentScore != null ? bandFor(currentScore).name : null;
+
+  // Live KRI values for the Human Capital pillar (latest capture per KRI).
+  const { data: hcData } = useHumanCapitalData();
+  const liveKris = useMemo<KRI[]>(() => {
+    const result: KRI[] = [];
+    const map: Array<{ kriId: string; name: string }> = [
+      { kriId: "sickness_absence", name: "Sickness Absence Rate" },
+      { kriId: "vacancy", name: "Staff Vacancies" },
+    ];
+    for (const { kriId, name } of map) {
+      const latest = hcData.capturesByKri[kriId]?.[0];
+      const threshold = hcData.thresholdsByKri[kriId];
+      if (
+        latest?.headline_value != null &&
+        threshold?.threshold_value != null
+      ) {
+        result.push({
+          name,
+          value: Number(latest.headline_value),
+          target: Number(threshold.threshold_value),
+          unit: latest.headline_unit ?? "%",
+        });
+      }
+    }
+    return result;
+  }, [hcData]);
+
   const {
     interventions,
     loading: interventionsLoading,
     error: interventionsError,
-  } = useAIInterventions({ score: currentScore, ragBand: ragBandName });
+  } = useAIInterventions({
+    score: currentScore,
+    ragBand: ragBandName,
+    kris: liveKris,
+  });
 
   return (
     <div className="space-y-5">
