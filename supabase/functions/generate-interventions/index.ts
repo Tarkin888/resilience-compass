@@ -1,10 +1,17 @@
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 
-const SYSTEM_PROMPT = `You are a resilience improvement adviser supporting NHS senior leaders. 
-You will be given an organisational resilience pillar name, its current score, 
-and its RAG band. Return exactly 4 prioritised interventions to improve resilience 
-in that pillar. Each intervention must be concise (one sentence, max 20 words), 
-actionable, and appropriate for NHS Trust leadership level. 
+const SYSTEM_PROMPT = `You are a resilience improvement adviser supporting NHS senior leaders.
+You will be given an organisational resilience pillar name, its current score,
+its RAG band, and — where available — individual KRI (Key Risk Indicator) values
+with their targets.
+
+Return exactly 4 prioritised interventions to improve resilience in that pillar.
+Rules:
+- Where KRI values are provided, reference the specific metric and value in at least 2 of the 4 interventions.
+- Each intervention must be concise (one sentence, max 25 words), actionable, and appropriate for NHS Trust leadership level.
+- Do not invent metrics or values not provided.
+- Do not quantify projected score improvements.
+
 Format your response as a JSON array with this structure:
 [
   { "rank": 1, "action": "..." },
@@ -13,6 +20,8 @@ Format your response as a JSON array with this structure:
   { "rank": 4, "action": "..." }
 ]
 Return only valid JSON. No preamble, no explanation, no markdown fences.`;
+
+type KRI = { name: string; value: number; target: number; unit: string };
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -28,13 +37,16 @@ Deno.serve(async (req) => {
       );
     }
 
-    const { pillarName, score, ragBand } = await req.json();
+    const { pillarName, score, ragBand, kris } = await req.json();
     if (!pillarName || typeof score !== "number" || !ragBand) {
       return new Response(
         JSON.stringify({ error: "Intervention generation failed" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
+
+    const krisArr: KRI[] = Array.isArray(kris) ? kris : [];
+    const krisPayload = krisArr.length > 0 ? JSON.stringify(krisArr) : "None provided";
 
     const anthropicRes = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
@@ -50,7 +62,7 @@ Deno.serve(async (req) => {
         messages: [
           {
             role: "user",
-            content: `Pillar: ${pillarName}. Score: ${score}. RAG band: ${ragBand}.`,
+            content: `Pillar: ${pillarName}. Score: ${score}. RAG band: ${ragBand}.\nKRIs: ${krisPayload}.`,
           },
         ],
       }),
