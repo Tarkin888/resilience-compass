@@ -1,58 +1,26 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Info, ChevronDown } from "lucide-react";
 import {
-  ComposedChart,
-  Line,
   Area,
+  AreaChart,
+  CartesianGrid,
+  Line,
+  ComposedChart,
+  ResponsiveContainer,
+  Tooltip as RTooltip,
   XAxis,
   YAxis,
-  CartesianGrid,
-  Tooltip as RTooltip,
-  ReferenceArea,
-  ReferenceDot,
-  ResponsiveContainer,
 } from "recharts";
-import { DataSourceChip } from "@/components/DataSourceChip";
 import { ScoreScale } from "@/components/ScoreScale";
-import { TrendLabel } from "@/components/prediction/TrendLabel";
-import { assessTrend } from "@/lib/trendAssessment";
-import { bandFor } from "@/lib/scoringEngine";
+import { useScoreHistory } from "@/hooks/useScoreHistory";
+import { useDashboardForecast } from "@/hooks/useDashboardForecast";
+import { classifyTrend, spcChipClasses } from "@/lib/spc";
 
-interface Point {
-  label: string;
-  historical?: number | null;
-  forecast?: number | null;
-  lower?: number | null;
-  upper?: number | null;
-}
-
-const CURRENT_LABEL = "2025/26 Q4";
-const CURRENT_SCORE = 54;
-
-// 4 quarterly historical + 6 monthly forecast, joined at current (54).
-const CHART_DATA: Point[] = [
-  { label: "2025/26 Q1", historical: 62, forecast: null, lower: null, upper: null },
-  { label: "2025/26 Q2", historical: 58, forecast: null, lower: null, upper: null },
-  { label: "2025/26 Q3", historical: 56, forecast: null, lower: null, upper: null },
-  { label: "2025/26 Q4", historical: 54, forecast: 54, lower: 50, upper: 58 },
-  { label: "Jan 2027", historical: null, forecast: 51, lower: 47, upper: 55 },
-  { label: "Feb 2027", historical: null, forecast: 48, lower: 44, upper: 52 },
-  { label: "Mar 2027", historical: null, forecast: 46, lower: 42, upper: 50 },
-  { label: "Apr 2027", historical: null, forecast: 44, lower: 40, upper: 48 },
-  { label: "May 2027", historical: null, forecast: 43, lower: 39, upper: 47 },
-  { label: "Jun 2027", historical: null, forecast: 43, lower: 39, upper: 47 },
-];
-
-const BANDS = [
-  { label: "Red", min: 0, max: 24, swatch: "bg-red-400" },
-  { label: "Amber", min: 25, max: 74, swatch: "bg-amber-400" },
-  { label: "Green", min: 75, max: 100, swatch: "bg-emerald-400" },
-];
+const FORECAST_COLOR = "#6366F1"; // matches TrendPanel
 
 interface Intervention {
   rank: number;
   title: string;
-  uplift: number;
   detail: string;
 }
 
@@ -60,66 +28,71 @@ const INTERVENTIONS: Intervention[] = [
   {
     rank: 1,
     title: "Activate temporary staffing framework for nursing and AHP roles",
-    uplift: 6,
     detail:
       "Pre-vetted agency frameworks have been shown to close vacancy-rate gaps of 2–4 percentage points within three to six months in NHS-comparable settings, particularly in nursing and Allied Health Professional (AHP) roles, by reducing time-to-hire and stabilising rotas.",
   },
   {
     rank: 2,
     title: "Stand up winter pressures workforce response group",
-    uplift: 4,
     detail:
       "Winter pressures response groups coordinate cross-directorate redeployment, occupational-health surge capacity, and absence management. Comparable trusts have reduced sickness absence rates by 0.5–1.5 percentage points across a winter.",
   },
   {
     rank: 3,
     title: "Stay-interview programme for hard-to-fill roles",
-    uplift: 3,
     detail:
       "Stay-interview programmes have been shown to reduce voluntary turnover by 1–2 percentage points over six months in NHS-comparable settings.",
   },
   {
     rank: 4,
     title: "Mandatory training catch-up campaign",
-    uplift: 3,
     detail:
       "30-day mandatory training campaigns with directorate-level accountability have lifted compliance by 10–20 percentage points in NHS-comparable settings, reducing Care Quality Commission (CQC) scrutiny risk and supporting a safer skill-mix.",
   },
   {
     rank: 5,
     title: "Local team listening sessions, exec-sponsored",
-    uplift: 2,
     detail:
       "Exec-sponsored team listening sessions in low-engagement directorates have been shown to lift engagement scores by 0.2–0.4 over six months, primarily by closing the perceived voice gap between staff and leadership.",
   },
 ];
 
-function upliftStyles(uplift: number): string {
-  if (uplift >= 5) return "border-emerald-200 bg-emerald-50 text-emerald-700";
-  if (uplift >= 3) return "border-blue-200 bg-blue-50 text-blue-700";
-  return "border-slate-200 bg-slate-100 text-slate-700";
+function formatPeriod(iso: string): string {
+  const d = new Date(iso);
+  return d.toLocaleDateString("en-GB", { month: "short", year: "2-digit" });
 }
 
 export const AiRiskPredictionTab = () => {
   const [explainerOpen, setExplainerOpen] = useState(false);
   const [expanded, setExpanded] = useState<number | null>(null);
 
-  const historicalSeries = CHART_DATA.map((d) => d.historical).filter(
-    (v): v is number => typeof v === "number",
+  const { points, loading } = useScoreHistory("dashboard", "dashboard");
+  const forecast = useDashboardForecast();
+
+  const scores = useMemo(
+    () => points.map((p) => Math.round(p.normalised_score)),
+    [points],
   );
-  const humanScoreTrend = assessTrend(historicalSeries, { cadence: "quarters" });
+  const currentScore = scores.length > 0 ? scores[scores.length - 1] : null;
+  const spc = useMemo(() => classifyTrend(scores), [scores]);
+
+  const forecastChartData = useMemo(() => {
+    if (forecast.method === "none" || forecast.points.length === 0) return [];
+    return forecast.points.map((p) => ({
+      period: formatPeriod(p.date),
+      forecast: p.value,
+      band: [p.lower, p.upper] as [number, number],
+    }));
+  }, [forecast]);
+
+  const forecastAvailable = forecastChartData.length > 0;
 
   return (
     <div className="space-y-5">
-      {/* Mockup chip */}
-      <div className="flex flex-wrap items-center gap-3">
-        <DataSourceChip variant="mockup" />
-      </div>
-
       <div>
         <h1 className="text-2xl font-semibold text-slate-900">AI Risk Prediction</h1>
         <p className="mt-1 text-sm text-slate-600">
-          Forward outlook for the next 6 months, based on current trend and modelled interventions
+          Forward outlook based on the current trend in Human Capital indicators.
         </p>
       </div>
 
@@ -135,53 +108,13 @@ export const AiRiskPredictionTab = () => {
               How trend direction is assessed
             </h2>
             <p>
-              This is a board / strategic view, not an operational dashboard. Short-term
-              fluctuations are expected and are not significant on their own.
+              Trend is classified using NHS Making Data Count (XmR) rules over the
+              Human Capital score history. Short-term fluctuations within control
+              limits are treated as common-cause variation, not as a signal.
             </p>
-            <ul className="space-y-1.5">
-              <li>
-                <span className="font-semibold text-slate-900">Worsening</span> — the score
-                is moving away from the target (75) back towards the minimum threshold (25),
-                assessed over the last six months.
-              </li>
-              <li>
-                <span className="font-semibold text-slate-900">Improving</span> — the score
-                is moving towards the target, assessed over the last six months.
-              </li>
-              <li>
-                <span className="font-semibold text-slate-900">Stable</span> — no
-                meaningful directional change (less than 2 points on the 0–100 scale) over
-                the last six months.
-              </li>
-            </ul>
           </div>
         </div>
       </section>
-
-      {/* Illustrative forecast disclaimer */}
-      <div
-        role="note"
-        aria-label="Illustrative forecast disclaimer"
-        className="rounded-lg border border-blue-200 border-l-4 border-l-blue-600 bg-blue-50 p-4 sm:p-5"
-      >
-        <div className="flex items-start gap-3">
-          <Info size={20} className="mt-0.5 shrink-0 text-blue-700" aria-hidden />
-          <div className="min-w-0">
-            <h2 className="text-base font-semibold text-blue-900">
-              Illustrative forecast — methodology in development
-            </h2>
-            <p className="mt-1.5 text-sm leading-relaxed text-blue-900/90">
-              The 6-month forecast shown below is an illustrative projection generated to
-              demonstrate the dashboard's predictive capability. In the production build, this
-              view will be driven by a rules-based engine combining per-data-point linear-trend
-              projection, bounded historical ranges, indicator-level scoring, and
-              intervention-uplift overlays. The agreed rule set will be documented and
-              version-controlled alongside the methodology applied to the Human Capital
-              indicator scores.
-            </p>
-          </div>
-        </div>
-      </div>
 
       {/* Two-column main area */}
       <div className="grid gap-5 lg:grid-cols-5">
@@ -200,132 +133,105 @@ export const AiRiskPredictionTab = () => {
                 <span className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
                   Current trend
                 </span>
-                <TrendLabel assessment={humanScoreTrend} />
-              </div>
-              <ScoreScale score={CURRENT_SCORE} size="compact" label="Current score" />
-            </div>
-
-            <div
-              className="h-64 w-full sm:h-72"
-              role="img"
-              aria-label="Human Capital score trajectory: 62, 58, 56, 54 historical (last four quarters), projected to fall to 51, 48, 46, 44, 43, 43 over the next six months. Forecast confidence range plus or minus 4 points."
-            >
-              <ResponsiveContainer width="100%" height="100%">
-                <ComposedChart
-                  data={CHART_DATA}
-                  margin={{ top: 16, right: 24, left: 0, bottom: 8 }}
+                <span
+                  title={spc.tooltip}
+                  className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-medium ${spcChipClasses(spc.direction)}`}
                 >
-                  <ReferenceArea y1={0} y2={24} fill="#dc2626" fillOpacity={0.05} />
-                  <ReferenceArea y1={25} y2={74} fill="#f59e0b" fillOpacity={0.05} />
-                  <ReferenceArea y1={75} y2={100} fill="#10b981" fillOpacity={0.05} />
-
-                  <CartesianGrid stroke="#e2e8f0" strokeDasharray="2 4" vertical={false} />
-                  <XAxis
-                    dataKey="label"
-                    tick={{ fontSize: 10, fill: "#475569" }}
-                    tickLine={false}
-                    axisLine={{ stroke: "#cbd5e1" }}
-                    interval={0}
-                    angle={-30}
-                    textAnchor="end"
-                    height={60}
-                  />
-                  <YAxis
-                    domain={[0, 100]}
-                    ticks={[0, 40, 60, 80, 100]}
-                    tick={{ fontSize: 11, fill: "#475569" }}
-                    tickLine={false}
-                    axisLine={{ stroke: "#cbd5e1" }}
-                    width={36}
-                  />
-
-                  <RTooltip content={<ChartTooltip />} />
-
-                  {/* Confidence band */}
-                  <Area
-                    type="monotone"
-                    dataKey={(d: Point) =>
-                      d.lower != null && d.upper != null ? [d.lower, d.upper] : null
-                    }
-                    stroke="none"
-                    fill="#1E5BB8"
-                    fillOpacity={0.15}
-                    isAnimationActive={false}
-                    activeDot={false}
-                    legendType="none"
-                    connectNulls={false}
-                  />
-
-                  <Line
-                    type="monotone"
-                    dataKey="historical"
-                    stroke="#1E5BB8"
-                    strokeWidth={2.5}
-                    dot={{ r: 4, fill: "#1E5BB8" }}
-                    activeDot={{ r: 6 }}
-                    isAnimationActive={false}
-                    connectNulls={false}
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="forecast"
-                    stroke="#1E5BB8"
-                    strokeWidth={2.5}
-                    strokeDasharray="6 4"
-                    dot={{ r: 4, fill: "#ffffff", stroke: "#1E5BB8", strokeWidth: 2 }}
-                    activeDot={{ r: 6 }}
-                    isAnimationActive={false}
-                    connectNulls={false}
-                  />
-
-                  <ReferenceDot
-                    x={CURRENT_LABEL}
-                    y={CURRENT_SCORE}
-                    r={6}
-                    fill="#0f172a"
-                    stroke="#ffffff"
-                    strokeWidth={2}
-                    label={{
-                      value: "You are here",
-                      position: "top",
-                      fill: "#0f172a",
-                      fontSize: 11,
-                      fontWeight: 600,
-                      offset: 12,
-                    }}
-                  />
-                </ComposedChart>
-              </ResponsiveContainer>
-            </div>
-
-            {(() => {
-              const last = CHART_DATA[CHART_DATA.length - 1];
-              const forecast = last.forecast ?? 0;
-              const lower = last.lower ?? 0;
-              const upper = last.upper ?? 0;
-              const lowerBand = bandFor(lower);
-              return (
-                <p className="mt-3 text-sm text-slate-700">
-                  Projected score in 6 months: {forecast} (range {lower}–{upper}), with the
-                  lower bound at {lower} ({lowerBand.parenthetical}).
-                </p>
-              );
-            })()}
-            <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                {BANDS.map((b) => (
-                  <div key={b.label} className="flex items-center gap-1.5">
-                    <span className={`h-2.5 w-2.5 rounded-sm ${b.swatch}`} aria-hidden />
-                    <span className="text-[11px] text-slate-600">
-                      {b.label} ({b.min}–{b.max})
-                    </span>
-                  </div>
-                ))}
+                  {spc.direction}
+                </span>
               </div>
-              <p className="text-[11px] text-slate-500">
-                Solid line = historical · Dashed line + shaded band = forecast (illustrative)
-              </p>
+              {loading ? (
+                <div className="text-xs text-slate-500">Loading current score…</div>
+              ) : currentScore != null ? (
+                <ScoreScale score={currentScore} size="compact" label="Current score" />
+              ) : (
+                <div className="text-xs text-slate-500">
+                  Current score unavailable.
+                </div>
+              )}
             </div>
+
+            <div className="mb-2 flex items-baseline justify-between">
+              <h3 className="text-sm font-semibold text-slate-900">
+                Projected score — next {forecastChartData.length || 3} months
+              </h3>
+              <span className="text-[11px] text-slate-500">
+                Dashed line + shaded band = forecast
+              </span>
+            </div>
+
+            {forecast.loading ? (
+              <div className="flex h-56 items-center justify-center text-xs text-slate-400">
+                Loading forecast…
+              </div>
+            ) : !forecastAvailable ? (
+              <div className="flex h-56 items-center justify-center rounded-md border border-dashed border-slate-300 bg-slate-50 px-4 text-center text-sm text-slate-500">
+                Forecast unavailable — insufficient historical data.
+              </div>
+            ) : (
+              <div className="h-56 w-full sm:h-64" role="img" aria-label="Projected Human Capital score over the forecast horizon.">
+                <ResponsiveContainer width="100%" height="100%">
+                  <ComposedChart
+                    data={forecastChartData}
+                    margin={{ top: 16, right: 24, left: 0, bottom: 8 }}
+                  >
+                    <CartesianGrid stroke="#e2e8f0" strokeDasharray="2 4" vertical={false} />
+                    <XAxis
+                      dataKey="period"
+                      tick={{ fontSize: 11, fill: "#475569" }}
+                      tickLine={false}
+                      axisLine={{ stroke: "#cbd5e1" }}
+                      interval={0}
+                      height={32}
+                    />
+                    <YAxis
+                      domain={[0, 100]}
+                      ticks={[0, 25, 50, 75, 100]}
+                      tick={{ fontSize: 11, fill: "#475569" }}
+                      tickLine={false}
+                      axisLine={{ stroke: "#cbd5e1" }}
+                      width={36}
+                    />
+                    <RTooltip
+                      formatter={(v: number | [number, number], name: string) => {
+                        if (name === "band" && Array.isArray(v)) {
+                          return [`${v[0]} – ${v[1]}`, "Projected range"];
+                        }
+                        return [`${v}`, "Projection"];
+                      }}
+                      labelFormatter={(l: string) => l}
+                      contentStyle={{ fontSize: 12 }}
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="band"
+                      stroke="none"
+                      fill={FORECAST_COLOR}
+                      fillOpacity={0.15}
+                      isAnimationActive={false}
+                      activeDot={false}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="forecast"
+                      stroke={FORECAST_COLOR}
+                      strokeWidth={2.5}
+                      strokeDasharray="6 4"
+                      dot={{ r: 4, fill: "#ffffff", stroke: FORECAST_COLOR, strokeWidth: 2 }}
+                      activeDot={{ r: 6 }}
+                      isAnimationActive={false}
+                    />
+                  </ComposedChart>
+                </ResponsiveContainer>
+              </div>
+            )}
+
+            {forecastAvailable && forecast.caption && (
+              <p className="mt-3 text-[11px] italic text-slate-500">
+                {forecast.caption} Other indicators held flat across the horizon;
+                shown as a projection, not a prediction.
+              </p>
+            )}
           </div>
         </div>
 
@@ -333,6 +239,9 @@ export const AiRiskPredictionTab = () => {
         <div className="lg:col-span-2">
           <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
             <h3 className="text-base font-semibold text-slate-900">Priority interventions</h3>
+            <p className="mt-1 text-xs italic text-slate-500">
+              Interventions are illustrative — AI-generated recommendations coming soon.
+            </p>
             <ul className="mt-4 space-y-3">
               {INTERVENTIONS.map((i) => {
                 const open = expanded === i.rank;
@@ -352,13 +261,6 @@ export const AiRiskPredictionTab = () => {
                       </span>
                       <div className="min-w-0 flex-1">
                         <div className="font-semibold text-slate-900">{i.title}</div>
-                        <span
-                          className={`mt-2 inline-flex items-center rounded-md border px-2.5 py-1 font-mono text-xs font-semibold tabular-nums ${upliftStyles(
-                            i.uplift,
-                          )}`}
-                        >
-                          +{i.uplift} to score
-                        </span>
                       </div>
                       <ChevronDown
                         size={16}
@@ -398,48 +300,13 @@ export const AiRiskPredictionTab = () => {
         </button>
         {explainerOpen && (
           <div className="border-t border-slate-200 px-4 py-5 text-base leading-relaxed text-slate-700 sm:px-6">
-            This projection extrapolates the current trend in vacancy rate and sickness absence
-            forward 6 months and assumes no new interventions are taken. The shaded band reflects
-            modelled uncertainty. Interventions on the right are ranked by expected uplift on the
-            Human Capital indicator scores; the ranking is rule-based for the demo and will be replaced with a
-            model-driven recommendation engine post-demo.
+            The projection extrapolates the current trend in the Human Capital
+            score forward and assumes no new interventions are taken. The shaded
+            band reflects modelled uncertainty. Interventions on the right are
+            illustrative for the demo and will be replaced by a model-driven
+            recommendation engine.
           </div>
         )}
-      </div>
-    </div>
-  );
-};
-
-const ChartTooltip = ({
-  active,
-  payload,
-  label,
-}: {
-  active?: boolean;
-  payload?: Array<{ dataKey: string; value: unknown; payload: Point }>;
-  label?: string;
-}) => {
-  if (!active || !payload || payload.length === 0) return null;
-  const p = payload[0]?.payload;
-  if (!p) return null;
-  const isForecast = p.forecast != null && p.historical == null;
-  const score = isForecast ? p.forecast : p.historical;
-  return (
-    <div className="rounded-md border border-slate-200 bg-white px-3 py-2 text-xs shadow-md">
-      <div className="font-semibold text-slate-900">{label}</div>
-      <div className="mt-1 text-slate-700">
-        Score: <span className="font-mono tabular-nums">{score}</span>
-      </div>
-      {isForecast && p.lower != null && p.upper != null && (
-        <div className="mt-0.5 text-slate-500">
-          Range:{" "}
-          <span className="font-mono tabular-nums">
-            {p.lower}–{p.upper}
-          </span>
-        </div>
-      )}
-      <div className="mt-1 text-[10px] uppercase tracking-wide text-slate-400">
-        {isForecast ? "Forecast" : "Historical"}
       </div>
     </div>
   );
