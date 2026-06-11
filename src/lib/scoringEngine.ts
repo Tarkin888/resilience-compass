@@ -48,10 +48,10 @@ export function normaliseScore(
   return Math.max(0, Math.min(100, raw));
 }
 
-/** RAG band for a 0–100 score. 0–24 red, 25–74 amber, 75–100 green. */
+/** RAG band for a 0–100 score (Rick's bands): ≤35 red, 36–66 amber, ≥67 green. */
 export function ragBand(score: number): Rag {
-  if (score < 25) return "red";
-  if (score < 75) return "amber";
+  if (score <= 35) return "red";
+  if (score <= 66) return "amber";
   return "green";
 }
 
@@ -65,8 +65,8 @@ export interface BandInfo {
  * explanation suitable for narrative copy.
  */
 export function bandFor(score: number): BandInfo {
-  if (score < 25) return { name: "Red", parenthetical: "below the minimum threshold of 25" };
-  if (score < 75) return { name: "Amber", parenthetical: "within the operating range, below target" };
+  if (score <= 35) return { name: "Red", parenthetical: "below the operating range" };
+  if (score <= 66) return { name: "Amber", parenthetical: "within the operating range, below target" };
   return { name: "Green", parenthetical: "at or above target" };
 }
 

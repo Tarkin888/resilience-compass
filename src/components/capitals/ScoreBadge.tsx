@@ -1,19 +1,19 @@
 import type { Rag } from "@/lib/scoringEngine";
-import { displayScore } from "@/lib/scoringEngine";
+import { displayScore, ragBand } from "@/lib/scoringEngine";
+import { RED, AMBER, GREEN } from "@/lib/scoreBand";
 
-const RED = "#DC2626";
-const AMBER = "#F59E0B";
-const GREEN = "#16A34A";
 const NAVY = "#001D57";
 
 function ragColor(score: number): string {
-  if (score < 25) return RED;
-  if (score < 75) return AMBER;
-  return GREEN;
+  const band = ragBand(score);
+  if (band === "red") return RED;
+  if (band === "green") return GREEN;
+  return AMBER;
 }
 
 function badgeTextColor(score: number): string {
-  if (score < 25 || score >= 75) return "#FFFFFF";
+  const band = ragBand(score);
+  if (band === "red" || band === "green") return "#FFFFFF";
   return NAVY;
 }
 
