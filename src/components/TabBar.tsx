@@ -1,10 +1,18 @@
 import { useEffect, useRef } from "react";
-import { Bell, Layers, BarChart3, TrendingUp, LucideIcon } from "lucide-react";
+import { Bell, Layers, BarChart3, TrendingUp, SlidersHorizontal, GitCompare, LucideIcon } from "lucide-react";
 
-export type TabId = "alerts" | "library" | "visualiser" | "prediction";
+export type TabId =
+  | "alerts"
+  | "scenario_testing"
+  | "scenario_impact"
+  | "library"
+  | "visualiser"
+  | "prediction";
 
 export const TABS: { id: TabId; label: string; icon: LucideIcon }[] = [
   { id: "alerts", label: "Live Risk Alerts", icon: Bell },
+  { id: "scenario_testing", label: "Scenario Testing", icon: SlidersHorizontal },
+  { id: "scenario_impact", label: "Scenario Impact", icon: GitCompare },
   { id: "library", label: "Scenario Testing Library", icon: Layers },
   { id: "visualiser", label: "Scenario Impact Visualiser", icon: BarChart3 },
   { id: "prediction", label: "AI Risk Prediction", icon: TrendingUp },
