@@ -10,11 +10,11 @@ export const GREY = "#94A3B8";
 
 export type ScoreBand = "red" | "amber" | "green" | "unscored";
 
-/** Band for a 0–100 score: <25 red, 25–75 amber, >75 green. */
+/** Band for a 0–100 score (Rick's bands): ≤35 red, 36–66 amber, ≥67 green. */
 export function scoreBand(score: number | null | undefined): ScoreBand {
   if (score == null || !Number.isFinite(score)) return "unscored";
-  if (score < 25) return "red";
-  if (score > 75) return "green";
+  if (score <= 35) return "red";
+  if (score >= 67) return "green";
   return "amber";
 }
 
