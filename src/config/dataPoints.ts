@@ -168,14 +168,14 @@ const environmental: PillarConfig = {
       ill("renewable_share", "Renewable share of energy", 60, 20, "%", "higherIsBetter", 34),
     ]},
     { id: "climate", name: "Climate Adaptation", description: "Flood/heat exposure, adaptation plan, critical site risk", dataPoints: [
-      ill("site_climate_risk", "Critical sites at high climate risk", 0, 5, "count", "lowerIsBetter", 0),
-      ill("adaptation_plan", "Adaptation plan completeness", 100, 50, "%", "higherIsBetter", 100),
-      ill("heat_exposure_days", "Heat-stress days/yr forecast", 10, 40, "days", "lowerIsBetter", 4),
+      ill("site_climate_risk", "Critical sites at high climate risk", 0, 5, "count", "lowerIsBetter", 3),
+      ill("adaptation_plan", "Adaptation plan completeness", 100, 50, "%", "higherIsBetter", 68),
+      ill("heat_exposure_days", "Heat-stress days/yr forecast", 10, 40, "days", "lowerIsBetter", 29),
     ]},
     { id: "resource", name: "Resource & Waste", description: "Waste intensity, recycling rate, water use", dataPoints: [
-      ill("waste_intensity", "Waste intensity (kg/bed-day)", 4, 9, "kg", "lowerIsBetter", 3),
-      ill("recycling_rate", "Recycling rate", 60, 25, "%", "higherIsBetter", 65),
-      ill("water_use", "Water use (m³/bed-day)", 0.4, 0.9, "m³", "lowerIsBetter", 0.3),
+      ill("waste_intensity", "Waste intensity (kg/bed-day)", 4, 9, "kg", "lowerIsBetter", 7.2),
+      ill("recycling_rate", "Recycling rate", 60, 25, "%", "higherIsBetter", 38),
+      ill("water_use", "Water use (m³/bed-day)", 0.4, 0.9, "m³", "lowerIsBetter", 0.72),
     ]},
   ],
 };
