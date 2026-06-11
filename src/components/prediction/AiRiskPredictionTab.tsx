@@ -49,6 +49,13 @@ export const AiRiskPredictionTab = () => {
 
   const forecastAvailable = forecastChartData.length > 0;
 
+  const ragBandName = currentScore != null ? bandFor(currentScore).name : null;
+  const {
+    interventions,
+    loading: interventionsLoading,
+    error: interventionsError,
+  } = useAIInterventions({ score: currentScore, ragBand: ragBandName });
+
   return (
     <div className="space-y-5">
       <div>
