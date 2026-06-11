@@ -209,45 +209,45 @@ export const AiRiskPredictionTab = () => {
           <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
             <h3 className="text-base font-semibold text-slate-900">Priority interventions</h3>
             <p className="mt-1 text-xs italic text-slate-500">
-              Interventions are illustrative — AI-generated recommendations coming soon.
+              AI-generated recommendations · Based on current score and RAG band · Not a substitute for professional judgement
             </p>
-            <ul className="mt-4 space-y-3">
-              {INTERVENTIONS.map((i) => {
-                const open = expanded === i.rank;
-                return (
+
+            {interventionsLoading ? (
+              <ul className="mt-4 space-y-3" aria-label="Loading recommendations">
+                {[0, 1, 2, 3].map((i) => (
+                  <li
+                    key={i}
+                    className="flex items-start gap-3 rounded-lg border border-slate-200 bg-white p-4"
+                  >
+                    <div className="h-7 w-7 shrink-0 animate-pulse rounded-full bg-slate-200" />
+                    <div className="flex-1 space-y-2">
+                      <div className="h-3 w-5/6 animate-pulse rounded bg-slate-200" />
+                      <div className="h-3 w-2/3 animate-pulse rounded bg-slate-200" />
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            ) : interventionsError ? (
+              <p className="mt-4 text-sm text-slate-600">
+                Recommendations unavailable — please try refreshing the page.
+              </p>
+            ) : (
+              <ol className="mt-4 space-y-3">
+                {interventions.map((i) => (
                   <li
                     key={i.rank}
-                    className="rounded-lg border border-slate-200 bg-white"
+                    className="flex items-start gap-3 rounded-lg border border-slate-200 bg-white p-4"
                   >
-                    <button
-                      type="button"
-                      onClick={() => setExpanded(open ? null : i.rank)}
-                      aria-expanded={open}
-                      className="flex w-full items-start gap-3 p-4 text-left"
-                    >
-                      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-900 text-xs font-semibold text-white">
-                        {i.rank}
-                      </span>
-                      <div className="min-w-0 flex-1">
-                        <div className="font-semibold text-slate-900">{i.title}</div>
-                      </div>
-                      <ChevronDown
-                        size={16}
-                        className={`mt-1 shrink-0 text-slate-500 transition-transform ${
-                          open ? "rotate-180" : ""
-                        }`}
-                        aria-hidden
-                      />
-                    </button>
-                    {open && (
-                      <div className="border-t border-slate-200 px-4 py-3 text-base leading-relaxed text-slate-700">
-                        {i.detail}
-                      </div>
-                    )}
+                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-900 text-xs font-semibold text-white">
+                      {i.rank}
+                    </span>
+                    <div className="min-w-0 flex-1 text-sm leading-relaxed text-slate-800">
+                      {i.action}
+                    </div>
                   </li>
-                );
-              })}
-            </ul>
+                ))}
+              </ol>
+            )}
           </div>
         </div>
       </div>
