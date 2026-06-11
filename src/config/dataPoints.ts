@@ -163,9 +163,9 @@ const environmental: PillarConfig = {
   name: "Environmental",
   indicators: [
     { id: "carbon", name: "Carbon & Energy", description: "Scope 1+2, energy intensity, renewable share", dataPoints: [
-      ill("scope12_kt", "Scope 1+2 emissions (ktCO2e)", 8, 16, "kt", "lowerIsBetter", 6),
-      ill("energy_intensity", "Energy intensity (kWh/m²)", 250, 450, "kWh/m²", "lowerIsBetter", 210),
-      ill("renewable_share", "Renewable share of energy", 60, 20, "%", "higherIsBetter", 70),
+      ill("scope12_kt", "Scope 1+2 emissions (ktCO2e)", 8, 16, "kt", "lowerIsBetter", 13),
+      ill("energy_intensity", "Energy intensity (kWh/m²)", 250, 450, "kWh/m²", "lowerIsBetter", 378),
+      ill("renewable_share", "Renewable share of energy", 60, 20, "%", "higherIsBetter", 34),
     ]},
     { id: "climate", name: "Climate Adaptation", description: "Flood/heat exposure, adaptation plan, critical site risk", dataPoints: [
       ill("site_climate_risk", "Critical sites at high climate risk", 0, 5, "count", "lowerIsBetter", 0),
