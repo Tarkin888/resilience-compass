@@ -45,17 +45,6 @@ const Index = () => {
             <ScenarioImpactTab onBack={() => setActive("scenario_testing")} />
           )}
         </div>
-        <div role="tabpanel" id={tabPanelId("library")} aria-labelledby={tabButtonId("library")} hidden={active !== "library"}>
-          {active === "library" && <ScenarioLibraryTab onLoadScenario={handleLoadScenario} />}
-        </div>
-        <div role="tabpanel" id={tabPanelId("visualiser")} aria-labelledby={tabButtonId("visualiser")} hidden={active !== "visualiser"}>
-          {active === "visualiser" && (
-            <VisualiserMockup
-              scenario={loadedScenario}
-              onBrowseScenarios={() => setActive("library")}
-            />
-          )}
-        </div>
         <div role="tabpanel" id={tabPanelId("prediction")} aria-labelledby={tabButtonId("prediction")} hidden={active !== "prediction"}>
           {active === "prediction" && <AiRiskPredictionTab />}
         </div>
