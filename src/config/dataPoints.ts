@@ -95,20 +95,20 @@ const financial: PillarConfig = {
   name: "Financial",
   indicators: [
     { id: "liquidity", name: "Liquidity Headroom", description: "Cash reserves, working capital, credit facility", dataPoints: [
-      ill("cash_reserves_days", "Cash reserves (days)", 60, 20, "days", "higherIsBetter", 14),
-      ill("working_capital_ratio", "Working capital ratio", 2.0, 1.0, "ratio", "higherIsBetter", 0.9),
-      ill("credit_facility_used", "Credit facility utilisation", 20, 80, "%", "lowerIsBetter", 84),
+      ill("cash_reserves_days", "Cash reserves (days)", 60, 20, "days", "higherIsBetter", 46),
+      ill("working_capital_ratio", "Working capital ratio", 2.0, 1.0, "ratio", "higherIsBetter", 1.66),
+      ill("credit_facility_used", "Credit facility utilisation", 20, 80, "%", "lowerIsBetter", 40),
     ]},
     { id: "cost_flex", name: "Cost Base Flexibility", description: "Fixed vs variable, supplier terms, pay mix, agency spend", dataPoints: [
-      ill("variable_cost_share", "Variable cost share", 45, 25, "%", "higherIsBetter", 22),
-      ill("supplier_terms_days", "Avg supplier payment terms", 60, 30, "days", "higherIsBetter", 27),
-      ill("agency_pay_share", "Agency pay share", 4, 10, "%", "lowerIsBetter", 11),
-      ill("pay_mix_flex", "Pay mix flexibility index", 70, 40, "score", "higherIsBetter", 38),
+      ill("variable_cost_share", "Variable cost share", 45, 25, "%", "higherIsBetter", 38),
+      ill("supplier_terms_days", "Avg supplier payment terms", 60, 30, "days", "higherIsBetter", 50),
+      ill("agency_pay_share", "Agency pay share", 4, 10, "%", "lowerIsBetter", 6),
+      ill("pay_mix_flex", "Pay mix flexibility index", 70, 40, "score", "higherIsBetter", 60),
     ]},
     { id: "capex", name: "Capital Investment Capacity", description: "CDEL utilisation, backlog maintenance, project pipeline", dataPoints: [
-      ill("cdel_utilisation", "CDEL utilisation", 95, 70, "%", "higherIsBetter", 67),
-      ill("backlog_maintenance", "Backlog maintenance (£m)", 5, 30, "£m", "lowerIsBetter", 33),
-      ill("pipeline_coverage", "Project pipeline coverage", 110, 80, "%", "higherIsBetter", 76),
+      ill("cdel_utilisation", "CDEL utilisation", 95, 70, "%", "higherIsBetter", 86),
+      ill("backlog_maintenance", "Backlog maintenance (£m)", 5, 30, "£m", "lowerIsBetter", 13.5),
+      ill("pipeline_coverage", "Project pipeline coverage", 110, 80, "%", "higherIsBetter", 100),
     ]},
   ],
 };
