@@ -88,7 +88,7 @@ export const ScoreCard = () => {
           </div>
           <div className="border-t border-slate-200 pt-4 sm:flex-1 sm:border-l sm:border-t-0 sm:pl-6 sm:pt-0">
             <p className="text-[13px] font-semibold italic leading-relaxed text-slate-700 sm:text-[14px] lg:text-[15px]">
-              This is an AI-powered resilience dashboard helping NHS Trusts monitor and anticipate workforce risk. This prototype focuses on the Human Capital pillar, presenting indicator scores averaged across data points, normalised onto Rick's 0–100 operating range. Staff Vacancy Rate and Sickness Absence Rate are populated with live public data from NHS England; remaining data points are clearly labelled as illustrative demo data. This is a working demonstration intended to invite challenge and iteration, not a finished product.
+              A resilience dashboard helping NHS Trusts monitor and anticipate workforce risk. This prototype focuses on the Human Capital pillar, presenting indicator scores averaged across data points and normalised onto a 0–100 operating range. Staff Vacancy Rate and Sickness Absence Rate are populated with live public data from NHS England; remaining data points are clearly labelled as illustrative demo data.
             </p>
           </div>
         </div>
