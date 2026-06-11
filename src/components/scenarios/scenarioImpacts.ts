@@ -165,9 +165,9 @@ export interface ScoreBand {
 }
 
 export const SCORE_BANDS: ScoreBand[] = [
-  { label: "Red", min: 0, max: 24, fill: "bg-red-100", text: "text-red-700", swatch: "bg-red-400" },
-  { label: "Amber", min: 25, max: 74, fill: "bg-amber-100", text: "text-amber-800", swatch: "bg-amber-400" },
-  { label: "Green", min: 75, max: 100, fill: "bg-emerald-100", text: "text-emerald-700", swatch: "bg-emerald-400" },
+  { label: "Red", min: 0, max: 35, fill: "bg-red-100", text: "text-red-700", swatch: "bg-red-400" },
+  { label: "Amber", min: 36, max: 66, fill: "bg-amber-100", text: "text-amber-800", swatch: "bg-amber-400" },
+  { label: "Green", min: 67, max: 100, fill: "bg-emerald-100", text: "text-emerald-700", swatch: "bg-emerald-400" },
 ];
 
 export function bandForScore(score: number): ScoreBand {
