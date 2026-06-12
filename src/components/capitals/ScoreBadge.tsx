@@ -1,20 +1,11 @@
-import type { Rag } from "@/lib/scoringEngine";
-import { displayScore, ragBand } from "@/lib/scoringEngine";
-import { RED, AMBER, GREEN } from "@/lib/scoreBand";
+import { displayScore } from "@/lib/scoringEngine";
+import { colourForScore, luminance } from "@/lib/scoreBand";
 
 const NAVY = "#001D57";
 
-function ragColor(score: number): string {
-  const band = ragBand(score);
-  if (band === "red") return RED;
-  if (band === "green") return GREEN;
-  return AMBER;
-}
-
 function badgeTextColor(score: number): string {
-  const band = ragBand(score);
-  if (band === "red" || band === "green") return "#FFFFFF";
-  return NAVY;
+  const bg = colourForScore(score);
+  return luminance(bg) > 0.45 ? NAVY : "#FFFFFF";
 }
 
 interface Props {
@@ -41,7 +32,7 @@ export const ScoreBadge = ({ score, size = "md", className = "" }: Props) => {
     );
   }
 
-  const fill = ragColor(display);
+  const fill = colourForScore(display);
   const textColor = badgeTextColor(display);
 
   return (
