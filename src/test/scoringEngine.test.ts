@@ -36,10 +36,10 @@ describe("scoringEngine", () => {
 
   it("RAG bands", () => {
     expect(ragBand(0)).toBe("red");
-    expect(ragBand(24)).toBe("red");
-    expect(ragBand(25)).toBe("amber");
-    expect(ragBand(74)).toBe("amber");
-    expect(ragBand(75)).toBe("green");
+    expect(ragBand(35)).toBe("red");
+    expect(ragBand(36)).toBe("amber");
+    expect(ragBand(66)).toBe("amber");
+    expect(ragBand(67)).toBe("green");
     expect(ragBand(100)).toBe("green");
   });
 
