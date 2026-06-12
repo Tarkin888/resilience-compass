@@ -79,6 +79,40 @@ const human: PillarConfig = {
       description: "Based on the future skills plan (data points to be confirmed)",
       dataPoints: [], // unscored — excluded from pillar average
     },
+    {
+      id: "workforce_of_the_future",
+      name: "Workforce of the Future",
+      description: "Illustrative — talent attraction into new skills/roles",
+      dataPoints: [
+        {
+          id: "talent_attraction_future",
+          name: "Talent attraction (new areas)",
+          target: 80,
+          minimumThreshold: 40,
+          unit: "%",
+          direction: "higherIsBetter",
+          source: "Illustrative",
+          illustrativeValue: 58,
+        },
+      ],
+    },
+    {
+      id: "continuity_critical_skills",
+      name: "Continuity of Critical Skills",
+      description: "Illustrative — talent attraction into critical services today",
+      dataPoints: [
+        {
+          id: "talent_attraction_today",
+          name: "Talent attraction (critical services today)",
+          target: 90,
+          minimumThreshold: 50,
+          unit: "%",
+          direction: "higherIsBetter",
+          source: "Illustrative",
+          illustrativeValue: 72,
+        },
+      ],
+    },
   ],
 };
 
