@@ -38,7 +38,7 @@ const human: PillarConfig = {
       name: "Staff Vacancies",
       description: "Vacancy rate (live, NHS England)",
       dataPoints: [
-        { id: "vacancy", name: "Vacancy rate", target: 8.5, minimumThreshold: 12, unit: "%", direction: "lowerIsBetter", source: "Live", liveKriId: "vacancy" },
+        { id: "vacancy", name: "Vacancy rate", target: 8, minimumThreshold: 15, unit: "%", direction: "lowerIsBetter", source: "Live", liveKriId: "vacancy" },
       ],
     },
     {
@@ -46,7 +46,7 @@ const human: PillarConfig = {
       name: "Sickness Absence Rate",
       description: "Quarterly absence rate (live, NHS England)",
       dataPoints: [
-        { id: "sickness_absence", name: "Sickness absence rate", target: 4.2, minimumThreshold: 6.0, unit: "%", direction: "lowerIsBetter", source: "Live", liveKriId: "sickness_absence" },
+        { id: "sickness_absence", name: "Sickness absence rate", target: 3, minimumThreshold: 6, unit: "%", direction: "lowerIsBetter", source: "Live", liveKriId: "sickness_absence" },
       ],
     },
     {

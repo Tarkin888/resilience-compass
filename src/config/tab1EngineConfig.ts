@@ -16,11 +16,11 @@ export interface Tab1EngineConfig {
  * runtime `thresholds.threshold_value` when present, falling back to the
  * `target` value here. The two are kept aligned so Tab 1 and Tab 3 agree.
  *
- * Minimum thresholds are illustrative until Rick confirms (8 June 2026 agenda).
+ * Governance targets confirmed by Rick, 12 June 2026 — to be reconfirmed 6 July.
  */
 export const TAB1_ENGINE_CONFIG: Record<string, Tab1EngineConfig> = {
-  sickness_absence: { target: 4.2, minimumThreshold: 6.0, direction: "lowerIsBetter" },
-  vacancy: { target: 8.5, minimumThreshold: 12, direction: "lowerIsBetter" },
+  sickness_absence: { target: 3, minimumThreshold: 6, direction: "lowerIsBetter" },
+  vacancy: { target: 8, minimumThreshold: 15, direction: "lowerIsBetter" },
   training_compliance: { target: 95, minimumThreshold: 60, direction: "higherIsBetter" },
   staff_engagement_score: { target: 7.5, minimumThreshold: 5.0, direction: "higherIsBetter" },
   voluntary_turnover: { target: 10, minimumThreshold: 16, direction: "lowerIsBetter" },
