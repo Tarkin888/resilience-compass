@@ -2,10 +2,10 @@ import { useMemo, useState } from "react";
 import { Info, ChevronDown } from "lucide-react";
 import {
   Area,
-  AreaChart,
   CartesianGrid,
   Line,
   ComposedChart,
+  ReferenceLine,
   ResponsiveContainer,
   Tooltip as RTooltip,
   XAxis,
@@ -20,6 +20,11 @@ import { bandFor } from "@/lib/scoringEngine";
 import { useAIInterventions, type KRI } from "@/hooks/useAIInterventions";
 
 const FORECAST_COLOR = "#6366F1"; // matches TrendPanel
+const ACTUAL_COLOR = "#F59E0B"; // amber, matches Score over time chart
+
+function displayDirection(d: string): string {
+  return d === "Worsening" ? "Declining" : d;
+}
 
 function formatPeriod(iso: string): string {
   const d = new Date(iso);
@@ -39,16 +44,62 @@ export const AiRiskPredictionTab = () => {
   const currentScore = scores.length > 0 ? scores[scores.length - 1] : null;
   const spc = useMemo(() => classifyTrend(scores), [scores]);
 
-  const forecastChartData = useMemo(() => {
-    if (forecast.method === "none" || forecast.points.length === 0) return [];
-    return forecast.points.map((p) => ({
-      period: formatPeriod(p.date),
-      forecast: p.value,
-      band: [p.lower, p.upper] as [number, number],
-    }));
-  }, [forecast]);
+  const recentActuals = useMemo(
+    () =>
+      points.slice(-6).map((p) => ({
+        period: formatPeriod(p.snapshot_date),
+        actual: Math.round(p.normalised_score),
+      })),
+    [points],
+  );
 
-  const forecastAvailable = forecastChartData.length > 0;
+  const projectedScore =
+    forecast.points.length > 0
+      ? forecast.points[forecast.points.length - 1].value
+      : null;
+  const forecastLow =
+    forecast.points.length > 0
+      ? Math.min(...forecast.points.map((p) => p.lower))
+      : null;
+  const forecastHigh =
+    forecast.points.length > 0
+      ? Math.max(...forecast.points.map((p) => p.upper))
+      : null;
+
+  const zoomedChartData = useMemo(() => {
+    if (forecast.method === "none" || forecast.points.length === 0 || recentActuals.length === 0) {
+      return [] as Array<{
+        period: string;
+        actual?: number;
+        forecast?: number;
+        band?: [number, number];
+      }>;
+    }
+    const rows: Array<{
+      period: string;
+      actual?: number;
+      forecast?: number;
+      band?: [number, number];
+    }> = recentActuals.map((a) => ({ period: a.period, actual: a.actual }));
+    // Join row: last actual seeds the forecast line so they connect cleanly.
+    const last = recentActuals[recentActuals.length - 1];
+    rows[rows.length - 1] = {
+      ...rows[rows.length - 1],
+      forecast: last.actual,
+      band: [last.actual, last.actual],
+    };
+    for (const p of forecast.points) {
+      rows.push({
+        period: formatPeriod(p.date),
+        forecast: p.value,
+        band: [p.lower, p.upper],
+      });
+    }
+    return rows;
+  }, [forecast, recentActuals]);
+
+  const todayLabel = recentActuals[recentActuals.length - 1]?.period;
+  const forecastAvailable = zoomedChartData.length > 0;
 
   const ragBandName = currentScore != null ? bandFor(currentScore).name : null;
 
@@ -129,35 +180,60 @@ export const AiRiskPredictionTab = () => {
               <span className="text-xs text-slate-500">0–100 scale</span>
             </div>
 
+            {/* Headline read-out: current → projected */}
             <div className="mb-4 rounded-lg border border-slate-200 bg-slate-50 p-4">
               <div className="mb-3 flex items-center justify-between gap-3">
                 <span className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
-                  Current trend
+                  Next 3 months outlook
                 </span>
                 <span
                   title={spc.tooltip}
-                  className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-medium ${spcChipClasses(spc.direction)}`}
+                  className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium ${spcChipClasses(spc.direction)}`}
                 >
-                  {spc.direction}
+                  {displayDirection(spc.direction)}
                 </span>
               </div>
-              {loading ? (
-                <div className="text-xs text-slate-500">Loading current score…</div>
+              {loading || forecast.loading ? (
+                <div className="text-xs text-slate-500">Loading outlook…</div>
+              ) : currentScore != null && projectedScore != null ? (
+                <>
+                  <div className="flex items-baseline gap-3">
+                    <div className="flex flex-col">
+                      <span className="text-[11px] uppercase tracking-wide text-slate-500">Current</span>
+                      <span className="text-3xl font-semibold text-slate-900 tabular-nums">{currentScore}</span>
+                    </div>
+                    <span className="text-2xl text-slate-400" aria-hidden>→</span>
+                    <div className="flex flex-col">
+                      <span className="text-[11px] uppercase tracking-wide text-slate-500">Projected</span>
+                      <span className="text-3xl font-semibold tabular-nums" style={{ color: FORECAST_COLOR }}>
+                        {projectedScore}
+                      </span>
+                    </div>
+                  </div>
+                  {forecastLow != null && forecastHigh != null && ragBandName && (
+                    <p className="mt-2 text-xs text-slate-600">
+                      Expected range {forecastLow}–{forecastHigh} ·{" "}
+                      {ragBandName === "Green"
+                        ? "at or above target"
+                        : ragBandName === "Amber"
+                          ? "within operating range, below target"
+                          : "below the minimum threshold"}
+                    </p>
+                  )}
+                </>
               ) : currentScore != null ? (
                 <ScoreScale score={currentScore} size="compact" label="Current score" />
               ) : (
-                <div className="text-xs text-slate-500">
-                  Current score unavailable.
-                </div>
+                <div className="text-xs text-slate-500">Current score unavailable.</div>
               )}
             </div>
 
             <div className="mb-2 flex items-baseline justify-between">
               <h3 className="text-sm font-semibold text-slate-900">
-                Projected score — next {forecastChartData.length || 3} months
+                Last 6 months and next 3 months
               </h3>
               <span className="text-[11px] text-slate-500">
-                Dashed line + shaded band = forecast
+                Solid = actual · Dashed = forecast
               </span>
             </div>
 
@@ -170,10 +246,10 @@ export const AiRiskPredictionTab = () => {
                 Forecast unavailable — insufficient historical data.
               </div>
             ) : (
-              <div className="h-56 w-full sm:h-64" role="img" aria-label="Projected Human Capital score over the forecast horizon.">
+              <div className="h-56 w-full sm:h-64" role="img" aria-label="Last 6 months of actuals plus the next 3 months projected.">
                 <ResponsiveContainer width="100%" height="100%">
                   <ComposedChart
-                    data={forecastChartData}
+                    data={zoomedChartData}
                     margin={{ top: 16, right: 24, left: 0, bottom: 8 }}
                   >
                     <CartesianGrid stroke="#e2e8f0" strokeDasharray="2 4" vertical={false} />
@@ -193,12 +269,21 @@ export const AiRiskPredictionTab = () => {
                       axisLine={{ stroke: "#cbd5e1" }}
                       width={36}
                     />
+                    {todayLabel && (
+                      <ReferenceLine
+                        x={todayLabel}
+                        stroke="#64748B"
+                        strokeDasharray="4 3"
+                        label={{ value: "today", fontSize: 10, fill: "#475569", position: "top" }}
+                      />
+                    )}
                     <RTooltip
                       formatter={(v: number | [number, number], name: string) => {
                         if (name === "band" && Array.isArray(v)) {
                           return [`${v[0]} – ${v[1]}`, "Projected range"];
                         }
-                        return [`${v}`, "Projection"];
+                        if (name === "forecast") return [`${v}`, "Projection"];
+                        return [`${v}`, "Actual"];
                       }}
                       labelFormatter={(l: string) => l}
                       contentStyle={{ fontSize: 12 }}
@@ -211,6 +296,16 @@ export const AiRiskPredictionTab = () => {
                       fillOpacity={0.15}
                       isAnimationActive={false}
                       activeDot={false}
+                      connectNulls
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="actual"
+                      stroke={ACTUAL_COLOR}
+                      strokeWidth={2.5}
+                      dot={{ r: 3, fill: "#ffffff", stroke: ACTUAL_COLOR, strokeWidth: 2 }}
+                      activeDot={{ r: 5 }}
+                      isAnimationActive={false}
                     />
                     <Line
                       type="monotone"
@@ -218,9 +313,10 @@ export const AiRiskPredictionTab = () => {
                       stroke={FORECAST_COLOR}
                       strokeWidth={2.5}
                       strokeDasharray="6 4"
-                      dot={{ r: 4, fill: "#ffffff", stroke: FORECAST_COLOR, strokeWidth: 2 }}
-                      activeDot={{ r: 6 }}
+                      dot={{ r: 3, fill: "#ffffff", stroke: FORECAST_COLOR, strokeWidth: 2 }}
+                      activeDot={{ r: 5 }}
                       isAnimationActive={false}
+                      connectNulls
                     />
                   </ComposedChart>
                 </ResponsiveContainer>
@@ -233,6 +329,9 @@ export const AiRiskPredictionTab = () => {
                 shown as a projection, not a prediction.
               </p>
             )}
+            <p className="mt-2 text-[11px] text-slate-500">
+              The Score over time chart shows history only; the forecast is shown here.
+            </p>
           </div>
         </div>
 
