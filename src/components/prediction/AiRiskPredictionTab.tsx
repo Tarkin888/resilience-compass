@@ -6,6 +6,7 @@ import {
   CartesianGrid,
   Line,
   ComposedChart,
+  ReferenceLine,
   ResponsiveContainer,
   Tooltip as RTooltip,
   XAxis,
