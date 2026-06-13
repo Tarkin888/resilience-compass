@@ -2,7 +2,6 @@ import { useMemo, useState } from "react";
 import { Info, ChevronDown } from "lucide-react";
 import {
   Area,
-  AreaChart,
   CartesianGrid,
   Line,
   ComposedChart,
