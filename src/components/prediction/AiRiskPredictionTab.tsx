@@ -20,6 +20,11 @@ import { bandFor } from "@/lib/scoringEngine";
 import { useAIInterventions, type KRI } from "@/hooks/useAIInterventions";
 
 const FORECAST_COLOR = "#6366F1"; // matches TrendPanel
+const ACTUAL_COLOR = "#F59E0B"; // amber, matches Score over time chart
+
+function displayDirection(d: string): string {
+  return d === "Worsening" ? "Declining" : d;
+}
 
 function formatPeriod(iso: string): string {
   const d = new Date(iso);
