@@ -130,8 +130,8 @@ export const MethodologyDialog = ({ open, onOpenChange, returnFocusRef }: Method
               Each data point is compared against its own target and minimum threshold and placed on
               the 0–100 scale, so that very different measures become directly comparable. Related data
               points are then averaged into an indicator score. A score is read as{" "}
-              <strong>Red (0–24)</strong> below the threshold, <strong>Amber (25–74)</strong> within the operating range but below target, and{" "}
-              <strong>Green (75–100)</strong> at or above target.
+              <strong>Red (0–35)</strong> below the threshold, <strong>Amber (36–66)</strong> within the operating range but below target, and{" "}
+              <strong>Green (67–100)</strong> at or above target.
             </p>
           </section>
 

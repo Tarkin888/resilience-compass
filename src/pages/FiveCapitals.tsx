@@ -194,19 +194,19 @@ const FiveCapitals = () => {
             <li>
               <span className="inline-flex items-center gap-2">
                 <span className="inline-block h-3 w-3 rounded-full" style={{ background: "#DC2626" }} />
-                <strong>Red (0–24)</strong> — below the minimum threshold; a critical risk, action required.
+                <strong>Red (0–35)</strong> — below the minimum threshold; a critical risk, action required.
               </span>
             </li>
             <li>
               <span className="inline-flex items-center gap-2">
                 <span className="inline-block h-3 w-3 rounded-full" style={{ background: "#F59E0B" }} />
-                <strong>Amber (25–74)</strong> — within the operating range, below target.
+                <strong>Amber (36–66)</strong> — within the operating range, below target.
               </span>
             </li>
             <li>
               <span className="inline-flex items-center gap-2">
                 <span className="inline-block h-3 w-3 rounded-full" style={{ background: "#16A34A" }} />
-                <strong>Green (75–100)</strong> — at or above target.
+                <strong>Green (67–100)</strong> — at or above target.
               </span>
             </li>
             <li>
