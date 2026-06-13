@@ -44,16 +44,62 @@ export const AiRiskPredictionTab = () => {
   const currentScore = scores.length > 0 ? scores[scores.length - 1] : null;
   const spc = useMemo(() => classifyTrend(scores), [scores]);
 
-  const forecastChartData = useMemo(() => {
-    if (forecast.method === "none" || forecast.points.length === 0) return [];
-    return forecast.points.map((p) => ({
-      period: formatPeriod(p.date),
-      forecast: p.value,
-      band: [p.lower, p.upper] as [number, number],
-    }));
-  }, [forecast]);
+  const recentActuals = useMemo(
+    () =>
+      points.slice(-6).map((p) => ({
+        period: formatPeriod(p.snapshot_date),
+        actual: Math.round(p.normalised_score),
+      })),
+    [points],
+  );
 
-  const forecastAvailable = forecastChartData.length > 0;
+  const projectedScore =
+    forecast.points.length > 0
+      ? forecast.points[forecast.points.length - 1].value
+      : null;
+  const forecastLow =
+    forecast.points.length > 0
+      ? Math.min(...forecast.points.map((p) => p.lower))
+      : null;
+  const forecastHigh =
+    forecast.points.length > 0
+      ? Math.max(...forecast.points.map((p) => p.upper))
+      : null;
+
+  const zoomedChartData = useMemo(() => {
+    if (forecast.method === "none" || forecast.points.length === 0 || recentActuals.length === 0) {
+      return [] as Array<{
+        period: string;
+        actual?: number;
+        forecast?: number;
+        band?: [number, number];
+      }>;
+    }
+    const rows: Array<{
+      period: string;
+      actual?: number;
+      forecast?: number;
+      band?: [number, number];
+    }> = recentActuals.map((a) => ({ period: a.period, actual: a.actual }));
+    // Join row: last actual seeds the forecast line so they connect cleanly.
+    const last = recentActuals[recentActuals.length - 1];
+    rows[rows.length - 1] = {
+      ...rows[rows.length - 1],
+      forecast: last.actual,
+      band: [last.actual, last.actual],
+    };
+    for (const p of forecast.points) {
+      rows.push({
+        period: formatPeriod(p.date),
+        forecast: p.value,
+        band: [p.lower, p.upper],
+      });
+    }
+    return rows;
+  }, [forecast, recentActuals]);
+
+  const todayLabel = recentActuals[recentActuals.length - 1]?.period;
+  const forecastAvailable = zoomedChartData.length > 0;
 
   const ragBandName = currentScore != null ? bandFor(currentScore).name : null;
 
