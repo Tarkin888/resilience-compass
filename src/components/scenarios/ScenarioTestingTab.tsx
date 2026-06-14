@@ -196,15 +196,58 @@ export const ScenarioTestingTab = ({ onViewImpact }: { onViewImpact: () => void 
 
   return (
     <div className="space-y-5">
-      <div className="rounded-xl border border-slate-200 bg-white p-4 sm:p-5">
-        <p className="text-sm text-slate-700">
-          Adjust one or more data point values below to model a hypothetical scenario. Changes are
-          illustrative only and do not affect live data.
+      <div className="rounded-xl border-l-4 border-amber-400 bg-amber-50 p-4 sm:p-5">
+        <p className="text-xs font-semibold uppercase tracking-wide text-amber-800">
+          Illustrative scenario modelling
         </p>
-        <p className="mt-1 text-xs font-semibold uppercase tracking-wide text-amber-700">
-          Illustrative only — does not affect live data
+        <p className="mt-1 text-sm text-amber-900">
+          Selecting a scenario loads example values into the live calculator. Only Staff Vacancy
+          Rate and Sickness Absence move on real NHS data; all other indicators are held at current
+          levels pending historical data. Results are a hypothetical what-if — not a forecast —
+          and do not affect live data.
         </p>
       </div>
+
+      <div className="rounded-xl border border-slate-200 bg-white">
+        <div className="border-b border-slate-200 px-4 py-3 sm:px-5">
+          <h2 className="text-sm font-bold uppercase tracking-wide text-[#001D57]">Preset scenarios</h2>
+          <p className="mt-0.5 text-xs text-slate-500">
+            Click a scenario to load its example values into the calculator below.
+          </p>
+        </div>
+        <div className="grid gap-3 p-4 sm:grid-cols-2 sm:p-5 lg:grid-cols-3">
+          {SCENARIOS.map((s) => {
+            const sev = SCENARIO_SEVERITY_STYLES[s.severity];
+            const selected = selectedScenarioId === s.id;
+            return (
+              <button
+                key={s.id}
+                type="button"
+                onClick={() => handleSelectScenario(s.id)}
+                className={`flex flex-col gap-2 rounded-lg border p-3 text-left transition hover:border-[#001D57] hover:shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-brand ${
+                  selected
+                    ? "border-[#001D57] bg-[#001D57]/5 ring-2 ring-[#001D57]/30"
+                    : "border-slate-200 bg-white"
+                }`}
+                aria-pressed={selected}
+              >
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${sev.chip}`}>
+                    <span className={`h-1.5 w-1.5 rounded-full ${sev.dot}`} aria-hidden />
+                    {s.severity}
+                  </span>
+                  <span className="text-[10px] font-medium uppercase tracking-wide text-slate-500">
+                    {s.type}
+                  </span>
+                </div>
+                <div className="text-sm font-semibold text-[#001D57]">{s.title}</div>
+                <p className="text-xs text-slate-600">{s.description}</p>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
 
       <div className="rounded-xl border border-slate-200 bg-white">
         <div className="border-b border-slate-200 px-4 py-3 sm:px-5">
