@@ -113,6 +113,7 @@ export const ScenarioTestingTab = ({ onViewImpact }: { onViewImpact: () => void 
 
   const handleChange = (kriId: string, raw: string) => {
     setInputs((p) => ({ ...p, [kriId]: raw }));
+    setSelectedScenarioId(null);
     const parsed = raw.trim() === "" ? null : Number(raw);
     const row = liveRows.find((r) => r.kriId === kriId);
     if (parsed != null && row && Number.isFinite(parsed) && parsed !== row.currentValue) {
@@ -124,11 +125,33 @@ export const ScenarioTestingTab = ({ onViewImpact }: { onViewImpact: () => void 
 
   const handleReset = () => {
     resetOverrides();
+    setSelectedScenarioId(null);
     const next: Record<string, string> = {};
     liveRows.forEach((r) => {
       if (r.currentValue != null) next[r.kriId] = String(r.currentValue);
     });
     setInputs(next);
+  };
+
+  const handleSelectScenario = (scenarioId: string) => {
+    const scenario = SCENARIOS.find((s) => s.id === scenarioId);
+    if (!scenario) return;
+    setSelectedScenarioId(scenarioId);
+    // Start from live values, then apply overrides for any kris in the preset.
+    const nextInputs: Record<string, string> = {};
+    liveRows.forEach((r) => {
+      const presetVal = scenario.inputs[r.kriId];
+      if (presetVal != null) {
+        nextInputs[r.kriId] = String(presetVal);
+        setOverride(r.kriId, presetVal);
+      } else {
+        if (r.currentValue != null) nextInputs[r.kriId] = String(r.currentValue);
+        setOverride(r.kriId, null);
+      }
+    });
+    setInputs((prev) => ({ ...prev, ...nextInputs }));
+    // Defer runScenario so override state has flushed.
+    setTimeout(() => runScenario(), 0);
   };
 
   const hasChanges = Object.keys(overrides).length > 0;
