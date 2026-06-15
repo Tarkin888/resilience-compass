@@ -10,6 +10,7 @@ import { PILLAR_CONFIG } from "@/config/dataPoints";
 import { computePillarScores } from "@/lib/pillarScores";
 import { scoreBand, scoreBandColor } from "@/lib/scoreBand";
 import { SCENARIOS, SCENARIO_SEVERITY_STYLES } from "./scenarios";
+import { ScenarioAppliedBanner } from "./ScenarioAppliedBanner";
 
 interface KriRow {
   kriId: string;
