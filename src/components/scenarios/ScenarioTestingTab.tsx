@@ -310,6 +310,8 @@ export const ScenarioTestingTab = ({ onViewImpact }: { onViewImpact: () => void 
         </div>
       </div>
 
+      {hasRun && hasChanges && <ScenarioAppliedBanner />}
+
       {hasRun && hasChanges && (
         <div className="rounded-xl border border-slate-200 bg-white">
           <div className="border-b border-slate-200 px-4 py-3 sm:px-5">
