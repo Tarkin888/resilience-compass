@@ -64,8 +64,11 @@ function DeltaChip({ delta }: { delta: number | null }) {
 
 export const ScenarioTestingTab = ({ onViewImpact }: { onViewImpact: () => void }) => {
   const { data } = useHumanCapitalData();
-  const { overrides, setOverride, resetOverrides, runScenario, hasRun } = useScenario();
-  const [selectedScenarioId, setSelectedScenarioId] = useState<string | null>(null);
+  const {
+    overrides, setOverride, resetOverrides, runScenario, hasRun,
+    selectedScenario, setSelectedScenario, markScenarioModified,
+  } = useScenario();
+  const selectedScenarioId = selectedScenario?.id ?? null;
 
   // Live values keyed by kri_id (same shape pillarScores expects).
   const liveValues = useMemo<Record<string, number | null>>(() => {
