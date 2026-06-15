@@ -99,8 +99,11 @@ export const ScenarioImpactTab = ({ onBack }: { onBack: () => void }) => {
 
   if (!hasOverlay) {
     return (
-      <div className="rounded-xl border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">
-        Run a scenario on the Scenario Testing tab to see its impact here.
+      <div className="space-y-4">
+        <ScenarioAppliedBanner />
+        <div className="rounded-xl border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">
+          Run a scenario on the Scenario Testing tab to see its impact here.
+        </div>
       </div>
     );
   }
