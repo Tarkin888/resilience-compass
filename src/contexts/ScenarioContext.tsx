@@ -9,9 +9,7 @@ export interface SelectedScenarioInfo {
 }
 
 export interface ScenarioState {
-  /** Hypothetical raw KRI values keyed by kri_id (omit = use live value). */
   overrides: Record<string, number>;
-  /** True once the user clicks Run Scenario with at least one change. */
   hasRun: boolean;
   /** The preset scenario currently applied, if any. */
   selectedScenario: SelectedScenarioInfo | null;
@@ -25,6 +23,7 @@ interface ScenarioContextValue extends ScenarioState {
   runScenario: () => void;
   clearRun: () => void;
   setSelectedScenario: (scenario: SelectedScenarioInfo | null) => void;
+  markScenarioModified: () => void;
 }
 
 const ScenarioContext = createContext<ScenarioContextValue | null>(null);
@@ -60,7 +59,9 @@ export const ScenarioProvider = ({ children }: { children: ReactNode }) => {
     setScenarioModified(false);
   }, []);
 
-  const value = useMemo(
+  const markScenarioModified = useCallback(() => setScenarioModified(true), []);
+
+  const value = useMemo<ScenarioContextValue>(
     () => ({
       overrides,
       hasRun,
@@ -71,20 +72,12 @@ export const ScenarioProvider = ({ children }: { children: ReactNode }) => {
       runScenario,
       clearRun,
       setSelectedScenario,
+      markScenarioModified,
     }),
-    [overrides, hasRun, selectedScenario, scenarioModified, setOverride, resetOverrides, runScenario, clearRun, setSelectedScenario],
+    [overrides, hasRun, selectedScenario, scenarioModified, setOverride, resetOverrides, runScenario, clearRun, setSelectedScenario, markScenarioModified],
   );
 
-  // Wrap setOverride to track modification when a preset is active.
-  const wrappedValue = useMemo<ScenarioContextValue>(() => ({
-    ...value,
-    setOverride: (kriId: string, val: number | null) => {
-      setOverride(kriId, val);
-      if (selectedScenario) setScenarioModified(true);
-    },
-  }), [value, setOverride, selectedScenario]);
-
-  return <ScenarioContext.Provider value={wrappedValue}>{children}</ScenarioContext.Provider>;
+  return <ScenarioContext.Provider value={value}>{children}</ScenarioContext.Provider>;
 };
 
 export const useScenario = () => {
