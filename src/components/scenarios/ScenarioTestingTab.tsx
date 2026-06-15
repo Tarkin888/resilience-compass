@@ -116,7 +116,6 @@ export const ScenarioTestingTab = ({ onViewImpact }: { onViewImpact: () => void 
 
   const handleChange = (kriId: string, raw: string) => {
     setInputs((p) => ({ ...p, [kriId]: raw }));
-    setSelectedScenarioId(null);
     const parsed = raw.trim() === "" ? null : Number(raw);
     const row = liveRows.find((r) => r.kriId === kriId);
     if (parsed != null && row && Number.isFinite(parsed) && parsed !== row.currentValue) {
@@ -124,6 +123,8 @@ export const ScenarioTestingTab = ({ onViewImpact }: { onViewImpact: () => void 
     } else {
       setOverride(kriId, null);
     }
+    // If a preset is currently selected, mark it as modified; otherwise leave null.
+    if (selectedScenario) markScenarioModified();
   };
 
   const handleReset = () => {
