@@ -129,7 +129,7 @@ export const ScenarioTestingTab = ({ onViewImpact }: { onViewImpact: () => void 
 
   const handleReset = () => {
     resetOverrides();
-    setSelectedScenarioId(null);
+    // resetOverrides() already clears selectedScenario + scenarioModified.
     const next: Record<string, string> = {};
     liveRows.forEach((r) => {
       if (r.currentValue != null) next[r.kriId] = String(r.currentValue);
@@ -140,7 +140,7 @@ export const ScenarioTestingTab = ({ onViewImpact }: { onViewImpact: () => void 
   const handleSelectScenario = (scenarioId: string) => {
     const scenario = SCENARIOS.find((s) => s.id === scenarioId);
     if (!scenario) return;
-    setSelectedScenarioId(scenarioId);
+    setSelectedScenario({ id: scenario.id, title: scenario.title, severity: scenario.severity });
     // Start from live values, then apply overrides for any kris in the preset.
     const nextInputs: Record<string, string> = {};
     liveRows.forEach((r) => {
