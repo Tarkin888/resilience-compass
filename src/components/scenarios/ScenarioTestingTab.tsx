@@ -10,6 +10,7 @@ import { PILLAR_CONFIG } from "@/config/dataPoints";
 import { computePillarScores } from "@/lib/pillarScores";
 import { scoreBand, scoreBandColor } from "@/lib/scoreBand";
 import { SCENARIOS, SCENARIO_SEVERITY_STYLES } from "./scenarios";
+import { ScenarioAppliedBanner } from "./ScenarioAppliedBanner";
 
 interface KriRow {
   kriId: string;
@@ -64,8 +65,11 @@ function DeltaChip({ delta }: { delta: number | null }) {
 
 export const ScenarioTestingTab = ({ onViewImpact }: { onViewImpact: () => void }) => {
   const { data } = useHumanCapitalData();
-  const { overrides, setOverride, resetOverrides, runScenario, hasRun } = useScenario();
-  const [selectedScenarioId, setSelectedScenarioId] = useState<string | null>(null);
+  const {
+    overrides, setOverride, resetOverrides, runScenario, hasRun,
+    selectedScenario, setSelectedScenario, markScenarioModified,
+  } = useScenario();
+  const selectedScenarioId = selectedScenario?.id ?? null;
 
   // Live values keyed by kri_id (same shape pillarScores expects).
   const liveValues = useMemo<Record<string, number | null>>(() => {
@@ -113,7 +117,6 @@ export const ScenarioTestingTab = ({ onViewImpact }: { onViewImpact: () => void 
 
   const handleChange = (kriId: string, raw: string) => {
     setInputs((p) => ({ ...p, [kriId]: raw }));
-    setSelectedScenarioId(null);
     const parsed = raw.trim() === "" ? null : Number(raw);
     const row = liveRows.find((r) => r.kriId === kriId);
     if (parsed != null && row && Number.isFinite(parsed) && parsed !== row.currentValue) {
@@ -121,11 +124,13 @@ export const ScenarioTestingTab = ({ onViewImpact }: { onViewImpact: () => void 
     } else {
       setOverride(kriId, null);
     }
+    // If a preset is currently selected, mark it as modified; otherwise leave null.
+    if (selectedScenario) markScenarioModified();
   };
 
   const handleReset = () => {
     resetOverrides();
-    setSelectedScenarioId(null);
+    // resetOverrides() already clears selectedScenario + scenarioModified.
     const next: Record<string, string> = {};
     liveRows.forEach((r) => {
       if (r.currentValue != null) next[r.kriId] = String(r.currentValue);
@@ -136,7 +141,7 @@ export const ScenarioTestingTab = ({ onViewImpact }: { onViewImpact: () => void 
   const handleSelectScenario = (scenarioId: string) => {
     const scenario = SCENARIOS.find((s) => s.id === scenarioId);
     if (!scenario) return;
-    setSelectedScenarioId(scenarioId);
+    setSelectedScenario({ id: scenario.id, title: scenario.title, severity: scenario.severity });
     // Start from live values, then apply overrides for any kris in the preset.
     const nextInputs: Record<string, string> = {};
     liveRows.forEach((r) => {
@@ -304,6 +309,8 @@ export const ScenarioTestingTab = ({ onViewImpact }: { onViewImpact: () => void 
           </button>
         </div>
       </div>
+
+      {hasRun && hasChanges && <ScenarioAppliedBanner />}
 
       {hasRun && hasChanges && (
         <div className="rounded-xl border border-slate-200 bg-white">

@@ -6,6 +6,7 @@ import { useHumanCapitalData } from "@/hooks/useHumanCapitalData";
 import { useScenario } from "@/contexts/ScenarioContext";
 import { computePillarScores } from "@/lib/pillarScores";
 import { colourForScore, luminance } from "@/lib/scoreBand";
+import { ScenarioAppliedBanner } from "./ScenarioAppliedBanner";
 
 const NAVY = "#001D57";
 
@@ -98,8 +99,11 @@ export const ScenarioImpactTab = ({ onBack }: { onBack: () => void }) => {
 
   if (!hasOverlay) {
     return (
-      <div className="rounded-xl border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">
-        Run a scenario on the Scenario Testing tab to see its impact here.
+      <div className="space-y-4">
+        <ScenarioAppliedBanner />
+        <div className="rounded-xl border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">
+          Run a scenario on the Scenario Testing tab to see its impact here.
+        </div>
       </div>
     );
   }
@@ -114,6 +118,8 @@ export const ScenarioImpactTab = ({ onBack }: { onBack: () => void }) => {
 
   return (
     <div className="space-y-5">
+      <ScenarioAppliedBanner />
+
       <div className="rounded-xl border border-slate-200 bg-white p-4 sm:p-5">
         <h2 className="text-base font-bold" style={{ color: NAVY }}>
           Scenario Impact
