@@ -37,6 +37,20 @@ const FiveCapitals = () => {
     return out;
   }, [data]);
 
+  const lastSync = useMemo(() => {
+    let latest: number | null = null;
+    Object.values(data.latestLogByKri).forEach((log) => {
+      if (log?.attempt_at) {
+        const t = new Date(log.attempt_at).getTime();
+        if (latest === null || t > latest) latest = t;
+      }
+    });
+    return latest === null ? null : new Date(latest);
+  }, [data]);
+
+  const lastSyncIsStale =
+    lastSync != null && Date.now() - lastSync.getTime() > 8 * 24 * 60 * 60 * 1000;
+
   const pillars = useMemo(() => {
     return computePillarScores(liveValues).map((p) => {
       const meta = PILLAR_META[p.id];
@@ -66,8 +80,16 @@ const FiveCapitals = () => {
       {/* Live feed bar */}
       <div className="border-b border-slate-200 bg-white px-4 py-2 text-xs text-slate-600 sm:px-6">
         <span className="inline-flex items-center gap-2">
-          <span className="h-2 w-2 rounded-full bg-emerald-500" />
-          Live data feed connected — last sync 23 May 2026
+          <span
+            className={`h-2 w-2 rounded-full ${lastSyncIsStale ? "bg-amber-500" : "bg-emerald-500"}`}
+          />
+          {lastSync
+            ? `Live data feed connected — last sync ${lastSync.toLocaleDateString("en-GB", {
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+              })}${lastSyncIsStale ? " (stale)" : ""}`
+            : "Live data feed connected — awaiting first sync"}
         </span>
       </div>
 
