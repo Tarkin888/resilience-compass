@@ -1,4 +1,11 @@
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Shield } from "lucide-react";
+import { Link } from "react-router-dom";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export const Header = () => {
   return (
@@ -17,7 +24,35 @@ export const Header = () => {
           </div>
         </div>
 
-        <div className="flex items-center">
+        <div className="flex items-center gap-2">
+          {/* Admin dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                aria-label="Admin menu"
+                className="flex min-h-[44px] items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-brand shadow-sm hover:bg-slate-50 sm:px-4"
+              >
+                <Shield size={16} />
+                <span>Admin</span>
+                <ChevronDown size={16} className="text-slate-500" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem asChild>
+                <Link to="/admin/status" className="cursor-pointer">
+                  Data feed status
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/admin/sources" className="cursor-pointer">
+                  Manage sources
+                </Link>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* Existing trust selector */}
           <button
             type="button"
             className="flex min-h-[44px] items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-brand shadow-sm hover:bg-slate-50 sm:px-4"
