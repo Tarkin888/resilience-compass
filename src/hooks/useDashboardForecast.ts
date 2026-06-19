@@ -73,6 +73,7 @@ export function useDashboardForecast(): DashboardForecast {
         caption: "",
         loading,
         rollupConstant: null,
+        currentScore: liveCurrentScore,
       };
     }
 
@@ -84,16 +85,16 @@ export function useDashboardForecast(): DashboardForecast {
     });
 
     if (f.method === "none") {
-      return { ...f, loading: false, rollupConstant: null };
+      return { ...f, loading: false, rollupConstant: null, currentScore: liveCurrentScore };
     }
 
-    // Derive rollup constant from the latest historical join point:
-    //   dashboard_latest = round((sickness_latest + others) / 5)
-    // so others ≈ 5 * dashboard_latest - sickness_latest. Using this offset
-    // guarantees the first forecast point reconciles to the latest actual.
+    // Derive rollup constant from the LIVE engine-computed Human Capital score
+    // so the forecast joins the value the dashboard actually displays:
+    //   live = round((sickness_latest + others) / 5)
+    // → others ≈ 5 * live - sickness_latest.
     const latestSickness = sickness[sickness.length - 1].score;
     const PILLAR_KRI_COUNT = 5;
-    const others = PILLAR_KRI_COUNT * latestDashboard - latestSickness;
+    const others = PILLAR_KRI_COUNT * liveCurrentScore - latestSickness;
 
     const rolled: ForecastPoint[] = f.points.map((p) => ({
       date: p.date,
@@ -108,8 +109,9 @@ export function useDashboardForecast(): DashboardForecast {
       caption: f.caption,
       loading: false,
       rollupConstant: others,
+      currentScore: liveCurrentScore,
     };
-  }, [sickness, latestDashboard, loading]);
+  }, [sickness, liveCurrentScore, loading]);
 }
 
 function clampRound(v: number): number {
