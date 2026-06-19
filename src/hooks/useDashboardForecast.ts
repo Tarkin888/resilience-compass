@@ -1,49 +1,54 @@
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { forecastSeries, type ForecastResult, type ForecastPoint } from "@/lib/forecast";
+import { useHumanCapitalData } from "@/hooks/useHumanCapitalData";
+import { pillarScoreById } from "@/lib/pillarScores";
 
 export interface DashboardForecast extends ForecastResult {
   loading: boolean;
   /** Offset applied to sickness forecast to produce the dashboard rollup
    *  (i.e. sum of the other indicators held flat / carried forward). */
   rollupConstant: number | null;
+  /** The live engine-computed Human Capital score used as the forecast
+   *  join point — the same value the dashboard displays. */
+  currentScore: number | null;
 }
 
 /**
  * Dashboard forecast for the Human pillar.
  *
  * Implementation: forecast the sickness_absence KRI (the only series with
- * monthly history long enough to project), then roll up using the Draft 1
- * flat-hold method — every other scored indicator is held at its latest
- * historical value across the horizon (vacancy LOCF between quarters,
- * illustrative indicators flat). The rollup constant is derived from the
- * latest historical snapshots so the forecast joins the latest actual
- * dashboard score exactly.
+ * monthly history long enough to project), then roll up so the forecast
+ * joins the LIVE engine-computed Human Capital score (the same value shown
+ * everywhere else on the dashboard). Every other scored indicator is held
+ * flat across the horizon.
  */
 export function useDashboardForecast(): DashboardForecast {
   const [sickness, setSickness] = useState<{ date: string; score: number }[]>([]);
-  const [latestDashboard, setLatestDashboard] = useState<number | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [sicknessLoading, setSicknessLoading] = useState(true);
+  const { data: hcData, loading: hcLoading } = useHumanCapitalData();
+
+  // Live engine-computed Human Capital score — the canonical "current" value.
+  const liveCurrentScore = useMemo<number | null>(() => {
+    if (hcLoading) return null;
+    const liveValues: Record<string, number | null> = {};
+    Object.entries(hcData.capturesByKri).forEach(([kriId, caps]) => {
+      const latest = caps[0];
+      liveValues[kriId] = latest ? Number(latest.headline_value) : null;
+    });
+    return pillarScoreById(liveValues, "human");
+  }, [hcData, hcLoading]);
 
   useEffect(() => {
     let cancelled = false;
-    setLoading(true);
+    setSicknessLoading(true);
     (async () => {
-      const [{ data: sData }, { data: dData }] = await Promise.all([
-        supabase
-          .from("score_history")
-          .select("snapshot_date, normalised_score")
-          .eq("entity_type", "kri")
-          .eq("entity_id", "sickness_absence")
-          .order("snapshot_date", { ascending: true }),
-        supabase
-          .from("score_history")
-          .select("snapshot_date, normalised_score")
-          .eq("entity_type", "dashboard")
-          .eq("entity_id", "dashboard")
-          .order("snapshot_date", { ascending: false })
-          .limit(1),
-      ]);
+      const { data: sData } = await supabase
+        .from("score_history")
+        .select("snapshot_date, normalised_score")
+        .eq("entity_type", "kri")
+        .eq("entity_id", "sickness_absence")
+        .order("snapshot_date", { ascending: true });
       if (cancelled) return;
       setSickness(
         (sData ?? []).map((d) => ({
@@ -51,18 +56,17 @@ export function useDashboardForecast(): DashboardForecast {
           score: Number(d.normalised_score),
         })),
       );
-      setLatestDashboard(
-        dData && dData.length > 0 ? Number(dData[0].normalised_score) : null,
-      );
-      setLoading(false);
+      setSicknessLoading(false);
     })();
     return () => {
       cancelled = true;
     };
   }, []);
 
+  const loading = sicknessLoading || hcLoading;
+
   return useMemo<DashboardForecast>(() => {
-    if (loading || sickness.length === 0 || latestDashboard == null) {
+    if (loading || sickness.length === 0 || liveCurrentScore == null) {
       return {
         method: "none",
         points: [],
