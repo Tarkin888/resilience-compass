@@ -41,7 +41,11 @@ export const AiRiskPredictionTab = () => {
     () => points.map((p) => Math.round(p.normalised_score)),
     [points],
   );
-  const currentScore = scores.length > 0 ? scores[scores.length - 1] : null;
+  // Current score = live engine-computed Human Capital score (same value the
+  // dashboard displays). Falls back to the latest history snapshot only if the
+  // live value is not yet available.
+  const currentScore =
+    forecast.currentScore ?? (scores.length > 0 ? scores[scores.length - 1] : null);
   const spc = useMemo(() => classifyTrend(scores), [scores]);
 
   const recentActuals = useMemo(
