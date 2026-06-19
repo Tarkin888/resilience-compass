@@ -48,14 +48,18 @@ export const AiRiskPredictionTab = () => {
     forecast.currentScore ?? (scores.length > 0 ? scores[scores.length - 1] : null);
   const spc = useMemo(() => classifyTrend(scores), [scores]);
 
-  const recentActuals = useMemo(
-    () =>
-      points.slice(-6).map((p) => ({
-        period: formatPeriod(p.snapshot_date),
-        actual: Math.round(p.normalised_score),
-      })),
-    [points],
-  );
+  const recentActuals = useMemo(() => {
+    const rows = points.slice(-6).map((p) => ({
+      period: formatPeriod(p.snapshot_date),
+      actual: Math.round(p.normalised_score),
+    }));
+    // Overwrite the most recent actual with the live engine score so the
+    // chart's join point matches the headline and the forecast anchor.
+    if (rows.length > 0 && currentScore != null) {
+      rows[rows.length - 1] = { ...rows[rows.length - 1], actual: currentScore };
+    }
+    return rows;
+  }, [points, currentScore]);
 
   const projectedScore =
     forecast.points.length > 0
