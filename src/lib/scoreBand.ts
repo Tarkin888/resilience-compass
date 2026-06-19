@@ -123,10 +123,19 @@ export function luminance(hex: string): number {
 }
 
 /**
- * Hex colour for a 0–100 score, matching the app palette.
- * Now returns a graduated colour that blends smoothly between bands.
+ * Discrete RAG colour for a 0–100 score, using the same bands as scoreBand().
+ * Red ≤ 35, amber 36–66, green ≥ 67. Unscored returns grey.
  */
 export function scoreBandColor(score: number | null | undefined): string {
-  if (score == null || !Number.isFinite(score)) return GREY;
-  return colourForScore(score);
+  const band = scoreBand(score);
+  switch (band) {
+    case "red":
+      return RED;
+    case "amber":
+      return AMBER;
+    case "green":
+      return GREEN;
+    default:
+      return GREY;
+  }
 }
