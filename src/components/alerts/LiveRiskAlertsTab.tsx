@@ -29,15 +29,13 @@ const FAILURE_OUTCOMES = new Set([
 const BENIGN_OUTCOMES = new Set(["ok", "success", "no_new_edition"]);
 
 // Display-only nesting of data points under their parent indicator
-// (Rick's case study pp. 6–8, confirmed in Prompt_12 Change 3).
-// Job Distribution has no confirmed data points yet; Training Compliance is
-// unassigned until Rick confirms its parent indicator (decision D6 —
-// untraceable assumptions must be flagged).
+// (case study pp. 6–8, confirmed in Prompt_12 Change 3).
+// Training Compliance is unassigned until its parent indicator is confirmed
+// (decision D6 — untraceable assumptions must be flagged).
 const INDICATOR_GROUPS: { id: string; name: string; kris: string[] }[] = [
   { id: "workforce_of_the_future", name: "Workforce of the Future", kris: ["vacancy"] },
   { id: "people_resilience", name: "People Resilience", kris: ["sickness_absence", "staff_engagement_score"] },
   { id: "continuity_critical_skills", name: "Continuity of Critical Skills", kris: ["voluntary_turnover"] },
-  { id: "job_distribution", name: "Job Distribution", kris: [] },
   { id: "unassigned", name: "Unassigned indicator", kris: ["training_compliance"] },
 ];
 
@@ -340,7 +338,6 @@ export const LiveRiskAlertsTab = () => {
             const groupRowsVisible = filtered.filter((r) => group.kris.includes(r.def.kri_id));
             const scoredCount = groupRowsAll.filter((r) => r.engineScore != null).length;
             const totalCount = groupRowsAll.length;
-            const isJobDist = group.id === "job_distribution";
             const isUnassigned = group.id === "unassigned";
 
             return (
@@ -354,17 +351,11 @@ export const LiveRiskAlertsTab = () => {
                     {group.name}
                   </h2>
                   <span className="text-[11px] font-medium text-slate-500">
-                    {isJobDist
-                      ? "Not yet scored — data points to be confirmed"
-                      : `${scoredCount} of ${totalCount} data point${totalCount === 1 ? "" : "s"} scored`}
+                    {`${scoredCount} of ${totalCount} data point${totalCount === 1 ? "" : "s"} scored`}
                   </span>
                 </div>
 
-                {isJobDist ? (
-                  <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-5 text-sm text-slate-500">
-                    No data points defined for this indicator yet.
-                  </div>
-                ) : groupRowsVisible.length === 0 ? (
+                {groupRowsVisible.length === 0 ? (
                   <div className="rounded-xl border border-slate-200 bg-white p-5 text-center text-xs text-slate-500">
                     No matching data points under the current filters.
                   </div>

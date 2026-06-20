@@ -27,8 +27,7 @@ export interface PillarConfig {
 // -----------------------------
 // Human pillar — one indicator per Tab 1 KRI so the pillar dial, pillar-card
 // header and dashboard header are computed from the same five KRI engine
-// scores the user sees in Live Risk Alerts. Job Distribution is intentionally
-// unscored (no data points) so the average excludes it.
+// scores the user sees in Live Risk Alerts.
 const human: PillarConfig = {
   id: "human",
   name: "Human (Workforce)",
@@ -72,12 +71,6 @@ const human: PillarConfig = {
       dataPoints: [
         { id: "training_compliance", name: "Training compliance", target: 95, minimumThreshold: 60, unit: "%", direction: "higherIsBetter", source: "Illustrative", illustrativeValue: 78 },
       ],
-    },
-    {
-      id: "job_distribution",
-      name: "Job Distribution",
-      description: "Based on the future skills plan (data points to be confirmed)",
-      dataPoints: [], // unscored — excluded from pillar average
     },
     {
       id: "workforce_of_the_future",
