@@ -38,7 +38,7 @@ const INDICATOR_GROUPS: { id: string; name: string; kris: string[] }[] = [
   { id: "people_resilience", name: "People Resilience", kris: ["sickness_absence", "staff_engagement_score"] },
   { id: "continuity_critical_skills", name: "Continuity of Critical Skills", kris: ["voluntary_turnover"] },
   { id: "job_distribution", name: "Job Distribution", kris: [] },
-  { id: "unassigned", name: "Unassigned — parent indicator to be confirmed with Rick", kris: ["training_compliance"] },
+  { id: "unassigned", name: "Unassigned indicator", kris: ["training_compliance"] },
 ];
 
 const FAILURE_REASONS: Record<string, string> = {
@@ -355,7 +355,7 @@ export const LiveRiskAlertsTab = () => {
                   </h2>
                   <span className="text-[11px] font-medium text-slate-500">
                     {isJobDist
-                      ? "Not yet scored — data points to be confirmed by Rick"
+                      ? "Not yet scored — data points to be confirmed"
                       : `${scoredCount} of ${totalCount} data point${totalCount === 1 ? "" : "s"} scored`}
                   </span>
                 </div>
