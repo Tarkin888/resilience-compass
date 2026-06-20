@@ -16,7 +16,7 @@ export interface Tab1EngineConfig {
  * runtime `thresholds.threshold_value` when present, falling back to the
  * `target` value here. The two are kept aligned so Tab 1 and Tab 3 agree.
  *
- * Governance targets confirmed by Rick, 12 June 2026 — to be reconfirmed 6 July.
+ * Governance targets confirmed by the methodology owner, 12 June 2026 — to be reconfirmed 6 July.
  */
 export const TAB1_ENGINE_CONFIG: Record<string, Tab1EngineConfig> = {
   sickness_absence: { target: 3, minimumThreshold: 6, direction: "lowerIsBetter" },

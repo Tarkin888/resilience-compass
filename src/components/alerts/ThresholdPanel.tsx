@@ -86,8 +86,8 @@ export const ThresholdPanel = ({
             {(source?.kri_id === "sickness_absence" || source?.kri_id === "vacancy") && (
               <p className="mt-1 text-sm text-slate-700">
                 {source?.kri_id === "sickness_absence"
-                  ? "Governance target of 3% and minimum threshold of 6% confirmed by Rick on 12 June 2026."
-                  : "Governance target of 8% and minimum threshold of 15% confirmed by Rick on 12 June 2026."}
+                  ? "Governance target of 3% and minimum threshold of 6% confirmed by the methodology owner on 12 June 2026."
+                  : "Governance target of 8% and minimum threshold of 15% confirmed by the methodology owner on 12 June 2026."}
               </p>
             )}
             {source?.kri_id === "sickness_absence" && (
