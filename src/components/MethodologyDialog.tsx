@@ -137,15 +137,11 @@ export const MethodologyDialog = ({ open, onOpenChange, returnFocusRef }: Method
 
           {/* Section 4 */}
           <section>
-            <h3 className="mb-1 text-sm font-bold">The four Workforce indicators</h3>
-            <p className="mb-2">Workforce resilience is tracked through four indicators:</p>
+            <h3 className="mb-1 text-sm font-bold">The three Workforce indicators</h3>
+            <p className="mb-2">Workforce resilience is tracked through three indicators:</p>
             <ul className="list-disc space-y-1 pl-5">
               <li>
                 <strong>Workforce of the Future</strong> — having the right skills to compete in a changing market.
-              </li>
-              <li>
-                <strong>Job Distribution</strong> — a workforce distribution that balances knowledge, cost and
-                resilience.
               </li>
               <li>
                 <strong>People Resilience</strong> — collective resilience across the workforce, to navigate change
