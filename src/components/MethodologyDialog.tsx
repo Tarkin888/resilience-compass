@@ -56,8 +56,8 @@ function StaticRangeBar() {
           </span>
         ))}
       </div>
-      <p className="mt-2 text-[11px] italic text-slate-500">
-        Colour bands show the RAG status (red ≤35, amber 36–66, green ≥67). The teal ticks mark the minimum threshold and target positions, which are separate from the colour boundaries.
+      <p className="mt-2 text-[10px] text-slate-500">
+        Colours show the RAG bands (red ≤35, amber 36–66, green ≥67). The teal ticks mark the minimum threshold (25) and target (75) — these are separate from the colour boundaries.
       </p>
     </div>
   );
