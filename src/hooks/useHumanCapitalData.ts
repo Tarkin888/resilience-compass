@@ -37,7 +37,7 @@ export function useHumanCapitalData() {
         supabase.from("kri_definitions").select("*").order("display_order"),
         supabase.from("kri_captures").select("*").order("captured_at", { ascending: false }),
         supabase.from("thresholds").select("*"),
-        supabase.from("sources_public" as "sources").select("id,kri_id,publisher,publication_name,series_landing_page_url,edition_page_url_pattern,update_cadence,file_format,last_known_file_url,updated_at"),
+        supabase.from("sources").select("id,kri_id,publisher,publication_name,series_landing_page_url,edition_page_url_pattern,update_cadence,file_format,last_known_file_url,updated_at"),
         supabase.from("capture_log").select("id,kri_id,outcome,attempt_at").order("attempt_at", { ascending: false }),
       ]);
 
