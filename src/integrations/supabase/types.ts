@@ -109,13 +109,6 @@ export type Database = {
             referencedRelation: "sources"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "kri_captures_source_id_fkey"
-            columns: ["source_id"]
-            isOneToOne: false
-            referencedRelation: "sources_public"
-            referencedColumns: ["id"]
-          },
         ]
       }
       kri_definitions: {
@@ -319,13 +312,6 @@ export type Database = {
             referencedRelation: "sources"
             referencedColumns: ["kri_id"]
           },
-          {
-            foreignKeyName: "thresholds_kri_id_fkey"
-            columns: ["kri_id"]
-            isOneToOne: false
-            referencedRelation: "sources_public"
-            referencedColumns: ["kri_id"]
-          },
         ]
       }
     }
@@ -348,45 +334,6 @@ export type Database = {
           id?: string | null
           kri_id?: string | null
           outcome?: string | null
-        }
-        Relationships: []
-      }
-      sources_public: {
-        Row: {
-          edition_page_url_pattern: string | null
-          file_format: string | null
-          id: string | null
-          kri_id: string | null
-          last_known_file_url: string | null
-          publication_name: string | null
-          publisher: string | null
-          series_landing_page_url: string | null
-          update_cadence: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          edition_page_url_pattern?: string | null
-          file_format?: string | null
-          id?: string | null
-          kri_id?: string | null
-          last_known_file_url?: string | null
-          publication_name?: string | null
-          publisher?: string | null
-          series_landing_page_url?: string | null
-          update_cadence?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          edition_page_url_pattern?: string | null
-          file_format?: string | null
-          id?: string | null
-          kri_id?: string | null
-          last_known_file_url?: string | null
-          publication_name?: string | null
-          publisher?: string | null
-          series_landing_page_url?: string | null
-          update_cadence?: string | null
-          updated_at?: string | null
         }
         Relationships: []
       }
