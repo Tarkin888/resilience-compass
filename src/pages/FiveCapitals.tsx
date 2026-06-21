@@ -6,6 +6,8 @@ import { Footer } from "@/components/Footer";
 import { PillarDial } from "@/components/capitals/PillarDial";
 import { IndicatorRangeBar } from "@/components/capitals/IndicatorRangeBar";
 import { useHumanCapitalData } from "@/hooks/useHumanCapitalData";
+import { getLastSuccessfulCapture } from "@/hooks/useLastSuccessfulCapture";
+import { formatDateTime } from "@/components/alerts/severity";
 import { computePillarScores } from "@/lib/pillarScores";
 import { scoreBandColor } from "@/lib/scoreBand";
 
