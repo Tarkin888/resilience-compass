@@ -1,20 +1,7 @@
-import { useEffect, useState } from "react";
 import { CheckCircle2, AlertTriangle, HelpCircle } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { Footer } from "@/components/Footer";
 import { BackButton } from "@/components/BackButton";
-
-interface CapRow {
-  kri_id: string;
-  captured_at: string;
-  edition_label: string;
-  headline_value: number | null;
-}
-interface LogRow {
-  kri_id: string;
-  outcome: string;
-  attempt_at: string;
-}
+import { useHumanCapitalData } from "@/hooks/useHumanCapitalData";
 
 const KRI_LIST: { id: string; name: string; unit: string }[] = [
   { id: "sickness_absence", name: "Sickness Absence Rate", unit: "%" },
@@ -23,7 +10,7 @@ const KRI_LIST: { id: string; name: string; unit: string }[] = [
 
 const SUCCESS = new Set(["ok", "success", "no_new_edition"]);
 
-function fmtDate(iso?: string): string {
+function fmtDate(iso?: string | null): string {
   if (!iso) return "—";
   const d = new Date(iso);
   const date = d.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
@@ -31,7 +18,7 @@ function fmtDate(iso?: string): string {
   return `${date} at ${time}`;
 }
 
-function relative(iso?: string): string {
+function relative(iso?: string | null): string {
   if (!iso) return "never";
   const diff = Date.now() - new Date(iso).getTime();
   const mins = Math.floor(diff / 60000);
@@ -44,32 +31,7 @@ function relative(iso?: string): string {
 }
 
 export default function AdminStatus() {
-  const [caps, setCaps] = useState<Record<string, CapRow>>({});
-  const [logs, setLogs] = useState<Record<string, LogRow>>({});
-
-  useEffect(() => {
-    (async () => {
-      const { data: c } = await supabase
-        .from("kri_captures")
-        .select("kri_id,captured_at,edition_label,headline_value")
-        .order("captured_at", { ascending: false });
-      const cm: Record<string, CapRow> = {};
-      (c ?? []).forEach((r: CapRow) => {
-        if (!cm[r.kri_id]) cm[r.kri_id] = r;
-      });
-      setCaps(cm);
-
-      const { data: l } = await supabase
-        .from("capture_log")
-        .select("kri_id,outcome,attempt_at")
-        .order("attempt_at", { ascending: false });
-      const lm: Record<string, LogRow> = {};
-      (l ?? []).forEach((r: LogRow) => {
-        if (!lm[r.kri_id]) lm[r.kri_id] = r;
-      });
-      setLogs(lm);
-    })();
-  }, []);
+  const { data, loading, error } = useHumanCapitalData();
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col">
@@ -84,6 +46,11 @@ export default function AdminStatus() {
       </header>
       <main className="flex-1 px-4 py-6 space-y-5 sm:px-6">
         <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+          {loading ? (
+            <div className="px-4 py-6 text-sm text-slate-500">Loading live data status…</div>
+          ) : error ? (
+            <div className="px-4 py-6 text-sm text-amber-700">Unable to load: {error}</div>
+          ) : (
           <table className="w-full text-sm">
             <thead className="border-b border-slate-200 bg-slate-50">
               <tr className="text-left text-xs font-medium uppercase tracking-wide text-slate-500">
@@ -98,8 +65,8 @@ export default function AdminStatus() {
             </thead>
             <tbody>
               {KRI_LIST.map((k) => {
-                const log = logs[k.id];
-                const cap = caps[k.id];
+                const log = data.latestLogByKri[k.id];
+                const cap = data.capturesByKri[k.id]?.[0];
                 const outcome = log?.outcome ?? "unknown";
                 const isFail = log && !SUCCESS.has(outcome);
                 const chip = !log
@@ -138,6 +105,7 @@ export default function AdminStatus() {
               })}
             </tbody>
           </table>
+          )}
         </div>
 
         <section
