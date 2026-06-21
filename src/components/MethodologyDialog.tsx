@@ -20,27 +20,20 @@ function StaticRangeBar() {
         preserveAspectRatio="none"
         className="block h-7 w-full"
         role="img"
-        aria-label="Operating range from 0 to 100. Minimum threshold at 25, target at 75."
+        aria-label="Operating range from 0 to 100. RAG colour bands: red 0–35, amber 36–66, green 67–100. Minimum threshold tick at 25, target tick at 75."
       >
-        <defs>
-          <linearGradient id="static-grad" x1="0" x2="1" y1="0" y2="0">
-            <stop offset="0%" stopColor={RED} />
-            <stop offset="50%" stopColor={AMBER} />
-            <stop offset="100%" stopColor={GREEN} />
-          </linearGradient>
-        </defs>
-        {/* solid red 0-25 */}
-        <rect x="0" y="10" width="50" height="6" fill={RED} />
-        {/* gradient 25-75 */}
-        <rect x="50" y="10" width="100" height="6" fill="url(#static-grad)" />
-        {/* solid green 75-100 */}
-        <rect x="150" y="10" width="50" height="6" fill={GREEN} />
+        {/* solid red 0-35 */}
+        <rect x="0" y="10" width="70" height="6" fill={RED} />
+        {/* solid amber 35-67 */}
+        <rect x="70" y="10" width="64" height="6" fill={AMBER} />
+        {/* solid green 67-100 */}
+        <rect x="134" y="10" width="66" height="6" fill={GREEN} />
 
         {/* end dots */}
         <circle cx="2" cy="13" r="2.5" fill="#000" />
         <circle cx="198" cy="13" r="2.5" fill="#000" />
 
-        {/* teal ticks at 25 and 75 */}
+        {/* teal ticks at 25 and 75 (threshold / target positions) */}
         <line x1="50" y1="6" x2="50" y2="20" stroke={TEAL} strokeWidth="2" />
         <line x1="150" y1="6" x2="150" y2="20" stroke={TEAL} strokeWidth="2" />
       </svg>
@@ -48,21 +41,24 @@ function StaticRangeBar() {
       {/* threshold/target labels */}
       <div className="relative mt-1 h-4 text-[10px] font-bold" style={{ color: TEAL }} aria-hidden>
         <span className="absolute -translate-x-1/2" style={{ left: "25%" }}>
-          Min threshold
+          Min threshold (25)
         </span>
         <span className="absolute -translate-x-1/2" style={{ left: "75%" }}>
-          Target
+          Target (75)
         </span>
       </div>
 
       {/* numeric scale */}
       <div className="relative mt-0.5 h-3 text-[10px] tabular-nums text-slate-500" aria-hidden>
-        {[0, 25, 75, 100].map((t) => (
+        {[0, 35, 67, 100].map((t) => (
           <span key={t} className="absolute -translate-x-1/2" style={{ left: `${t}%` }}>
             {t}
           </span>
         ))}
       </div>
+      <p className="mt-2 text-[11px] italic text-slate-500">
+        Colour bands show the RAG status (red ≤35, amber 36–66, green ≥67). The teal ticks mark the minimum threshold and target positions, which are separate from the colour boundaries.
+      </p>
     </div>
   );
 }
