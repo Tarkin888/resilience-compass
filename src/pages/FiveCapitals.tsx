@@ -6,6 +6,8 @@ import { Footer } from "@/components/Footer";
 import { PillarDial } from "@/components/capitals/PillarDial";
 import { IndicatorRangeBar } from "@/components/capitals/IndicatorRangeBar";
 import { useHumanCapitalData } from "@/hooks/useHumanCapitalData";
+import { getLastSuccessfulCapture } from "@/hooks/useLastSuccessfulCapture";
+import { formatDateTime } from "@/components/alerts/severity";
 import { computePillarScores } from "@/lib/pillarScores";
 import { scoreBandColor } from "@/lib/scoreBand";
 
@@ -37,19 +39,10 @@ const FiveCapitals = () => {
     return out;
   }, [data]);
 
-  const lastSync = useMemo(() => {
-    let latest: number | null = null;
-    Object.values(data.latestLogByKri).forEach((log) => {
-      if (log?.attempt_at) {
-        const t = new Date(log.attempt_at).getTime();
-        if (latest === null || t > latest) latest = t;
-      }
-    });
-    return latest === null ? null : new Date(latest);
-  }, [data]);
-
-  const lastSyncIsStale =
-    lastSync != null && Date.now() - lastSync.getTime() > 8 * 24 * 60 * 60 * 1000;
+  const lastSuccessIso = useMemo(() => getLastSuccessfulCapture(data), [data]);
+  const lastSuccessIsStale =
+    lastSuccessIso != null &&
+    Date.now() - new Date(lastSuccessIso).getTime() > 8 * 24 * 60 * 60 * 1000;
 
   const pillars = useMemo(() => {
     return computePillarScores(liveValues).map((p) => {
@@ -81,15 +74,11 @@ const FiveCapitals = () => {
       <div className="border-b border-slate-200 bg-white px-4 py-2 text-xs text-slate-600 sm:px-6">
         <span className="inline-flex items-center gap-2">
           <span
-            className={`h-2 w-2 rounded-full ${lastSyncIsStale ? "bg-amber-500" : "bg-emerald-500"}`}
+            className={`h-2 w-2 rounded-full ${lastSuccessIsStale ? "bg-amber-500" : lastSuccessIso ? "bg-emerald-500" : "bg-slate-300"}`}
           />
-          {lastSync
-            ? `Live data feed connected — last sync ${lastSync.toLocaleDateString("en-GB", {
-                day: "numeric",
-                month: "long",
-                year: "numeric",
-              })}${lastSyncIsStale ? " (stale)" : ""}`
-            : "Live data feed connected — awaiting first sync"}
+          {lastSuccessIso
+            ? `Live data feed connected — last successful capture ${formatDateTime(lastSuccessIso)}${lastSuccessIsStale ? " (stale)" : ""}`
+            : "Live data feed connected — last successful capture —"}
         </span>
       </div>
 
