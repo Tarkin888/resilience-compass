@@ -24,6 +24,10 @@ export const ScoreCard = () => {
     return pillarScoreById(liveValues, "human");
   }, [data]);
 
+  const humanReady = !loading &&
+    data.capturesByKri["vacancy"]?.[0]?.headline_value != null &&
+    data.capturesByKri["sickness_absence"]?.[0]?.headline_value != null;
+
   useEffect(() => {
     let cancelled = false;
     (async () => {
