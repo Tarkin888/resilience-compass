@@ -99,7 +99,7 @@ const FiveCapitals = () => {
             <PillarDial
               key={p.id}
               name={p.name}
-              score={p.score}
+              score={p.id === "human" && humanLoading ? null : p.score}
               trend={p.trend}
               trendLabel={p.trendLabel}
               onViewDetails={() => scrollToPillar(p.id)}
