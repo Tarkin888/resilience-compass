@@ -27,7 +27,7 @@ const FiveCapitals = () => {
   const navigate = useNavigate();
   
   const [highlight, setHighlight] = useState<string | null>(null);
-  const { data } = useHumanCapitalData();
+  const { data, loading } = useHumanCapitalData();
 
   // Latest live values keyed by kri_id.
   const liveValues = useMemo<Record<string, number | null>>(() => {
