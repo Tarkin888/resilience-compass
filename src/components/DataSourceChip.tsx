@@ -94,11 +94,11 @@ export const DataSourceChip = (props: DataSourceChipProps) => {
           className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
         >
           <Info size={12} aria-hidden />
-          Mockup — not yet live
+          Illustrative preview
         </span>
       </TooltipTrigger>
       <TooltipContent id={tooltipId} role="tooltip" className="max-w-[280px]">
-        <span className="text-xs">Mockup — not yet live in the demo build</span>
+        <span className="text-xs">Illustrative preview — not from a live source</span>
       </TooltipContent>
     </Tooltip>
   );
