@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { Header } from "@/components/Header";
@@ -25,7 +25,7 @@ const PILLAR_META: Record<string, { trend: "up" | "down" | "flat"; trendLabel: s
 
 const FiveCapitals = () => {
   const navigate = useNavigate();
-  const cardRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  
   const [highlight, setHighlight] = useState<string | null>(null);
   const { data } = useHumanCapitalData();
 
@@ -59,7 +59,7 @@ const FiveCapitals = () => {
   }, [liveValues]);
 
   const scrollToPillar = (id: string) => {
-    const el = cardRefs.current[id];
+    const el = document.getElementById(`pillar-${id}`);
     if (!el) return;
     el.scrollIntoView({ behavior: "smooth", block: "start" });
     setHighlight(id);
@@ -115,8 +115,8 @@ const FiveCapitals = () => {
               const isHighlighted = highlight === p.id;
               return (
                 <div
+                  id={`pillar-${p.id}`}
                   key={p.id}
-                  ref={(el) => (cardRefs.current[p.id] = el)}
                   className={`rounded-xl border bg-white p-5 shadow-sm transition-shadow ${
                     isHighlighted ? "ring-2 ring-[#24BEAA] shadow-md" : "border-slate-200"
                   }`}
