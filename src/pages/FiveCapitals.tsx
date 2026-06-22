@@ -27,7 +27,7 @@ const FiveCapitals = () => {
   const navigate = useNavigate();
   
   const [highlight, setHighlight] = useState<string | null>(null);
-  const { data } = useHumanCapitalData();
+  const { data, loading } = useHumanCapitalData();
 
   // Latest live values keyed by kri_id.
   const liveValues = useMemo<Record<string, number | null>>(() => {
@@ -38,6 +38,8 @@ const FiveCapitals = () => {
     });
     return out;
   }, [data]);
+
+  const humanLoading = loading || liveValues.vacancy == null || liveValues.sickness_absence == null;
 
   const lastSuccessIso = useMemo(() => getLastSuccessfulCapture(data), [data]);
   const lastSuccessIsStale =
@@ -97,7 +99,7 @@ const FiveCapitals = () => {
             <PillarDial
               key={p.id}
               name={p.name}
-              score={p.score}
+              score={p.id === "human" && humanLoading ? null : p.score}
               trend={p.trend}
               trendLabel={p.trendLabel}
               onViewDetails={() => scrollToPillar(p.id)}

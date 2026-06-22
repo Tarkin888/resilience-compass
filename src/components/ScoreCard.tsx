@@ -13,7 +13,7 @@ export const ScoreCard = () => {
   const [stale, setStale] = useState(false);
   const [methodologyOpen, setMethodologyOpen] = useState(false);
   const methodologyTriggerRef = useRef<HTMLButtonElement>(null);
-  const { data } = useHumanCapitalData();
+  const { data, loading } = useHumanCapitalData();
 
   const humanScore = useMemo(() => {
     const liveValues: Record<string, number | null> = {};
@@ -23,6 +23,10 @@ export const ScoreCard = () => {
     });
     return pillarScoreById(liveValues, "human");
   }, [data]);
+
+  const humanReady = !loading &&
+    data.capturesByKri["vacancy"]?.[0]?.headline_value != null &&
+    data.capturesByKri["sickness_absence"]?.[0]?.headline_value != null;
 
   useEffect(() => {
     let cancelled = false;
@@ -56,7 +60,21 @@ export const ScoreCard = () => {
           <div className="sm:w-1/2 sm:shrink-0">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0 flex-1">
-                <ScoreScale score={humanScore ?? 0} size="large" label="Human Capital score" />
+                {humanReady ? (
+                  <ScoreScale score={humanScore ?? 0} size="large" label="Human Capital score" />
+                ) : (
+                  <div className="w-full">
+                    <div className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                      Human Capital score
+                    </div>
+                    <div className="mt-1 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                      <span className="text-5xl font-semibold leading-none tabular-nums text-slate-300 sm:text-6xl">
+                        —
+                      </span>
+                    </div>
+                    <p className="mt-1 text-base text-slate-400">Loading…</p>
+                  </div>
+                )}
               </div>
               <button
                 ref={methodologyTriggerRef}
