@@ -72,7 +72,7 @@ export const PillarDial = ({ name, score, trend, trendLabel, onViewDetails }: Pr
         className="mt-3 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-xs font-semibold hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand"
         style={{ color: NAVY }}
       >
-        View details
+        View composition
       </button>
     </div>
   );
