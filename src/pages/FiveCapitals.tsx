@@ -126,7 +126,7 @@ const FiveCapitals = () => {
                   <div className="flex flex-wrap items-start justify-between gap-2">
                     <div>
                       <div className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                        {isLive ? "Live build 3 of 5" : "Preview"} · {p.name}
+                        {isLive ? "Live" : "Preview"} · {p.name}
                       </div>
                       <div className="mt-1 flex items-baseline gap-2">
                         <span className="text-2xl font-bold tabular-nums" style={{ color: scoreBandColor(p.score) }}>
@@ -189,7 +189,7 @@ const FiveCapitals = () => {
                       </button>
                     ) : (
                       <span className="inline-flex items-center rounded-md border border-slate-300 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-500">
-                        Coming soon
+                        Illustrative preview
                       </span>
                     )}
                   </div>
@@ -226,7 +226,7 @@ const FiveCapitals = () => {
               Each data point sits on the 0–100 operating range, normalised so that <strong>minimum threshold = 25</strong> and <strong>target = 75</strong>. Indicator scores are the unweighted average of their data-point scores.
             </li>
             <li>
-              A downward trend arrow means a score is moving away from target back towards the minimum threshold.
+              A downward trend arrow means a score is moving away from target back towards the minimum threshold; an upward arrow means it is improving towards target.
             </li>
           </ul>
         </section>
