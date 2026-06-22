@@ -13,7 +13,7 @@ export const ScoreCard = () => {
   const [stale, setStale] = useState(false);
   const [methodologyOpen, setMethodologyOpen] = useState(false);
   const methodologyTriggerRef = useRef<HTMLButtonElement>(null);
-  const { data } = useHumanCapitalData();
+  const { data, loading } = useHumanCapitalData();
 
   const humanScore = useMemo(() => {
     const liveValues: Record<string, number | null> = {};
