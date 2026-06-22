@@ -334,10 +334,10 @@ export const LiveRiskAlertsTab = () => {
       ) : (
         <div className="space-y-6">
           {INDICATOR_GROUPS.map((group) => {
-            const groupRowsAll = rows.filter((r) => group.kris.includes(r.def.kri_id));
             const groupRowsVisible = filtered.filter((r) => group.kris.includes(r.def.kri_id));
-            const scoredCount = groupRowsAll.filter((r) => r.engineScore != null).length;
-            const totalCount = groupRowsAll.length;
+            if (groupRowsVisible.length === 0) return null;
+            const scoredCount = groupRowsVisible.filter((r) => r.engineScore != null).length;
+            const totalCount = groupRowsVisible.length;
             const isUnassigned = group.id === "unassigned";
 
             return (
@@ -355,29 +355,23 @@ export const LiveRiskAlertsTab = () => {
                   </span>
                 </div>
 
-                {groupRowsVisible.length === 0 ? (
-                  <div className="rounded-xl border border-slate-200 bg-white p-5 text-center text-xs text-slate-500">
-                    No matching data points under the current filters.
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {groupRowsVisible.map((r) => (
-                      <AlertCard
-                        key={r.def.id}
-                        definition={r.def}
-                        status={r.status}
-                        trend={r.trend}
-                        value={r.value}
-                        unit={r.unit}
-                        threshold={r.threshold}
-                        source={r.source}
-                        captures={r.captures}
-                        narrative={r.narrative}
-                        engineScore={r.engineScore}
-                      />
-                    ))}
-                  </div>
-                )}
+                <div className="space-y-3">
+                  {groupRowsVisible.map((r) => (
+                    <AlertCard
+                      key={r.def.id}
+                      definition={r.def}
+                      status={r.status}
+                      trend={r.trend}
+                      value={r.value}
+                      unit={r.unit}
+                      threshold={r.threshold}
+                      source={r.source}
+                      captures={r.captures}
+                      narrative={r.narrative}
+                      engineScore={r.engineScore}
+                    />
+                  ))}
+                </div>
               </section>
             );
           })}
