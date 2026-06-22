@@ -39,6 +39,8 @@ const FiveCapitals = () => {
     return out;
   }, [data]);
 
+  const humanLoading = loading || liveValues.vacancy == null || liveValues.sickness_absence == null;
+
   const lastSuccessIso = useMemo(() => getLastSuccessfulCapture(data), [data]);
   const lastSuccessIsStale =
     lastSuccessIso != null &&
