@@ -19,7 +19,18 @@ import { classifyTrend, spcChipClasses } from "@/lib/spc";
 import { bandFor } from "@/lib/scoringEngine";
 import { useAIInterventions, type DataPointInfo, type TieredIntervention } from "@/hooks/useAIInterventions";
 import { PILLAR_CONFIG, resolveDataPoints } from "@/config/dataPoints";
-import { pillarScoreWithOverride } from "@/lib/pillarScores";
+import { pillarScoreWithOverride, pillarIndicatorScoresWithOverrides } from "@/lib/pillarScores";
+
+// Format a value + unit for the simulation copy.
+// %: tight (e.g. "3%"); score: phrased ("a score of 6.9"); else spaced ("45 days").
+function formatValueUnit(value: number, unit: string): string {
+  if (unit === "%") return `${value}%`;
+  if (unit === "score") return `a score of ${value}`;
+  return `${value} ${unit}`;
+}
+function assumptionPhrase(name: string, value: number, unit: string): string {
+  return `${name.toLowerCase()} reaches ${formatValueUnit(value, unit)}`;
+}
 
 const FORECAST_COLOR = "#6366F1";
 const ACTUAL_COLOR = "#F59E0B";
