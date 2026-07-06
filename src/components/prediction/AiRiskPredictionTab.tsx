@@ -526,9 +526,9 @@ export const AiRiskPredictionTab = () => {
               </div>
             )}
 
-            {activeSim && activeTargetDpName && (
+            {activeSim && activeAssumptions.length > 0 && (
               <p className="mt-2 text-[11px] italic text-slate-600">
-                Simulation assumes {activeTargetDpName} reaches {activeSim.intervention.assumedValue}{activeUnit} within 3 months; scores recomputed with the standard scoring method.
+                Simulation assumes {activeAssumptions.join(", ")} within 3 months; scores recomputed with the standard scoring method.
               </p>
             )}
 
