@@ -574,7 +574,13 @@ export const AiRiskPredictionTab = () => {
             ) : (
               <>
                 <ol className="mt-4 space-y-3">
-                  {orderedInterventions.map(({ intervention, simulatedScore, uplift }, idx) => {
+                  {orderedInterventions.map(({ intervention, uplift, affectedIndicators }, idx) => {
+                    const cardSimEnd =
+                      projectedScore != null ? Math.min(100, projectedScore + uplift) : null;
+                    const movesLine =
+                      affectedIndicators.length > 0
+                        ? `Moves: ${affectedIndicators.map((a) => a.name).join(", ")}`
+                        : "";
                     const isActive = simulatingId === intervention.id;
                     const isOpen = openRationaleId === intervention.id;
                     const meta = TIER_META[intervention.tier];
