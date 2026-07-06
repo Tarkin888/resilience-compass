@@ -350,7 +350,7 @@ export const AiRiskPredictionTab = () => {
                         {projectedScore}
                       </span>
                     </div>
-                    {activeSim && activeSim.simulatedScore != null && (
+                    {activeSim && simulatedEndScore != null && (
                       <>
                         <span className="text-2xl text-slate-400" aria-hidden>→</span>
                         <div className="flex flex-col">
@@ -358,17 +358,32 @@ export const AiRiskPredictionTab = () => {
                             Simulated · Intervention {activeRank}
                           </span>
                           <span className="text-3xl font-semibold tabular-nums" style={{ color: SIMULATION_COLOR }}>
-                            {activeSim.simulatedScore}
+                            {simulatedEndScore}
                           </span>
                         </div>
                       </>
                     )}
                   </div>
                   {activeSim && (
-                    <div className="mt-2">
+                    <div className="mt-2 space-y-2">
                       <span className="inline-flex items-center rounded-full border border-green-300 bg-green-50 px-2 py-0.5 text-[11px] font-medium text-green-800">
                         Simulation — illustrative
                       </span>
+                      {activeSim.affectedIndicators.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5">
+                          {activeSim.affectedIndicators.map((ind) => (
+                            <span
+                              key={ind.id}
+                              className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-2 py-0.5 text-[11px] text-slate-700"
+                            >
+                              {ind.name}{" "}
+                              <span className="tabular-nums text-slate-500">{ind.before}</span>
+                              <span className="text-slate-400" aria-hidden>→</span>
+                              <span className="tabular-nums font-semibold" style={{ color: SIMULATION_COLOR }}>{ind.after}</span>
+                            </span>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   )}
                   {forecastLow != null && forecastHigh != null && ragBandName && (
