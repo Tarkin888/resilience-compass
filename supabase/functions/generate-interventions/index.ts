@@ -24,8 +24,8 @@ Wording rules:
 - Concise: one sentence description, max 28 words. UK English.
 
 For each intervention:
-- pick ONE targetDataPointId from the provided list — the data point this intervention primarily acts on.
-- propose an assumedValue: the value that data point could PLAUSIBLY reach as a result of this intervention within roughly 3 months. It must be no better than the target and no worse than the currentValue, respecting direction.
+- list EVERY data point (from the provided list only) it would plausibly move, up to a maximum of THREE. Real interventions rarely move only one metric; a wellbeing programme, for example, plausibly moves sickness absence, staff engagement AND staff advocacy.
+- for each target, propose an assumedValue: the value that data point could PLAUSIBLY reach as a result of this intervention within roughly 3 months. It must be no better than the target and no worse than the currentValue, respecting direction.
 - tierRationale: 1–2 sentences that explicitly mention resource/cost, time and reversibility considerations.
 
 Return ONLY a JSON array. No preamble, no markdown fences. Shape:
@@ -36,8 +36,9 @@ Return ONLY a JSON array. No preamble, no markdown fences. Shape:
     "description": "One-sentence softened impact statement.",
     "tier": 1,
     "tierRationale": "Why this tier — mention cost, time, reversibility.",
-    "targetDataPointId": "one of the provided data point ids",
-    "assumedValue": 4.5,
+    "targets": [
+      { "dataPointId": "one of the provided data point ids", "assumedValue": 4.5 }
+    ],
     "timeToImpact": "3-6 months"
   }
 ]`;

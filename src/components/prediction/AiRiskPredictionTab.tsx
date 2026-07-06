@@ -19,7 +19,18 @@ import { classifyTrend, spcChipClasses } from "@/lib/spc";
 import { bandFor } from "@/lib/scoringEngine";
 import { useAIInterventions, type DataPointInfo, type TieredIntervention } from "@/hooks/useAIInterventions";
 import { PILLAR_CONFIG, resolveDataPoints } from "@/config/dataPoints";
-import { pillarScoreWithOverride } from "@/lib/pillarScores";
+import { pillarScoreWithOverride, pillarIndicatorScoresWithOverrides } from "@/lib/pillarScores";
+
+// Format a value + unit for the simulation copy.
+// %: tight (e.g. "3%"); score: phrased ("a score of 6.9"); else spaced ("45 days").
+function formatValueUnit(value: number, unit: string): string {
+  if (unit === "%") return `${value}%`;
+  if (unit === "score") return `a score of ${value}`;
+  return `${value} ${unit}`;
+}
+function assumptionPhrase(name: string, value: number, unit: string): string {
+  return `${name.toLowerCase()} reaches ${formatValueUnit(value, unit)}`;
+}
 
 const FORECAST_COLOR = "#6366F1";
 const ACTUAL_COLOR = "#F59E0B";
@@ -132,19 +143,41 @@ export const AiRiskPredictionTab = () => {
     dataPoints: humanDataPoints,
   });
 
-  // Compute simulated end score per intervention (deterministic; engine only).
+  // Baseline pillar score (all live+illustrative data at today's values).
+  const baselinePillar = useMemo(
+    () => pillarScoreWithOverride(liveValues, "human", {}),
+    [liveValues],
+  );
+
+  // Per-intervention: engine-computed uplift at today's values, and per-indicator
+  // baseline/after scores (used for the "affected indicators" chips + card copy).
   const withSimulated = useMemo(() => {
+    const baselineIndicators = pillarIndicatorScoresWithOverrides(liveValues, "human", {});
+    const baselineById = new Map(baselineIndicators.map((i) => [i.id, i]));
+
     return interventions.map((i) => {
-      const simulated = pillarScoreWithOverride(
-        liveValues,
-        "human",
-        i.targetDataPointId,
-        i.assumedValue,
-      );
-      const uplift = simulated != null && currentScore != null ? simulated - currentScore : 0;
-      return { intervention: i, simulatedScore: simulated, uplift };
+      const overrides: Record<string, number> = {};
+      for (const t of i.targets) overrides[t.dataPointId] = t.assumedValue;
+
+      const overriddenPillar = pillarScoreWithOverride(liveValues, "human", overrides);
+      const uplift =
+        overriddenPillar != null && baselinePillar != null
+          ? Math.max(0, overriddenPillar - baselinePillar)
+          : 0;
+
+      const overriddenIndicators = pillarIndicatorScoresWithOverrides(liveValues, "human", overrides);
+      const affectedIndicators = overriddenIndicators
+        .map((ind) => {
+          const base = baselineById.get(ind.id);
+          if (!base || base.score == null || ind.score == null) return null;
+          if (base.score === ind.score) return null;
+          return { id: ind.id, name: ind.name, before: base.score, after: ind.score };
+        })
+        .filter((x): x is { id: string; name: string; before: number; after: number } => x !== null);
+
+      return { intervention: i, uplift, affectedIndicators };
     });
-  }, [interventions, liveValues, currentScore]);
+  }, [interventions, liveValues, baselinePillar]);
 
   // Sort: tier ascending, then uplift descending.
   const orderedInterventions = useMemo(() => {
@@ -158,6 +191,17 @@ export const AiRiskPredictionTab = () => {
   const activeRank = activeSim
     ? orderedInterventions.findIndex((x) => x.intervention.id === simulatingId) + 1
     : null;
+
+  // Simulated end score in the outlook = projected + uplift, capped at 100.
+  const simulatedEndScore =
+    activeSim && projectedScore != null
+      ? Math.min(100, projectedScore + activeSim.uplift)
+      : null;
+
+  const dpById = useMemo(
+    () => new Map(humanDataPoints.map((d) => [d.id, d])),
+    [humanDataPoints],
+  );
 
   const zoomedChartData = useMemo(() => {
     if (forecast.method === "none" || forecast.points.length === 0 || recentActuals.length === 0) {
@@ -181,18 +225,17 @@ export const AiRiskPredictionTab = () => {
       ...rows[rows.length - 1],
       forecast: last.actual,
       band: [last.actual, last.actual],
-      simulated: activeSim && currentScore != null ? currentScore : undefined,
+      // At t=0 the simulated line matches today's actual — uplift ramps in.
+      simulated: activeSim ? last.actual : undefined,
     };
     const forecastPts = forecast.points;
-    const simEnd = activeSim?.simulatedScore ?? null;
-    const startScore = currentScore ?? last.actual;
+    const uplift = activeSim?.uplift ?? 0;
     for (let idx = 0; idx < forecastPts.length; idx += 1) {
       const p = forecastPts[idx];
-      let simulated: number | undefined;
-      if (activeSim && simEnd != null) {
-        const t = (idx + 1) / forecastPts.length;
-        simulated = Math.round(startScore + (simEnd - startScore) * t);
-      }
+      const t = (idx + 1) / forecastPts.length;
+      const simulated = activeSim
+        ? Math.min(100, Math.round(p.value + uplift * t))
+        : undefined;
       rows.push({
         period: formatPeriod(p.date),
         forecast: p.value,
@@ -201,16 +244,44 @@ export const AiRiskPredictionTab = () => {
       });
     }
     return rows;
-  }, [forecast, recentActuals, activeSim, currentScore]);
+  }, [forecast, recentActuals, activeSim]);
+
+  // Data-driven y-axis domain: span every plotted numeric value.
+  const yDomain = useMemo<[number, number]>(() => {
+    const values: number[] = [];
+    for (const r of zoomedChartData) {
+      if (r.actual != null) values.push(r.actual);
+      if (r.forecast != null) values.push(r.forecast);
+      if (r.simulated != null) values.push(r.simulated);
+      if (r.band) values.push(r.band[0], r.band[1]);
+    }
+    if (values.length === 0) return [0, 100];
+    const min = Math.min(...values);
+    const max = Math.max(...values);
+    const lower = Math.max(0, Math.floor((min - 8) / 5) * 5);
+    const upper = Math.min(100, Math.ceil((max + 8) / 5) * 5);
+    return [lower, upper];
+  }, [zoomedChartData]);
+  const yTicks = useMemo(() => {
+    const [lo, hi] = yDomain;
+    const step = hi - lo <= 30 ? 5 : 10;
+    const ticks: number[] = [];
+    for (let v = lo; v <= hi; v += step) ticks.push(v);
+    return ticks;
+  }, [yDomain]);
 
   const todayLabel = recentActuals[recentActuals.length - 1]?.period;
   const forecastAvailable = zoomedChartData.length > 0;
-  const activeTargetDpName = activeSim
-    ? humanDataPoints.find((d) => d.id === activeSim.intervention.targetDataPointId)?.name
-    : null;
-  const activeUnit = activeSim
-    ? humanDataPoints.find((d) => d.id === activeSim.intervention.targetDataPointId)?.unit ?? ""
-    : "";
+
+  const activeAssumptions = activeSim
+    ? activeSim.intervention.targets
+        .map((t) => {
+          const dp = dpById.get(t.dataPointId);
+          if (!dp) return null;
+          return assumptionPhrase(dp.name, t.assumedValue, dp.unit);
+        })
+        .filter((s): s is string => Boolean(s))
+    : [];
 
   return (
     <div className="space-y-5">
@@ -248,7 +319,7 @@ export const AiRiskPredictionTab = () => {
               <h2 className="text-base font-semibold text-slate-900">
                 Human Capital score trajectory
               </h2>
-              <span className="text-xs text-slate-500">0–100 scale</span>
+              <span className="text-xs text-slate-500">0–100 scale · axis zoomed to data</span>
             </div>
 
             <div className="mb-4 rounded-lg border border-slate-200 bg-slate-50 p-4">
@@ -279,7 +350,7 @@ export const AiRiskPredictionTab = () => {
                         {projectedScore}
                       </span>
                     </div>
-                    {activeSim && activeSim.simulatedScore != null && (
+                    {activeSim && simulatedEndScore != null && (
                       <>
                         <span className="text-2xl text-slate-400" aria-hidden>→</span>
                         <div className="flex flex-col">
@@ -287,17 +358,32 @@ export const AiRiskPredictionTab = () => {
                             Simulated · Intervention {activeRank}
                           </span>
                           <span className="text-3xl font-semibold tabular-nums" style={{ color: SIMULATION_COLOR }}>
-                            {activeSim.simulatedScore}
+                            {simulatedEndScore}
                           </span>
                         </div>
                       </>
                     )}
                   </div>
                   {activeSim && (
-                    <div className="mt-2">
+                    <div className="mt-2 space-y-2">
                       <span className="inline-flex items-center rounded-full border border-green-300 bg-green-50 px-2 py-0.5 text-[11px] font-medium text-green-800">
                         Simulation — illustrative
                       </span>
+                      {activeSim.affectedIndicators.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5">
+                          {activeSim.affectedIndicators.map((ind) => (
+                            <span
+                              key={ind.id}
+                              className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-2 py-0.5 text-[11px] text-slate-700"
+                            >
+                              {ind.name}{" "}
+                              <span className="tabular-nums text-slate-500">{ind.before}</span>
+                              <span className="text-slate-400" aria-hidden>→</span>
+                              <span className="tabular-nums font-semibold" style={{ color: SIMULATION_COLOR }}>{ind.after}</span>
+                            </span>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   )}
                   {forecastLow != null && forecastHigh != null && ragBandName && (
@@ -367,8 +453,8 @@ export const AiRiskPredictionTab = () => {
                       height={32}
                     />
                     <YAxis
-                      domain={[0, 100]}
-                      ticks={[0, 25, 50, 75, 100]}
+                      domain={yDomain}
+                      ticks={yTicks}
                       tick={{ fontSize: 11, fill: "#475569" }}
                       tickLine={false}
                       axisLine={{ stroke: "#cbd5e1" }}
@@ -440,9 +526,9 @@ export const AiRiskPredictionTab = () => {
               </div>
             )}
 
-            {activeSim && activeTargetDpName && (
+            {activeSim && activeAssumptions.length > 0 && (
               <p className="mt-2 text-[11px] italic text-slate-600">
-                Simulation assumes {activeTargetDpName} reaches {activeSim.intervention.assumedValue}{activeUnit} within 3 months; scores recomputed with the standard scoring method.
+                Simulation assumes {activeAssumptions.join(", ")} within 3 months; scores recomputed with the standard scoring method.
               </p>
             )}
 
@@ -488,7 +574,13 @@ export const AiRiskPredictionTab = () => {
             ) : (
               <>
                 <ol className="mt-4 space-y-3">
-                  {orderedInterventions.map(({ intervention, simulatedScore, uplift }, idx) => {
+                  {orderedInterventions.map(({ intervention, uplift, affectedIndicators }, idx) => {
+                    const cardSimEnd =
+                      projectedScore != null ? Math.min(100, projectedScore + uplift) : null;
+                    const movesLine =
+                      affectedIndicators.length > 0
+                        ? `Moves: ${affectedIndicators.map((a) => a.name).join(", ")}`
+                        : "";
                     const isActive = simulatingId === intervention.id;
                     const isOpen = openRationaleId === intervention.id;
                     const meta = TIER_META[intervention.tier];
@@ -531,9 +623,16 @@ export const AiRiskPredictionTab = () => {
                             )}
 
                             <div className="mt-3 flex items-center justify-between gap-2">
-                              <span className="text-[11px] text-slate-500">
-                                {simulatedScore != null ? `Simulated end score: ${simulatedScore}${uplift > 0 ? ` (+${uplift})` : uplift < 0 ? ` (${uplift})` : ""}` : ""}
-                              </span>
+                              <div className="flex flex-col gap-0.5">
+                                <span className="text-[11px] text-slate-500">
+                                  {cardSimEnd != null
+                                    ? `Simulated end score: ${cardSimEnd}${uplift > 0 ? ` (+${uplift})` : ""}`
+                                    : ""}
+                                </span>
+                                {movesLine && (
+                                  <span className="text-[11px] text-slate-500">{movesLine}</span>
+                                )}
+                              </div>
                               <button
                                 type="button"
                                 onClick={() => setSimulatingId(isActive ? null : intervention.id)}
