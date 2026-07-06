@@ -54,27 +54,38 @@ export function pillarScoreById(
 }
 
 /**
- * Compute a pillar score with ONE data point's value overridden by `assumedValue`.
- * Used by the AI Risk Prediction "Simulate this intervention" flow. The override
- * matches on data-point id (see PILLAR_CONFIG). Everything else is scored exactly
- * as `computePillarScores` — same unweighted roll-up, same engine.
+ * Compute per-indicator scores for a pillar with an OVERRIDES map applied
+ * (dataPointId → assumedValue). Same engine, same roll-up. Any indicator
+ * whose data points are all unscored returns { score: null }.
+ */
+export function pillarIndicatorScoresWithOverrides(
+  liveValues: Record<string, number | null | undefined>,
+  pillarId: PillarConfig["id"],
+  overrides: Record<string, number> = {},
+): Array<{ id: string; name: string; score: number | null }> {
+  const pillar = PILLAR_CONFIG.find((p) => p.id === pillarId);
+  if (!pillar) return [];
+  return pillar.indicators.map((ind) => {
+    const dps = resolveDataPoints(ind, liveValues).map((dp) =>
+      dp.id in overrides ? { ...dp, value: overrides[dp.id] } : dp,
+    );
+    const roll = rollupIndicator(dps);
+    return { id: ind.id, name: ind.name, score: displayScore(roll.score) };
+  });
+}
+
+/**
+ * Compute a pillar score with an OVERRIDES map applied. Used by the AI Risk
+ * Prediction "Simulate this intervention" flow. Everything else is scored
+ * exactly as `computePillarScores` — same unweighted roll-up, same engine.
  */
 export function pillarScoreWithOverride(
   liveValues: Record<string, number | null | undefined>,
   pillarId: PillarConfig["id"],
-  dataPointId: string,
-  assumedValue: number,
+  overrides: Record<string, number>,
 ): number | null {
-  const pillar = PILLAR_CONFIG.find((p) => p.id === pillarId);
-  if (!pillar) return null;
-  const indicators = pillar.indicators.map((ind) => {
-    const dps = resolveDataPoints(ind, liveValues).map((dp) =>
-      dp.id === dataPointId ? { ...dp, value: assumedValue } : dp,
-    );
-    const roll = rollupIndicator(dps);
-    return displayScore(roll.score);
-  });
-  const scored = indicators.filter((s): s is number => s != null);
+  const indicators = pillarIndicatorScoresWithOverrides(liveValues, pillarId, overrides);
+  const scored = indicators.map((i) => i.score).filter((s): s is number => s != null);
   if (scored.length === 0) return null;
   return Math.round(scored.reduce((a, b) => a + b, 0) / scored.length);
 }
