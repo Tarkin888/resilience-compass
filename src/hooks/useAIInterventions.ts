@@ -1,12 +1,30 @@
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
-export type Intervention = { rank: number; action: string };
+export interface TieredIntervention {
+  id: string;
+  title: string;
+  description: string;
+  tier: 1 | 2 | 3;
+  tierRationale: string;
+  targetDataPointId: string;
+  currentValue: number;
+  assumedValue: number;
+  timeToImpact: string;
+}
 
-export type KRI = { name: string; value: number; target: number; unit: string };
+export type DataPointInfo = {
+  id: string;
+  name: string;
+  currentValue: number | null;
+  target: number;
+  minimumThreshold: number;
+  unit: string;
+  direction: "higherIsBetter" | "lowerIsBetter";
+};
 
 export type UseAIInterventionsResult = {
-  interventions: Intervention[];
+  interventions: TieredIntervention[];
   loading: boolean;
   error: string | null;
 };
@@ -15,21 +33,34 @@ interface Args {
   score: number | null;
   ragBand: string | null;
   pillarName?: string;
-  kris?: KRI[];
+  dataPoints?: DataPointInfo[];
+}
+
+function clampAssumed(
+  proposed: number,
+  currentValue: number,
+  target: number,
+  direction: "higherIsBetter" | "lowerIsBetter",
+): number {
+  if (direction === "higherIsBetter") {
+    // best = target (larger), worst allowed = currentValue
+    return Math.min(target, Math.max(currentValue, proposed));
+  }
+  // lowerIsBetter: best = target (smaller), worst allowed = currentValue
+  return Math.max(target, Math.min(currentValue, proposed));
 }
 
 export function useAIInterventions({
   score,
   ragBand,
   pillarName = "Human Capital",
-  kris,
+  dataPoints,
 }: Args): UseAIInterventionsResult {
-  const [interventions, setInterventions] = useState<Intervention[]>([]);
+  const [interventions, setInterventions] = useState<TieredIntervention[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Stable key so the effect only re-runs when KRI values actually change.
-  const krisKey = useMemo(() => JSON.stringify(kris ?? []), [kris]);
+  const dpKey = useMemo(() => JSON.stringify(dataPoints ?? []), [dataPoints]);
 
   useEffect(() => {
     if (score == null || !ragBand) return;
@@ -38,22 +69,56 @@ export function useAIInterventions({
     setLoading(true);
     setError(null);
 
-    const parsedKris: KRI[] = JSON.parse(krisKey);
+    const parsedDps: DataPointInfo[] = JSON.parse(dpKey);
+    const dpById = new Map(parsedDps.map((d) => [d.id, d]));
 
     supabase.functions
       .invoke("generate-interventions", {
-        body: { pillarName, score, ragBand, kris: parsedKris },
+        body: { pillarName, score, ragBand, dataPoints: parsedDps },
       })
       .then(({ data, error: invokeError }) => {
         if (cancelled) return;
-        if (invokeError || !data || data.error) {
+        if (invokeError || !data || data.error || !Array.isArray(data.interventions)) {
           setError("unavailable");
           setInterventions([]);
-        } else if (Array.isArray(data.interventions)) {
-          setInterventions(data.interventions);
-        } else {
-          setError("unavailable");
+          return;
         }
+        const cleaned: TieredIntervention[] = [];
+        for (const raw of data.interventions) {
+          const tier = Number(raw?.tier);
+          const dpId = String(raw?.targetDataPointId ?? "");
+          const dp = dpById.get(dpId);
+          if (!dp || dp.currentValue == null) {
+            console.warn("[interventions] discarded — unknown data point:", raw);
+            continue;
+          }
+          if (tier !== 1 && tier !== 2 && tier !== 3) {
+            console.warn("[interventions] discarded — invalid tier:", raw);
+            continue;
+          }
+          const proposed = Number(raw?.assumedValue);
+          if (!Number.isFinite(proposed)) {
+            console.warn("[interventions] discarded — invalid assumedValue:", raw);
+            continue;
+          }
+          const clamped = clampAssumed(proposed, dp.currentValue, dp.target, dp.direction);
+          if (clamped !== proposed) {
+            console.warn("[interventions] assumedValue clamped", { id: raw?.id, proposed, clamped });
+          }
+          cleaned.push({
+            id: String(raw?.id ?? `intv-${cleaned.length + 1}`),
+            title: String(raw?.title ?? "Intervention"),
+            description: String(raw?.description ?? ""),
+            tier: tier as 1 | 2 | 3,
+            tierRationale: String(raw?.tierRationale ?? ""),
+            targetDataPointId: dpId,
+            currentValue: dp.currentValue,
+            assumedValue: clamped,
+            timeToImpact: String(raw?.timeToImpact ?? ""),
+          });
+        }
+        setInterventions(cleaned);
+        if (cleaned.length === 0) setError("unavailable");
       })
       .catch(() => {
         if (!cancelled) setError("unavailable");
@@ -65,7 +130,7 @@ export function useAIInterventions({
     return () => {
       cancelled = true;
     };
-  }, [score, ragBand, pillarName, krisKey]);
+  }, [score, ragBand, pillarName, dpKey]);
 
   return { interventions, loading, error };
 }

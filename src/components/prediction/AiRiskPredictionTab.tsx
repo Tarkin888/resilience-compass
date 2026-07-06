@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { Info, ChevronDown } from "lucide-react";
+import { useMemo, useState, useEffect } from "react";
+import { Info, ChevronDown, RotateCcw } from "lucide-react";
 import {
   Area,
   CartesianGrid,
@@ -17,10 +17,19 @@ import { useDashboardForecast } from "@/hooks/useDashboardForecast";
 import { useHumanCapitalData } from "@/hooks/useHumanCapitalData";
 import { classifyTrend, spcChipClasses } from "@/lib/spc";
 import { bandFor } from "@/lib/scoringEngine";
-import { useAIInterventions, type KRI } from "@/hooks/useAIInterventions";
+import { useAIInterventions, type DataPointInfo, type TieredIntervention } from "@/hooks/useAIInterventions";
+import { PILLAR_CONFIG, resolveDataPoints } from "@/config/dataPoints";
+import { pillarScoreWithOverride } from "@/lib/pillarScores";
 
-const FORECAST_COLOR = "#6366F1"; // matches TrendPanel
-const ACTUAL_COLOR = "#F59E0B"; // amber, matches Score over time chart
+const FORECAST_COLOR = "#6366F1";
+const ACTUAL_COLOR = "#F59E0B";
+const SIMULATION_COLOR = "#16A34A";
+
+const TIER_META: Record<1 | 2 | 3, { label: string; badgeClass: string }> = {
+  1: { label: "Level 1 — No regret", badgeClass: "bg-green-100 text-green-800 border-green-300" },
+  2: { label: "Level 2 — Committed effort", badgeClass: "bg-amber-100 text-amber-800 border-amber-300" },
+  3: { label: "Level 3 — Last resort", badgeClass: "bg-red-100 text-red-800 border-red-300" },
+};
 
 function displayDirection(d: string): string {
   return d === "Worsening" ? "Declining" : d;
@@ -33,6 +42,13 @@ function formatPeriod(iso: string): string {
 
 export const AiRiskPredictionTab = () => {
   const [explainerOpen, setExplainerOpen] = useState(false);
+  const [openRationaleId, setOpenRationaleId] = useState<string | null>(null);
+  const [simulatingId, setSimulatingId] = useState<string | null>(null);
+
+  // Clear any active simulation on unmount (leaving the tab).
+  useEffect(() => {
+    return () => setSimulatingId(null);
+  }, []);
 
   const { points, loading } = useScoreHistory("dashboard", "dashboard");
   const forecast = useDashboardForecast();
@@ -41,9 +57,6 @@ export const AiRiskPredictionTab = () => {
     () => points.map((p) => Math.round(p.normalised_score)),
     [points],
   );
-  // Current score = live engine-computed Human Capital score (same value the
-  // dashboard displays). Falls back to the latest history snapshot only if the
-  // live value is not yet available.
   const currentScore =
     forecast.currentScore ?? (scores.length > 0 ? scores[scores.length - 1] : null);
   const spc = useMemo(() => classifyTrend(scores), [scores]);
@@ -53,8 +66,6 @@ export const AiRiskPredictionTab = () => {
       period: formatPeriod(p.snapshot_date),
       actual: Math.round(p.normalised_score),
     }));
-    // Overwrite the most recent actual with the live engine score so the
-    // chart's join point matches the headline and the forecast anchor.
     if (rows.length > 0 && currentScore != null) {
       rows[rows.length - 1] = { ...rows[rows.length - 1], actual: currentScore };
     }
@@ -74,68 +85,42 @@ export const AiRiskPredictionTab = () => {
       ? Math.max(...forecast.points.map((p) => p.upper))
       : null;
 
-  const zoomedChartData = useMemo(() => {
-    if (forecast.method === "none" || forecast.points.length === 0 || recentActuals.length === 0) {
-      return [] as Array<{
-        period: string;
-        actual?: number;
-        forecast?: number;
-        band?: [number, number];
-      }>;
-    }
-    const rows: Array<{
-      period: string;
-      actual?: number;
-      forecast?: number;
-      band?: [number, number];
-    }> = recentActuals.map((a) => ({ period: a.period, actual: a.actual }));
-    // Join row: last actual seeds the forecast line so they connect cleanly.
-    const last = recentActuals[recentActuals.length - 1];
-    rows[rows.length - 1] = {
-      ...rows[rows.length - 1],
-      forecast: last.actual,
-      band: [last.actual, last.actual],
-    };
-    for (const p of forecast.points) {
-      rows.push({
-        period: formatPeriod(p.date),
-        forecast: p.value,
-        band: [p.lower, p.upper],
-      });
-    }
-    return rows;
-  }, [forecast, recentActuals]);
-
-  const todayLabel = recentActuals[recentActuals.length - 1]?.period;
-  const forecastAvailable = zoomedChartData.length > 0;
-
   const ragBandName = currentScore != null ? bandFor(currentScore).name : null;
 
-  // Live KRI values for the Human Capital pillar (latest capture per KRI).
   const { data: hcData } = useHumanCapitalData();
-  const liveKris = useMemo<KRI[]>(() => {
-    const result: KRI[] = [];
-    const map: Array<{ kriId: string; name: string }> = [
-      { kriId: "sickness_absence", name: "Sickness Absence Rate" },
-      { kriId: "vacancy", name: "Staff Vacancies" },
-    ];
-    for (const { kriId, name } of map) {
-      const latest = hcData.capturesByKri[kriId]?.[0];
-      const threshold = hcData.thresholdsByKri[kriId];
-      if (
-        latest?.headline_value != null &&
-        threshold?.threshold_value != null
-      ) {
-        result.push({
-          name,
-          value: Number(latest.headline_value),
-          target: Number(threshold.threshold_value),
-          unit: latest.headline_unit ?? "%",
+
+  // Live-values map for the Human pillar: latest live KRI values keyed by liveKriId.
+  const liveValues = useMemo<Record<string, number | null>>(() => {
+    const map: Record<string, number | null> = {};
+    Object.entries(hcData.capturesByKri).forEach(([kriId, caps]) => {
+      const latest = caps[0];
+      map[kriId] = latest?.headline_value != null ? Number(latest.headline_value) : null;
+    });
+    return map;
+  }, [hcData]);
+
+  // Resolve every Human data point (live + illustrative) with its current value —
+  // this is what the AI classifies against and simulates over.
+  const humanDataPoints = useMemo<DataPointInfo[]>(() => {
+    const human = PILLAR_CONFIG.find((p) => p.id === "human");
+    if (!human) return [];
+    const list: DataPointInfo[] = [];
+    for (const ind of human.indicators) {
+      for (const dp of resolveDataPoints(ind, liveValues)) {
+        if (dp.value == null) continue;
+        list.push({
+          id: dp.id,
+          name: dp.name,
+          currentValue: Number(dp.value),
+          target: dp.target,
+          minimumThreshold: dp.minimumThreshold,
+          unit: dp.unit,
+          direction: dp.direction,
         });
       }
     }
-    return result;
-  }, [hcData]);
+    return list;
+  }, [liveValues]);
 
   const {
     interventions,
@@ -144,8 +129,88 @@ export const AiRiskPredictionTab = () => {
   } = useAIInterventions({
     score: currentScore,
     ragBand: ragBandName,
-    kris: liveKris,
+    dataPoints: humanDataPoints,
   });
+
+  // Compute simulated end score per intervention (deterministic; engine only).
+  const withSimulated = useMemo(() => {
+    return interventions.map((i) => {
+      const simulated = pillarScoreWithOverride(
+        liveValues,
+        "human",
+        i.targetDataPointId,
+        i.assumedValue,
+      );
+      const uplift = simulated != null && currentScore != null ? simulated - currentScore : 0;
+      return { intervention: i, simulatedScore: simulated, uplift };
+    });
+  }, [interventions, liveValues, currentScore]);
+
+  // Sort: tier ascending, then uplift descending.
+  const orderedInterventions = useMemo(() => {
+    return [...withSimulated].sort((a, b) => {
+      if (a.intervention.tier !== b.intervention.tier) return a.intervention.tier - b.intervention.tier;
+      return b.uplift - a.uplift;
+    });
+  }, [withSimulated]);
+
+  const activeSim = orderedInterventions.find((x) => x.intervention.id === simulatingId) ?? null;
+  const activeRank = activeSim
+    ? orderedInterventions.findIndex((x) => x.intervention.id === simulatingId) + 1
+    : null;
+
+  const zoomedChartData = useMemo(() => {
+    if (forecast.method === "none" || forecast.points.length === 0 || recentActuals.length === 0) {
+      return [] as Array<{
+        period: string;
+        actual?: number;
+        forecast?: number;
+        simulated?: number;
+        band?: [number, number];
+      }>;
+    }
+    const rows: Array<{
+      period: string;
+      actual?: number;
+      forecast?: number;
+      simulated?: number;
+      band?: [number, number];
+    }> = recentActuals.map((a) => ({ period: a.period, actual: a.actual }));
+    const last = recentActuals[recentActuals.length - 1];
+    rows[rows.length - 1] = {
+      ...rows[rows.length - 1],
+      forecast: last.actual,
+      band: [last.actual, last.actual],
+      simulated: activeSim && currentScore != null ? currentScore : undefined,
+    };
+    const forecastPts = forecast.points;
+    const simEnd = activeSim?.simulatedScore ?? null;
+    const startScore = currentScore ?? last.actual;
+    for (let idx = 0; idx < forecastPts.length; idx += 1) {
+      const p = forecastPts[idx];
+      let simulated: number | undefined;
+      if (activeSim && simEnd != null) {
+        const t = (idx + 1) / forecastPts.length;
+        simulated = Math.round(startScore + (simEnd - startScore) * t);
+      }
+      rows.push({
+        period: formatPeriod(p.date),
+        forecast: p.value,
+        band: [p.lower, p.upper],
+        simulated,
+      });
+    }
+    return rows;
+  }, [forecast, recentActuals, activeSim, currentScore]);
+
+  const todayLabel = recentActuals[recentActuals.length - 1]?.period;
+  const forecastAvailable = zoomedChartData.length > 0;
+  const activeTargetDpName = activeSim
+    ? humanDataPoints.find((d) => d.id === activeSim.intervention.targetDataPointId)?.name
+    : null;
+  const activeUnit = activeSim
+    ? humanDataPoints.find((d) => d.id === activeSim.intervention.targetDataPointId)?.unit ?? ""
+    : "";
 
   return (
     <div className="space-y-5">
@@ -156,7 +221,6 @@ export const AiRiskPredictionTab = () => {
         </p>
       </div>
 
-      {/* Trend definition — strategic framing */}
       <section
         aria-label="How trend direction is assessed"
         className="rounded-xl border border-slate-200 bg-slate-50/60 p-4 sm:p-5"
@@ -176,9 +240,8 @@ export const AiRiskPredictionTab = () => {
         </div>
       </section>
 
-      {/* Two-column main area */}
       <div className="grid gap-5 lg:grid-cols-5">
-        {/* Left — chart (≈60%) */}
+        {/* Left — chart */}
         <div className="lg:col-span-3">
           <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
             <div className="mb-2 flex items-baseline justify-between">
@@ -188,7 +251,6 @@ export const AiRiskPredictionTab = () => {
               <span className="text-xs text-slate-500">0–100 scale</span>
             </div>
 
-            {/* Headline read-out: current → projected */}
             <div className="mb-4 rounded-lg border border-slate-200 bg-slate-50 p-4">
               <div className="mb-3 flex items-center justify-between gap-3">
                 <span className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
@@ -205,7 +267,7 @@ export const AiRiskPredictionTab = () => {
                 <div className="text-xs text-slate-500">Loading outlook…</div>
               ) : currentScore != null && projectedScore != null ? (
                 <>
-                  <div className="flex items-baseline gap-3">
+                  <div className="flex flex-wrap items-baseline gap-3">
                     <div className="flex flex-col">
                       <span className="text-[11px] uppercase tracking-wide text-slate-500">Current</span>
                       <span className="text-3xl font-semibold text-slate-900 tabular-nums">{currentScore}</span>
@@ -217,7 +279,27 @@ export const AiRiskPredictionTab = () => {
                         {projectedScore}
                       </span>
                     </div>
+                    {activeSim && activeSim.simulatedScore != null && (
+                      <>
+                        <span className="text-2xl text-slate-400" aria-hidden>→</span>
+                        <div className="flex flex-col">
+                          <span className="text-[11px] uppercase tracking-wide text-slate-500">
+                            Simulated · Intervention {activeRank}
+                          </span>
+                          <span className="text-3xl font-semibold tabular-nums" style={{ color: SIMULATION_COLOR }}>
+                            {activeSim.simulatedScore}
+                          </span>
+                        </div>
+                      </>
+                    )}
                   </div>
+                  {activeSim && (
+                    <div className="mt-2">
+                      <span className="inline-flex items-center rounded-full border border-green-300 bg-green-50 px-2 py-0.5 text-[11px] font-medium text-green-800">
+                        Simulation — illustrative
+                      </span>
+                    </div>
+                  )}
                   {forecastLow != null && forecastHigh != null && ragBandName && (
                     <p className="mt-2 text-xs text-slate-600">
                       Expected range {forecastLow}–{forecastHigh} ·{" "}
@@ -236,14 +318,29 @@ export const AiRiskPredictionTab = () => {
               )}
             </div>
 
-            <div className="mb-2 flex items-baseline justify-between">
+            <div className="mb-2 flex flex-wrap items-baseline justify-between gap-2">
               <h3 className="text-sm font-semibold text-slate-900">
                 Last 6 months and next 3 months
               </h3>
               <span className="text-[11px] text-slate-500">
-                Solid = actual · Dashed = forecast
+                Solid amber = actual · Dashed indigo = forecast{activeSim ? " · Dashed green = simulated" : ""}
               </span>
             </div>
+
+            {activeSim && (
+              <div className="mb-2 flex items-center justify-between rounded-md border border-green-200 bg-green-50 px-3 py-2 text-xs">
+                <span className="text-green-900">
+                  Simulating Intervention {activeRank}: <span className="font-medium">{activeSim.intervention.title}</span>
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setSimulatingId(null)}
+                  className="inline-flex items-center gap-1 rounded-md border border-slate-300 bg-white px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50"
+                >
+                  <RotateCcw size={12} aria-hidden /> Reset to current forecast
+                </button>
+              </div>
+            )}
 
             {forecast.loading ? (
               <div className="flex h-56 items-center justify-center text-xs text-slate-400">
@@ -287,10 +384,9 @@ export const AiRiskPredictionTab = () => {
                     )}
                     <RTooltip
                       formatter={(v: number | [number, number], name: string) => {
-                        if (name === "band" && Array.isArray(v)) {
-                          return [`${v[0]} – ${v[1]}`, "Projected range"];
-                        }
+                        if (name === "band" && Array.isArray(v)) return [`${v[0]} – ${v[1]}`, "Projected range"];
                         if (name === "forecast") return [`${v}`, "Projection"];
+                        if (name === "simulated") return [`${v}`, "Simulated"];
                         return [`${v}`, "Actual"];
                       }}
                       labelFormatter={(l: string) => l}
@@ -326,9 +422,28 @@ export const AiRiskPredictionTab = () => {
                       isAnimationActive={false}
                       connectNulls
                     />
+                    {activeSim && (
+                      <Line
+                        type="monotone"
+                        dataKey="simulated"
+                        stroke={SIMULATION_COLOR}
+                        strokeWidth={2.5}
+                        strokeDasharray="2 4"
+                        dot={{ r: 3, fill: "#ffffff", stroke: SIMULATION_COLOR, strokeWidth: 2 }}
+                        activeDot={{ r: 5 }}
+                        isAnimationActive={false}
+                        connectNulls
+                      />
+                    )}
                   </ComposedChart>
                 </ResponsiveContainer>
               </div>
+            )}
+
+            {activeSim && activeTargetDpName && (
+              <p className="mt-2 text-[11px] italic text-slate-600">
+                Simulation assumes {activeTargetDpName} reaches {activeSim.intervention.assumedValue}{activeUnit} within 3 months; scores recomputed with the standard scoring method.
+              </p>
             )}
 
             {forecastAvailable && forecast.caption && (
@@ -343,7 +458,7 @@ export const AiRiskPredictionTab = () => {
           </div>
         </div>
 
-        {/* Right — interventions (≈40%) */}
+        {/* Right — interventions */}
         <div className="lg:col-span-2">
           <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
             <h3 className="text-base font-semibold text-slate-900">Priority interventions</h3>
@@ -366,32 +481,82 @@ export const AiRiskPredictionTab = () => {
                   </li>
                 ))}
               </ul>
-            ) : interventionsError ? (
+            ) : interventionsError || orderedInterventions.length === 0 ? (
               <p className="mt-4 text-sm text-slate-600">
                 Recommendations unavailable — please try refreshing the page.
               </p>
             ) : (
-              <ol className="mt-4 space-y-3">
-                {interventions.map((i) => (
-                  <li
-                    key={i.rank}
-                    className="flex items-start gap-3 rounded-lg border border-slate-200 bg-white p-4"
-                  >
-                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-900 text-xs font-semibold text-white">
-                      {i.rank}
-                    </span>
-                    <div className="min-w-0 flex-1 text-sm leading-relaxed text-slate-800">
-                      {i.action}
-                    </div>
-                  </li>
-                ))}
-              </ol>
+              <>
+                <ol className="mt-4 space-y-3">
+                  {orderedInterventions.map(({ intervention, simulatedScore, uplift }, idx) => {
+                    const isActive = simulatingId === intervention.id;
+                    const isOpen = openRationaleId === intervention.id;
+                    const meta = TIER_META[intervention.tier];
+                    return (
+                      <li
+                        key={intervention.id}
+                        className={`rounded-lg border p-4 ${isActive ? "border-green-400 bg-green-50/40 ring-1 ring-green-300" : "border-slate-200 bg-white"}`}
+                      >
+                        <div className="flex items-start gap-3">
+                          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-900 text-xs font-semibold text-white">
+                            {idx + 1}
+                          </span>
+                          <div className="min-w-0 flex-1">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span className="text-sm font-semibold text-slate-900">{intervention.title}</span>
+                              <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-medium ${meta.badgeClass}`}>
+                                {meta.label}
+                              </span>
+                            </div>
+                            <p className="mt-1 text-sm leading-relaxed text-slate-700">
+                              {intervention.description}
+                            </p>
+                            <div className="mt-1 text-[11px] text-slate-500">
+                              Time to impact: {intervention.timeToImpact}
+                            </div>
+
+                            <button
+                              type="button"
+                              onClick={() => setOpenRationaleId(isOpen ? null : intervention.id)}
+                              aria-expanded={isOpen}
+                              className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-slate-700 hover:text-slate-900"
+                            >
+                              Why this level
+                              <ChevronDown size={12} className={`transition-transform ${isOpen ? "rotate-180" : ""}`} />
+                            </button>
+                            {isOpen && (
+                              <p className="mt-1 rounded-md bg-slate-50 p-2 text-xs leading-relaxed text-slate-700">
+                                {intervention.tierRationale}
+                              </p>
+                            )}
+
+                            <div className="mt-3 flex items-center justify-between gap-2">
+                              <span className="text-[11px] text-slate-500">
+                                {simulatedScore != null ? `Simulated end score: ${simulatedScore}${uplift > 0 ? ` (+${uplift})` : uplift < 0 ? ` (${uplift})` : ""}` : ""}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => setSimulatingId(isActive ? null : intervention.id)}
+                                className={`rounded-md border px-3 py-1.5 text-xs font-medium ${isActive ? "border-green-500 bg-green-600 text-white hover:bg-green-700" : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"}`}
+                              >
+                                {isActive ? "Simulating…" : "Simulate this intervention"}
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ol>
+                <p className="mt-3 text-[11px] italic text-slate-500">
+                  Indicative effects only. Actual impact depends on scope, funding and execution — refine with client-specific data.
+                </p>
+              </>
             )}
           </div>
         </div>
       </div>
 
-      {/* Why this prediction? — full width */}
       <div className="rounded-xl border border-slate-200 bg-white shadow-sm">
         <button
           type="button"
@@ -410,9 +575,9 @@ export const AiRiskPredictionTab = () => {
           <div className="border-t border-slate-200 px-4 py-5 text-base leading-relaxed text-slate-700 sm:px-6">
             The projection extrapolates the current trend in the Human Capital
             score forward and assumes no new interventions are taken. The shaded
-            band reflects modelled uncertainty. Interventions on the right are
-            illustrative for the demo and will be replaced by a model-driven
-            recommendation engine.
+            band reflects modelled uncertainty. Simulated interventions apply the
+            AI's assumed indicator value through the same normalisation engine
+            used everywhere else on the dashboard — no separate calculation.
           </div>
         )}
       </div>
