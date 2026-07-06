@@ -1,15 +1,18 @@
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
+export interface InterventionTarget {
+  dataPointId: string;
+  assumedValue: number;
+}
+
 export interface TieredIntervention {
   id: string;
   title: string;
   description: string;
   tier: 1 | 2 | 3;
   tierRationale: string;
-  targetDataPointId: string;
-  currentValue: number;
-  assumedValue: number;
+  targets: InterventionTarget[];
   timeToImpact: string;
 }
 
@@ -43,10 +46,8 @@ function clampAssumed(
   direction: "higherIsBetter" | "lowerIsBetter",
 ): number {
   if (direction === "higherIsBetter") {
-    // best = target (larger), worst allowed = currentValue
     return Math.min(target, Math.max(currentValue, proposed));
   }
-  // lowerIsBetter: best = target (smaller), worst allowed = currentValue
   return Math.max(target, Math.min(currentValue, proposed));
 }
 
@@ -86,34 +87,57 @@ export function useAIInterventions({
         const cleaned: TieredIntervention[] = [];
         for (const raw of data.interventions) {
           const tier = Number(raw?.tier);
-          const dpId = String(raw?.targetDataPointId ?? "");
-          const dp = dpById.get(dpId);
-          if (!dp || dp.currentValue == null) {
-            console.warn("[interventions] discarded — unknown data point:", raw);
-            continue;
-          }
           if (tier !== 1 && tier !== 2 && tier !== 3) {
             console.warn("[interventions] discarded — invalid tier:", raw);
             continue;
           }
-          const proposed = Number(raw?.assumedValue);
-          if (!Number.isFinite(proposed)) {
-            console.warn("[interventions] discarded — invalid assumedValue:", raw);
+
+          // Accept new `targets: [{dataPointId, assumedValue}]`; fall back to
+          // legacy `targetDataPointId` + `assumedValue` if the model returned that.
+          const rawTargets: Array<{ dataPointId?: unknown; assumedValue?: unknown }> =
+            Array.isArray(raw?.targets)
+              ? raw.targets
+              : raw?.targetDataPointId != null
+                ? [{ dataPointId: raw.targetDataPointId, assumedValue: raw.assumedValue }]
+                : [];
+
+          const validTargets: InterventionTarget[] = [];
+          for (const t of rawTargets.slice(0, 3)) {
+            const dpId = String(t?.dataPointId ?? "");
+            const dp = dpById.get(dpId);
+            if (!dp || dp.currentValue == null) {
+              console.warn("[interventions] target dropped — unknown data point:", t);
+              continue;
+            }
+            const proposed = Number(t?.assumedValue);
+            if (!Number.isFinite(proposed)) {
+              console.warn("[interventions] target dropped — invalid assumedValue:", t);
+              continue;
+            }
+            const clamped = clampAssumed(proposed, dp.currentValue, dp.target, dp.direction);
+            if (clamped !== proposed) {
+              console.warn("[interventions] assumedValue clamped", {
+                id: raw?.id,
+                dpId,
+                proposed,
+                clamped,
+              });
+            }
+            validTargets.push({ dataPointId: dpId, assumedValue: clamped });
+          }
+
+          if (validTargets.length === 0) {
+            console.warn("[interventions] discarded — no valid targets:", raw);
             continue;
           }
-          const clamped = clampAssumed(proposed, dp.currentValue, dp.target, dp.direction);
-          if (clamped !== proposed) {
-            console.warn("[interventions] assumedValue clamped", { id: raw?.id, proposed, clamped });
-          }
+
           cleaned.push({
             id: String(raw?.id ?? `intv-${cleaned.length + 1}`),
             title: String(raw?.title ?? "Intervention"),
             description: String(raw?.description ?? ""),
             tier: tier as 1 | 2 | 3,
             tierRationale: String(raw?.tierRationale ?? ""),
-            targetDataPointId: dpId,
-            currentValue: dp.currentValue,
-            assumedValue: clamped,
+            targets: validTargets,
             timeToImpact: String(raw?.timeToImpact ?? ""),
           });
         }
