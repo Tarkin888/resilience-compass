@@ -143,19 +143,41 @@ export const AiRiskPredictionTab = () => {
     dataPoints: humanDataPoints,
   });
 
-  // Compute simulated end score per intervention (deterministic; engine only).
+  // Baseline pillar score (all live+illustrative data at today's values).
+  const baselinePillar = useMemo(
+    () => pillarScoreWithOverride(liveValues, "human", {}),
+    [liveValues],
+  );
+
+  // Per-intervention: engine-computed uplift at today's values, and per-indicator
+  // baseline/after scores (used for the "affected indicators" chips + card copy).
   const withSimulated = useMemo(() => {
+    const baselineIndicators = pillarIndicatorScoresWithOverrides(liveValues, "human", {});
+    const baselineById = new Map(baselineIndicators.map((i) => [i.id, i]));
+
     return interventions.map((i) => {
-      const simulated = pillarScoreWithOverride(
-        liveValues,
-        "human",
-        i.targetDataPointId,
-        i.assumedValue,
-      );
-      const uplift = simulated != null && currentScore != null ? simulated - currentScore : 0;
-      return { intervention: i, simulatedScore: simulated, uplift };
+      const overrides: Record<string, number> = {};
+      for (const t of i.targets) overrides[t.dataPointId] = t.assumedValue;
+
+      const overriddenPillar = pillarScoreWithOverride(liveValues, "human", overrides);
+      const uplift =
+        overriddenPillar != null && baselinePillar != null
+          ? Math.max(0, overriddenPillar - baselinePillar)
+          : 0;
+
+      const overriddenIndicators = pillarIndicatorScoresWithOverrides(liveValues, "human", overrides);
+      const affectedIndicators = overriddenIndicators
+        .map((ind) => {
+          const base = baselineById.get(ind.id);
+          if (!base || base.score == null || ind.score == null) return null;
+          if (base.score === ind.score) return null;
+          return { id: ind.id, name: ind.name, before: base.score, after: ind.score };
+        })
+        .filter((x): x is { id: string; name: string; before: number; after: number } => x !== null);
+
+      return { intervention: i, uplift, affectedIndicators };
     });
-  }, [interventions, liveValues, currentScore]);
+  }, [interventions, liveValues, baselinePillar]);
 
   // Sort: tier ascending, then uplift descending.
   const orderedInterventions = useMemo(() => {
@@ -169,6 +191,17 @@ export const AiRiskPredictionTab = () => {
   const activeRank = activeSim
     ? orderedInterventions.findIndex((x) => x.intervention.id === simulatingId) + 1
     : null;
+
+  // Simulated end score in the outlook = projected + uplift, capped at 100.
+  const simulatedEndScore =
+    activeSim && projectedScore != null
+      ? Math.min(100, projectedScore + activeSim.uplift)
+      : null;
+
+  const dpById = useMemo(
+    () => new Map(humanDataPoints.map((d) => [d.id, d])),
+    [humanDataPoints],
+  );
 
   const zoomedChartData = useMemo(() => {
     if (forecast.method === "none" || forecast.points.length === 0 || recentActuals.length === 0) {
@@ -192,18 +225,17 @@ export const AiRiskPredictionTab = () => {
       ...rows[rows.length - 1],
       forecast: last.actual,
       band: [last.actual, last.actual],
-      simulated: activeSim && currentScore != null ? currentScore : undefined,
+      // At t=0 the simulated line matches today's actual — uplift ramps in.
+      simulated: activeSim ? last.actual : undefined,
     };
     const forecastPts = forecast.points;
-    const simEnd = activeSim?.simulatedScore ?? null;
-    const startScore = currentScore ?? last.actual;
+    const uplift = activeSim?.uplift ?? 0;
     for (let idx = 0; idx < forecastPts.length; idx += 1) {
       const p = forecastPts[idx];
-      let simulated: number | undefined;
-      if (activeSim && simEnd != null) {
-        const t = (idx + 1) / forecastPts.length;
-        simulated = Math.round(startScore + (simEnd - startScore) * t);
-      }
+      const t = (idx + 1) / forecastPts.length;
+      const simulated = activeSim
+        ? Math.min(100, Math.round(p.value + uplift * t))
+        : undefined;
       rows.push({
         period: formatPeriod(p.date),
         forecast: p.value,
@@ -212,16 +244,44 @@ export const AiRiskPredictionTab = () => {
       });
     }
     return rows;
-  }, [forecast, recentActuals, activeSim, currentScore]);
+  }, [forecast, recentActuals, activeSim]);
+
+  // Data-driven y-axis domain: span every plotted numeric value.
+  const yDomain = useMemo<[number, number]>(() => {
+    const values: number[] = [];
+    for (const r of zoomedChartData) {
+      if (r.actual != null) values.push(r.actual);
+      if (r.forecast != null) values.push(r.forecast);
+      if (r.simulated != null) values.push(r.simulated);
+      if (r.band) values.push(r.band[0], r.band[1]);
+    }
+    if (values.length === 0) return [0, 100];
+    const min = Math.min(...values);
+    const max = Math.max(...values);
+    const lower = Math.max(0, Math.floor((min - 8) / 5) * 5);
+    const upper = Math.min(100, Math.ceil((max + 8) / 5) * 5);
+    return [lower, upper];
+  }, [zoomedChartData]);
+  const yTicks = useMemo(() => {
+    const [lo, hi] = yDomain;
+    const step = hi - lo <= 30 ? 5 : 10;
+    const ticks: number[] = [];
+    for (let v = lo; v <= hi; v += step) ticks.push(v);
+    return ticks;
+  }, [yDomain]);
 
   const todayLabel = recentActuals[recentActuals.length - 1]?.period;
   const forecastAvailable = zoomedChartData.length > 0;
-  const activeTargetDpName = activeSim
-    ? humanDataPoints.find((d) => d.id === activeSim.intervention.targetDataPointId)?.name
-    : null;
-  const activeUnit = activeSim
-    ? humanDataPoints.find((d) => d.id === activeSim.intervention.targetDataPointId)?.unit ?? ""
-    : "";
+
+  const activeAssumptions = activeSim
+    ? activeSim.intervention.targets
+        .map((t) => {
+          const dp = dpById.get(t.dataPointId);
+          if (!dp) return null;
+          return assumptionPhrase(dp.name, t.assumedValue, dp.unit);
+        })
+        .filter((s): s is string => Boolean(s))
+    : [];
 
   return (
     <div className="space-y-5">
