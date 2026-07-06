@@ -52,3 +52,29 @@ export function pillarScoreById(
 ): number | null {
   return computePillarScores(liveValues).find((p) => p.id === pillarId)?.score ?? null;
 }
+
+/**
+ * Compute a pillar score with ONE data point's value overridden by `assumedValue`.
+ * Used by the AI Risk Prediction "Simulate this intervention" flow. The override
+ * matches on data-point id (see PILLAR_CONFIG). Everything else is scored exactly
+ * as `computePillarScores` — same unweighted roll-up, same engine.
+ */
+export function pillarScoreWithOverride(
+  liveValues: Record<string, number | null | undefined>,
+  pillarId: PillarConfig["id"],
+  dataPointId: string,
+  assumedValue: number,
+): number | null {
+  const pillar = PILLAR_CONFIG.find((p) => p.id === pillarId);
+  if (!pillar) return null;
+  const indicators = pillar.indicators.map((ind) => {
+    const dps = resolveDataPoints(ind, liveValues).map((dp) =>
+      dp.id === dataPointId ? { ...dp, value: assumedValue } : dp,
+    );
+    const roll = rollupIndicator(dps);
+    return displayScore(roll.score);
+  });
+  const scored = indicators.filter((s): s is number => s != null);
+  if (scored.length === 0) return null;
+  return Math.round(scored.reduce((a, b) => a + b, 0) / scored.length);
+}
