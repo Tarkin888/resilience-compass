@@ -623,9 +623,16 @@ export const AiRiskPredictionTab = () => {
                             )}
 
                             <div className="mt-3 flex items-center justify-between gap-2">
-                              <span className="text-[11px] text-slate-500">
-                                {simulatedScore != null ? `Simulated end score: ${simulatedScore}${uplift > 0 ? ` (+${uplift})` : uplift < 0 ? ` (${uplift})` : ""}` : ""}
-                              </span>
+                              <div className="flex flex-col gap-0.5">
+                                <span className="text-[11px] text-slate-500">
+                                  {cardSimEnd != null
+                                    ? `Simulated end score: ${cardSimEnd}${uplift > 0 ? ` (+${uplift})` : ""}`
+                                    : ""}
+                                </span>
+                                {movesLine && (
+                                  <span className="text-[11px] text-slate-500">{movesLine}</span>
+                                )}
+                              </div>
                               <button
                                 type="button"
                                 onClick={() => setSimulatingId(isActive ? null : intervention.id)}
