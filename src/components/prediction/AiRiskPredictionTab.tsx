@@ -453,8 +453,8 @@ export const AiRiskPredictionTab = () => {
                       height={32}
                     />
                     <YAxis
-                      domain={[0, 100]}
-                      ticks={[0, 25, 50, 75, 100]}
+                      domain={yDomain}
+                      ticks={yTicks}
                       tick={{ fontSize: 11, fill: "#475569" }}
                       tickLine={false}
                       axisLine={{ stroke: "#cbd5e1" }}
