@@ -319,7 +319,7 @@ export const AiRiskPredictionTab = () => {
               <h2 className="text-base font-semibold text-slate-900">
                 Human Capital score trajectory
               </h2>
-              <span className="text-xs text-slate-500">0–100 scale</span>
+              <span className="text-xs text-slate-500">0–100 scale · axis zoomed to data</span>
             </div>
 
             <div className="mb-4 rounded-lg border border-slate-200 bg-slate-50 p-4">
