@@ -98,6 +98,14 @@ async function fetchInterventions(
         continue;
       }
       const clamped = clampAssumed(proposed, dp.currentValue, dp.target, dp.direction);
+      if (clamped === dp.currentValue) {
+        console.warn("[interventions] target dropped — clamps to no movement:", {
+          id: raw?.id,
+          dpId,
+          proposed,
+        });
+        continue;
+      }
       if (clamped !== proposed) {
         console.warn("[interventions] assumedValue clamped", {
           id: raw?.id,

@@ -84,8 +84,31 @@ export function pillarScoreWithOverride(
   pillarId: PillarConfig["id"],
   overrides: Record<string, number>,
 ): number | null {
-  const indicators = pillarIndicatorScoresWithOverrides(liveValues, pillarId, overrides);
-  const scored = indicators.map((i) => i.score).filter((s): s is number => s != null);
-  if (scored.length === 0) return null;
-  return Math.round(scored.reduce((a, b) => a + b, 0) / scored.length);
+  const raw = pillarScoreWithOverrideRaw(liveValues, pillarId, overrides);
+  return raw == null ? null : Math.round(raw);
+}
+
+/**
+ * Same aggregation as `pillarScoreWithOverride` but returns the UNROUNDED
+ * pillar mean, computed from raw (unrounded) indicator scores. Use this when
+ * subtracting two pillar scores (e.g. simulation uplift) to avoid losing
+ * fractional movement to indicator- and pillar-level Math.round.
+ */
+export function pillarScoreWithOverrideRaw(
+  liveValues: Record<string, number | null | undefined>,
+  pillarId: PillarConfig["id"],
+  overrides: Record<string, number> = {},
+): number | null {
+  const pillar = PILLAR_CONFIG.find((p) => p.id === pillarId);
+  if (!pillar) return null;
+  const indicatorScores: number[] = [];
+  for (const ind of pillar.indicators) {
+    const dps = resolveDataPoints(ind, liveValues).map((dp) =>
+      dp.id in overrides ? { ...dp, value: overrides[dp.id] } : dp,
+    );
+    const roll = rollupIndicator(dps);
+    if (roll.score != null) indicatorScores.push(roll.score); // raw, pre-round
+  }
+  if (indicatorScores.length === 0) return null;
+  return indicatorScores.reduce((a, b) => a + b, 0) / indicatorScores.length;
 }
