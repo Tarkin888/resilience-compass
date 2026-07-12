@@ -19,7 +19,7 @@ import { classifyTrend, spcChipClasses } from "@/lib/spc";
 import { bandFor } from "@/lib/scoringEngine";
 import { useAIInterventions, type DataPointInfo, type TieredIntervention } from "@/hooks/useAIInterventions";
 import { PILLAR_CONFIG, resolveDataPoints } from "@/config/dataPoints";
-import { pillarScoreWithOverride, pillarIndicatorScoresWithOverrides } from "@/lib/pillarScores";
+import { pillarScoreWithOverride, pillarScoreWithOverrideRaw, pillarIndicatorScoresWithOverrides } from "@/lib/pillarScores";
 
 // Format a value + unit for the simulation copy.
 // %: tight (e.g. "3%"); score: phrased ("a score of 6.9"); else spaced ("45 days").
