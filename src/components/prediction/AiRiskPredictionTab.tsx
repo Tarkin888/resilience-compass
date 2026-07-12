@@ -148,6 +148,12 @@ export const AiRiskPredictionTab = () => {
     () => pillarScoreWithOverride(liveValues, "human", {}),
     [liveValues],
   );
+  // Unrounded baseline — used for uplift subtraction so fractional pillar
+  // movement isn't erased by Math.round before we ever see it.
+  const baselinePillarRaw = useMemo(
+    () => pillarScoreWithOverrideRaw(liveValues, "human", {}),
+    [liveValues],
+  );
 
   // Per-intervention: engine-computed uplift at today's values, and per-indicator
   // baseline/after scores (used for the "affected indicators" chips + card copy).
@@ -159,11 +165,15 @@ export const AiRiskPredictionTab = () => {
       const overrides: Record<string, number> = {};
       for (const t of i.targets) overrides[t.dataPointId] = t.assumedValue;
 
-      const overriddenPillar = pillarScoreWithOverride(liveValues, "human", overrides);
-      const uplift =
-        overriddenPillar != null && baselinePillar != null
-          ? Math.max(0, overriddenPillar - baselinePillar)
+      const overriddenRaw = pillarScoreWithOverrideRaw(liveValues, "human", overrides);
+      const rawUplift =
+        overriddenRaw != null && baselinePillarRaw != null
+          ? Math.max(0, overriddenRaw - baselinePillarRaw)
           : 0;
+      // Round once, at the end. Floor to +1 whenever there is any genuine
+      // positive movement so the display never implies "no effect" when the
+      // engine found one.
+      const uplift = rawUplift > 0 ? Math.max(1, Math.round(rawUplift)) : 0;
 
       const overriddenIndicators = pillarIndicatorScoresWithOverrides(liveValues, "human", overrides);
       const affectedIndicators = overriddenIndicators
@@ -177,7 +187,7 @@ export const AiRiskPredictionTab = () => {
 
       return { intervention: i, uplift, affectedIndicators };
     });
-  }, [interventions, liveValues, baselinePillar]);
+  }, [interventions, liveValues, baselinePillarRaw]);
 
   // Sort: tier ascending, then uplift descending.
   const orderedInterventions = useMemo(() => {
