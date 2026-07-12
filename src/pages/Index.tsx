@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ChevronLeft } from "lucide-react";
 import { Header } from "@/components/Header";
@@ -17,6 +17,10 @@ import { useChatContext } from "@/hooks/useChatContext";
 const Index = () => {
   const [active, setActive] = useState<TabId>("alerts");
   const { context, loading: chatContextLoading } = useChatContext();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [active]);
 
 
 
