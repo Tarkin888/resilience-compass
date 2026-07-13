@@ -648,7 +648,7 @@ export const AiRiskPredictionTab = () => {
                                 onClick={() => setSimulatingId(isActive ? null : intervention.id)}
                                 className={`rounded-md border px-3 py-1.5 text-xs font-medium ${isActive ? "border-green-500 bg-green-600 text-white hover:bg-green-700" : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"}`}
                               >
-                                {isActive ? "Simulating…" : "Simulate this intervention"}
+                                {isActive ? "Simulated" : "Simulate this intervention"}
                               </button>
                             </div>
                           </div>
