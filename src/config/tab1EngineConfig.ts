@@ -24,4 +24,6 @@ export const TAB1_ENGINE_CONFIG: Record<string, Tab1EngineConfig> = {
   training_compliance: { target: 95, minimumThreshold: 60, direction: "higherIsBetter" },
   staff_engagement_score: { target: 7.5, minimumThreshold: 5.0, direction: "higherIsBetter" },
   voluntary_turnover: { target: 10, minimumThreshold: 16, direction: "lowerIsBetter" },
+  talent_attraction_future: { target: 80, minimumThreshold: 40, direction: "higherIsBetter" },
+  talent_attraction_today: { target: 90, minimumThreshold: 50, direction: "higherIsBetter" },
 };
