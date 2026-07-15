@@ -322,49 +322,22 @@ export const LiveRiskAlertsTab = () => {
           Loading alerts…
         </div>
       ) : (
-        <div className="space-y-6">
-          {INDICATOR_GROUPS.map((group) => {
-            const groupRowsVisible = filtered.filter((r) => group.kris.includes(r.def.kri_id));
-            if (groupRowsVisible.length === 0) return null;
-            const scoredCount = groupRowsVisible.filter((r) => r.engineScore != null).length;
-            const totalCount = groupRowsVisible.length;
-            const isUnassigned = group.id === "unassigned";
-
-            return (
-              <section key={group.id} aria-label={group.name}>
-                <div className="mb-2 flex flex-wrap items-baseline justify-between gap-2 border-b border-slate-200 pb-1.5">
-                  <h2
-                    className={`text-sm font-bold uppercase tracking-wide ${
-                      isUnassigned ? "text-amber-700" : "text-[#001D57]"
-                    }`}
-                  >
-                    {group.name}
-                  </h2>
-                  <span className="text-[11px] font-medium text-slate-500">
-                    {`${scoredCount} of ${totalCount} data point${totalCount === 1 ? "" : "s"} scored`}
-                  </span>
-                </div>
-
-                <div className="space-y-3">
-                  {groupRowsVisible.map((r) => (
-                    <AlertCard
-                      key={r.def.id}
-                      definition={r.def}
-                      status={r.status}
-                      trend={r.trend}
-                      value={r.value}
-                      unit={r.unit}
-                      threshold={r.threshold}
-                      source={r.source}
-                      captures={r.captures}
-                      narrative={r.narrative}
-                      engineScore={r.engineScore}
-                    />
-                  ))}
-                </div>
-              </section>
-            );
-          })}
+        <div className="space-y-3">
+          {filtered.map((r) => (
+            <AlertCard
+              key={r.def.id}
+              definition={r.def}
+              status={r.status}
+              trend={r.trend}
+              value={r.value}
+              unit={r.unit}
+              threshold={r.threshold}
+              source={r.source}
+              captures={r.captures}
+              narrative={r.narrative}
+              engineScore={r.engineScore}
+            />
+          ))}
         </div>
       )}
     </div>
