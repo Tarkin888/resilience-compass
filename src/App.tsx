@@ -32,6 +32,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<FiveCapitals />} />
           <Route path="/human" element={<Index />} />
+          <Route path="/pillar/:id" element={<PillarSummary />} />
           <Route path="/admin/sources" element={<AdminSources />} />
           <Route path="/admin/status" element={<AdminStatus />} />
           <Route path="/demo/reset" element={<DemoReset />} />
