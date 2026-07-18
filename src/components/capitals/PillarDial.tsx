@@ -8,13 +8,15 @@ interface Props {
   score: number | null;
   trend: Trend;
   trendLabel: string;
+  status: "live" | "preview";
   onViewDetails: () => void;
 }
 
 const NAVY = "#001D57";
 
-export const PillarDial = ({ name, score, trend, trendLabel, onViewDetails }: Props) => {
+export const PillarDial = ({ name, score, trend, trendLabel, status, onViewDetails }: Props) => {
   const color = scoreBandColor(score);
+
 
 
 
