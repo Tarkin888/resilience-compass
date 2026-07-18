@@ -29,6 +29,19 @@ export const PillarDial = ({ name, score, trend, trendLabel, status, onViewDetai
       <div className="text-sm font-semibold uppercase tracking-wide text-center" style={{ color: NAVY }}>
         {name}
       </div>
+      <div className="mt-2">
+        {status === "live" ? (
+          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-600" aria-hidden />
+            Live
+          </span>
+        ) : (
+          <span className="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-600">
+            Preview
+          </span>
+        )}
+      </div>
+
       <div className="relative mt-3">
         <svg width="150" height="150" viewBox="0 0 150 150">
           <circle cx="75" cy="75" r="60" fill="none" stroke="#E5E7EB" strokeWidth="12" />
