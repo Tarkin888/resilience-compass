@@ -3,15 +3,15 @@ import { Bell, BarChart3, TrendingUp, SlidersHorizontal, GitCompare, LucideIcon 
 
 export type TabId =
   | "alerts"
+  | "prediction"
   | "scenario_testing"
-  | "scenario_impact"
-  | "prediction";
+  | "scenario_impact";
 
 export const TABS: { id: TabId; label: string; icon: LucideIcon }[] = [
-  { id: "alerts", label: "Live Risk Alerts", icon: Bell },
-  { id: "scenario_testing", label: "Scenario Testing", icon: SlidersHorizontal },
-  { id: "scenario_impact", label: "Scenario Impact", icon: GitCompare },
-  { id: "prediction", label: "AI Risk Prediction", icon: TrendingUp },
+  { id: "alerts", label: "Now", icon: Bell },
+  { id: "prediction", label: "Predict & interventions", icon: TrendingUp },
+  { id: "scenario_testing", label: "Scenario testing", icon: SlidersHorizontal },
+  { id: "scenario_impact", label: "Scenario impact", icon: GitCompare },
 ];
 
 export const tabButtonId = (id: TabId) => `tab-${id}`;

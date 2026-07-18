@@ -29,13 +29,22 @@ const Index = () => {
     <div className="min-h-screen bg-slate-50 text-slate-900 text-sm leading-relaxed">
       <Header />
       <div className="border-b border-slate-200 bg-white px-4 py-2 sm:px-6">
-        <Link
-          to="/"
-          className="inline-flex items-center gap-1 text-xs font-semibold text-brand hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-brand rounded"
-        >
-          <ChevronLeft size={14} aria-hidden />
-          Five Capitals
-        </Link>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <Link
+            to="/pillar/human"
+            className="inline-flex min-h-[36px] items-center gap-1 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-brand hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+          >
+            <ChevronLeft size={14} aria-hidden />
+            Back to Human (Workforce) summary
+          </Link>
+          <nav aria-label="Breadcrumb" className="text-xs text-slate-500">
+            <Link to="/" className="hover:underline">Five Capitals</Link>
+            <span className="mx-1.5">›</span>
+            <Link to="/pillar/human" className="hover:underline">Human (Workforce)</Link>
+            <span className="mx-1.5">›</span>
+            <span className="font-semibold text-slate-700">Dashboard</span>
+          </nav>
+        </div>
       </div>
       <ScoreCard />
       <TrendPanel />
