@@ -10,6 +10,7 @@ import AdminSources from "./pages/AdminSources.tsx";
 import AdminStatus from "./pages/AdminStatus.tsx";
 import DemoReset from "./pages/DemoReset.tsx";
 import FiveCapitals from "./pages/FiveCapitals.tsx";
+import PillarSummary from "./pages/PillarSummary.tsx";
 
 const queryClient = new QueryClient();
 
