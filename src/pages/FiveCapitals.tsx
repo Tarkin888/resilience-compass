@@ -76,6 +76,8 @@ const FiveCapitals = () => {
               score={p.id === "human" && humanLoading ? null : p.score}
               trend={p.trend}
               trendLabel={p.trendLabel}
+              status={p.status}
+
               onViewDetails={() => navigate(`/pillar/${p.id}`)}
             />
           ))}
