@@ -57,7 +57,7 @@ export const ScoreCard = () => {
     <section className="px-4 py-4 sm:px-6 sm:py-6">
       <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-6">
-          <div className="sm:w-1/2 sm:shrink-0">
+          <div className="w-full sm:shrink-0">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0 flex-1">
                 {humanReady ? (
