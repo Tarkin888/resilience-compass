@@ -7,6 +7,9 @@ import { useHumanCapitalData } from "@/hooks/useHumanCapitalData";
 import { getLastSuccessfulCapture } from "@/hooks/useLastSuccessfulCapture";
 import { formatDateTime } from "@/components/alerts/severity";
 import { computePillarScores } from "@/lib/pillarScores";
+import { scoreBand } from "@/lib/scoreBand";
+import { useOrgStatusSummary } from "@/hooks/useOrgStatusSummary";
+
 
 const NAVY = "#001D57";
 
@@ -41,6 +44,26 @@ const FiveCapitals = () => {
   const pillars = useMemo(() => {
     return computePillarScores(liveValues).map((p) => ({ ...p, ...PILLAR_META[p.id] }));
   }, [liveValues]);
+
+  const statusPillars = useMemo(
+    () =>
+      pillars.map((p) => {
+        const score = p.id === "human" && humanLoading ? null : p.score;
+        return {
+          name: p.name,
+          score,
+          ragBand: scoreBand(score),
+          trendLabel: p.trendLabel,
+        };
+      }),
+    [pillars, humanLoading],
+  );
+
+  const { summary: statusSummary, loading: statusLoading } = useOrgStatusSummary(
+    statusPillars,
+    !humanLoading,
+  );
+
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 text-sm leading-relaxed">
