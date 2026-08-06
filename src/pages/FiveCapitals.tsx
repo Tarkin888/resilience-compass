@@ -68,6 +68,33 @@ const FiveCapitals = () => {
           </p>
         </section>
 
+        {(statusLoading || statusSummary) && (
+          <section className="mx-auto mt-6 max-w-6xl">
+            <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+              <h2 className="text-sm font-semibold" style={{ color: NAVY }}>
+                Today's position
+              </h2>
+              {statusLoading ? (
+                <div className="mt-3 space-y-2" aria-live="polite" aria-busy="true">
+                  <span className="sr-only">Generating summary</span>
+                  <div className="h-3 w-full animate-pulse rounded bg-slate-100" />
+                  <div className="h-3 w-11/12 animate-pulse rounded bg-slate-100" />
+                  <div className="h-3 w-3/5 animate-pulse rounded bg-slate-100" />
+                </div>
+              ) : (
+                <p className="mt-2 max-w-4xl text-sm leading-relaxed text-slate-700">
+                  {statusSummary}
+                </p>
+              )}
+              <p className="mt-3 text-xs text-slate-500">
+                AI-generated from current pillar scores — for discussion, not a substitute for judgement.
+              </p>
+            </div>
+          </section>
+        )}
+
+
+
         <section className="mx-auto mt-8 grid max-w-6xl grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
           {pillars.map((p) => (
             <PillarDial
