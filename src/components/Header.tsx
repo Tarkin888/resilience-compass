@@ -52,6 +52,10 @@ export const Header = () => {
                   Manage sources
                 </Link>
               </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onSelect={logOut} className="cursor-pointer">
+                Log out
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
 
