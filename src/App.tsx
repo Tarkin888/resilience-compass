@@ -11,6 +11,8 @@ import AdminStatus from "./pages/AdminStatus.tsx";
 import DemoReset from "./pages/DemoReset.tsx";
 import FiveCapitals from "./pages/FiveCapitals.tsx";
 import PillarSummary from "./pages/PillarSummary.tsx";
+import { AuthGateProvider } from "@/contexts/AuthGateContext";
+import { PasswordGateModal } from "@/components/PasswordGateModal";
 
 const queryClient = new QueryClient();
 
@@ -25,21 +27,24 @@ const ScrollToTop = () => {
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <ScrollToTop />
-        <Routes>
-          <Route path="/" element={<FiveCapitals />} />
-          <Route path="/human" element={<Index />} />
-          <Route path="/pillar/:id" element={<PillarSummary />} />
-          <Route path="/admin/sources" element={<AdminSources />} />
-          <Route path="/admin/status" element={<AdminStatus />} />
-          <Route path="/demo/reset" element={<DemoReset />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
+      <AuthGateProvider>
+        <Toaster />
+        <Sonner />
+        <PasswordGateModal />
+        <BrowserRouter>
+          <ScrollToTop />
+          <Routes>
+            <Route path="/" element={<FiveCapitals />} />
+            <Route path="/human" element={<Index />} />
+            <Route path="/pillar/:id" element={<PillarSummary />} />
+            <Route path="/admin/sources" element={<AdminSources />} />
+            <Route path="/admin/status" element={<AdminStatus />} />
+            <Route path="/demo/reset" element={<DemoReset />} />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </AuthGateProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );
