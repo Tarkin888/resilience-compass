@@ -1,4 +1,4 @@
-import { ChevronDown, Shield } from "lucide-react";
+import { ChevronDown, LogOut, Shield } from "lucide-react";
 import { Link } from "react-router-dom";
 import {
   DropdownMenu,
@@ -6,7 +6,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useAuth } from "@/contexts/AuthContext";
 export const Header = () => {
+  const { user, signOut } = useAuth();
+
   return (
     <header className="w-full border-b border-slate-200 bg-white">
       <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6 sm:py-4">
@@ -60,7 +63,19 @@ export const Header = () => {
             Demo NHS Trust
             <ChevronDown size={16} className="text-slate-500" />
           </button>
+
+          {user && (
+            <button
+              type="button"
+              onClick={() => void signOut()}
+              className="flex min-h-[44px] items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-brand shadow-sm hover:bg-slate-50 sm:px-4"
+            >
+              <LogOut size={16} />
+              <span>Sign out</span>
+            </button>
+          )}
         </div>
+
       </div>
     </header>
 
