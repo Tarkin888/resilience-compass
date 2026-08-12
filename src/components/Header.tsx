@@ -7,10 +7,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useAuthGate } from "@/contexts/AuthGateContext";
-
 export const Header = () => {
-  const { logOut } = useAuthGate();
   return (
     <header className="w-full border-b border-slate-200 bg-white">
       <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6 sm:py-4">
@@ -51,10 +48,6 @@ export const Header = () => {
                 <Link to="/admin/sources" className="cursor-pointer">
                   Manage sources
                 </Link>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onSelect={logOut} className="cursor-pointer">
-                Log out
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
