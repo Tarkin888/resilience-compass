@@ -7,6 +7,9 @@ import { useHumanCapitalData } from "@/hooks/useHumanCapitalData";
 import { getLastSuccessfulCapture } from "@/hooks/useLastSuccessfulCapture";
 import { formatDateTime } from "@/components/alerts/severity";
 import { computePillarScores } from "@/lib/pillarScores";
+import { scoreBand } from "@/lib/scoreBand";
+import { useOrgStatusSummary } from "@/hooks/useOrgStatusSummary";
+
 
 const NAVY = "#001D57";
 
@@ -42,6 +45,26 @@ const FiveCapitals = () => {
     return computePillarScores(liveValues).map((p) => ({ ...p, ...PILLAR_META[p.id] }));
   }, [liveValues]);
 
+  const statusPillars = useMemo(
+    () =>
+      pillars.map((p) => {
+        const score = p.id === "human" && humanLoading ? null : p.score;
+        return {
+          name: p.name,
+          score,
+          ragBand: scoreBand(score),
+          trendLabel: p.trendLabel,
+        };
+      }),
+    [pillars, humanLoading],
+  );
+
+  const { summary: statusSummary, loading: statusLoading } = useOrgStatusSummary(
+    statusPillars,
+    !humanLoading,
+  );
+
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 text-sm leading-relaxed">
       <Header />
@@ -60,13 +83,40 @@ const FiveCapitals = () => {
       <main className="px-4 py-8 sm:px-6 sm:py-10">
         <section className="mx-auto max-w-6xl">
           <h1 className="text-2xl font-bold sm:text-3xl">
-            <span style={{ color: NAVY }}>Five Capitals Health </span>
-            <span style={{ color: "#DC2626" }}>Score</span>
+            <span style={{ color: NAVY }}>Five Capitals Health Score</span>
+
           </h1>
           <p className="mt-2 max-w-3xl text-sm text-slate-600">
             One view of organisational resilience across the five capitals. The Human (Workforce) pillar is live; the other four are illustrative previews. Select a pillar to see its indicator composition.
           </p>
         </section>
+
+        {(statusLoading || statusSummary) && (
+          <section className="mx-auto mt-6 max-w-6xl">
+            <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+              <h2 className="text-sm font-semibold" style={{ color: NAVY }}>
+                Today's position
+              </h2>
+              {statusLoading ? (
+                <div className="mt-3 space-y-2" aria-live="polite" aria-busy="true">
+                  <span className="sr-only">Generating summary</span>
+                  <div className="h-3 w-full animate-pulse rounded bg-slate-100" />
+                  <div className="h-3 w-11/12 animate-pulse rounded bg-slate-100" />
+                  <div className="h-3 w-3/5 animate-pulse rounded bg-slate-100" />
+                </div>
+              ) : (
+                <p className="mt-2 max-w-4xl text-sm leading-relaxed text-slate-700">
+                  {statusSummary}
+                </p>
+              )}
+              <p className="mt-3 text-xs text-slate-500">
+                AI-generated from current pillar scores — for discussion, not a substitute for judgement.
+              </p>
+            </div>
+          </section>
+        )}
+
+
 
         <section className="mx-auto mt-8 grid max-w-6xl grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
           {pillars.map((p) => (

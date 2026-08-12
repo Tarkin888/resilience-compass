@@ -57,7 +57,7 @@ export const ScoreCard = () => {
     <section className="px-4 py-4 sm:px-6 sm:py-6">
       <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-6">
-          <div className="sm:w-1/2 sm:shrink-0">
+          <div className="w-full sm:shrink-0">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0 flex-1">
                 {humanReady ? (
@@ -103,11 +103,6 @@ export const ScoreCard = () => {
                 </Tooltip>
               )}
             </div>
-          </div>
-          <div className="border-t border-slate-200 pt-4 sm:flex-1 sm:border-l sm:border-t-0 sm:pl-6 sm:pt-0">
-            <p className="text-[13px] font-semibold italic leading-relaxed text-slate-700 sm:text-[14px] lg:text-[15px]">
-              A resilience dashboard helping NHS Trusts monitor and anticipate workforce risk. This prototype focuses on the Human Capital pillar, presenting indicator scores averaged across data points and normalised onto a 0–100 operating range. Staff Vacancy Rate and Sickness Absence Rate are populated with live public data from NHS England; remaining data points are clearly labelled as illustrative demo data.
-            </p>
           </div>
         </div>
       </div>
