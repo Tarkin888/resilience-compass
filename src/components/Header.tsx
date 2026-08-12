@@ -1,4 +1,4 @@
-import { ChevronDown, Shield } from "lucide-react";
+import { ChevronDown, LogOut, Shield } from "lucide-react";
 import { Link } from "react-router-dom";
 import {
   DropdownMenu,
@@ -6,7 +6,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useAuth } from "@/contexts/AuthContext";
 export const Header = () => {
+  const { user, signOut } = useAuth();
+
   return (
     <header className="w-full border-b border-slate-200 bg-white">
       <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6 sm:py-4">

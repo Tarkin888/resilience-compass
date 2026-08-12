@@ -11,6 +11,9 @@ import AdminStatus from "./pages/AdminStatus.tsx";
 import DemoReset from "./pages/DemoReset.tsx";
 import FiveCapitals from "./pages/FiveCapitals.tsx";
 import PillarSummary from "./pages/PillarSummary.tsx";
+import { AuthProvider } from "@/contexts/AuthContext";
+import ProtectedRoute from "@/components/ProtectedRoute";
+
 
 const queryClient = new QueryClient();
 
@@ -27,21 +30,26 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
-        <ScrollToTop />
-        <Routes>
-          <Route path="/" element={<FiveCapitals />} />
-          <Route path="/human" element={<Index />} />
-          <Route path="/pillar/:id" element={<PillarSummary />} />
-          <Route path="/admin/sources" element={<AdminSources />} />
-          <Route path="/admin/status" element={<AdminStatus />} />
-          <Route path="/demo/reset" element={<DemoReset />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
+      <AuthProvider>
+        <ProtectedRoute>
+          <BrowserRouter>
+            <ScrollToTop />
+            <Routes>
+              <Route path="/" element={<FiveCapitals />} />
+              <Route path="/human" element={<Index />} />
+              <Route path="/pillar/:id" element={<PillarSummary />} />
+              <Route path="/admin/sources" element={<AdminSources />} />
+              <Route path="/admin/status" element={<AdminStatus />} />
+              <Route path="/demo/reset" element={<DemoReset />} />
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </ProtectedRoute>
+      </AuthProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );
+
 
 export default App;
