@@ -83,8 +83,8 @@ const FiveCapitals = () => {
       <main className="px-4 py-8 sm:px-6 sm:py-10">
         <section className="mx-auto max-w-6xl">
           <h1 className="text-2xl font-bold sm:text-3xl">
-            <span style={{ color: NAVY }}>Five Capitals Health </span>
-            <span style={{ color: "#DC2626" }}>Score</span>
+            <span style={{ color: NAVY }}>Five Capitals Health Score</span>
+
           </h1>
           <p className="mt-2 max-w-3xl text-sm text-slate-600">
             One view of organisational resilience across the five capitals. The Human (Workforce) pillar is live; the other four are illustrative previews. Select a pillar to see its indicator composition.
