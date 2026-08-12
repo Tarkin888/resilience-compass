@@ -63,7 +63,19 @@ export const Header = () => {
             Demo NHS Trust
             <ChevronDown size={16} className="text-slate-500" />
           </button>
+
+          {user && (
+            <button
+              type="button"
+              onClick={() => void signOut()}
+              className="flex min-h-[44px] items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-brand shadow-sm hover:bg-slate-50 sm:px-4"
+            >
+              <LogOut size={16} />
+              <span>Sign out</span>
+            </button>
+          )}
         </div>
+
       </div>
     </header>
 
