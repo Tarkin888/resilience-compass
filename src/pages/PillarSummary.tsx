@@ -86,7 +86,7 @@ const PillarSummary = () => {
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
               <div className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                {isLive ? "Live" : "Preview"} · {pillar.name}
+                {isLive ? "Semi-live" : "Preview"} · {pillar.name}
               </div>
               <div className="mt-1 flex items-baseline gap-2">
                 <span className="text-4xl font-bold tabular-nums" style={{ color: scoreBandColor(displayScore) }}>
