@@ -33,7 +33,7 @@ export const PillarDial = ({ name, score, trend, trendLabel, status, onViewDetai
         {status === "live" ? (
           <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700">
             <span className="h-1.5 w-1.5 rounded-full bg-emerald-600" aria-hidden />
-            Live
+            Semi-live
           </span>
         ) : (
           <span className="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-600">
