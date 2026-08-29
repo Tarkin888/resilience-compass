@@ -156,6 +156,26 @@ export const ScenarioImpactTab = ({ onBack }: { onBack: () => void }) => {
     enabled: hasOverlay,
   });
 
+  // Display "after" per pillar: Human uses the deterministic scenario engine;
+  // the other four capitals use the AI-indicative cascade delta (unchanged
+  // until cascade items arrive).
+  const displayAfterFor = (pillarId: string, before: number | null): number | null => {
+    if (pillarId === "human") return scenarioPillars.find((s) => s.id === "human")?.score ?? null;
+    if (before == null) return null;
+    const item = cascade.items.find((i) => i.pillarId === pillarId);
+    return item ? clamp0100(before + item.delta) : before;
+  };
+
+  const dashboardAfter = useMemo(() => {
+    const afters = livePillars
+      .map((p) => displayAfterFor(p.id, p.score))
+      .filter((s): s is number => s != null);
+    return afters.length
+      ? Math.round(afters.reduce((a, s) => a + s, 0) / afters.length)
+      : null;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [livePillars, scenarioPillars, cascade.items]);
+
   // Post-scenario data points (projected values) feed the recovery interventions.
   const projectedDataPoints = useMemo<DataPointInfo[]>(() => {
     const human = PILLAR_CONFIG.find((p) => p.id === "human");
