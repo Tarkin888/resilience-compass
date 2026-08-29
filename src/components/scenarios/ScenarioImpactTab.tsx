@@ -118,10 +118,6 @@ export const ScenarioImpactTab = ({ onBack }: { onBack: () => void }) => {
     const scored = livePillars.filter((p) => p.score != null) as Array<{ score: number }>;
     return scored.length ? Math.round(scored.reduce((a, p) => a + p.score, 0) / scored.length) : null;
   }, [livePillars]);
-  const dashboardAfter = useMemo(() => {
-    const scored = scenarioPillars.filter((p) => p.score != null) as Array<{ score: number }>;
-    return scored.length ? Math.round(scored.reduce((a, p) => a + p.score, 0) / scored.length) : null;
-  }, [scenarioPillars]);
 
   const hasOverlay = hasRun && Object.keys(overrides).length > 0;
 
