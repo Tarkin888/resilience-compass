@@ -39,9 +39,10 @@ export const ScenarioProvider = ({ children }: { children: ReactNode }) => {
       const next = { ...prev };
       if (value == null || !Number.isFinite(value)) delete next[kriId];
       else next[kriId] = value;
+      // Any change counts as a run: results show as soon as there is an override.
+      setHasRun(Object.keys(next).length > 0);
       return next;
     });
-    setHasRun(false);
   }, []);
 
   const resetOverrides = useCallback(() => {
