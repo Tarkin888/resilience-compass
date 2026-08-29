@@ -66,7 +66,7 @@ function DeltaChip({ delta }: { delta: number | null }) {
 export const ScenarioTestingTab = ({ onViewImpact }: { onViewImpact: () => void }) => {
   const { data } = useHumanCapitalData();
   const {
-    overrides, setOverride, resetOverrides, runScenario, hasRun,
+    overrides, setOverride, resetOverrides, hasRun,
     selectedScenario, setSelectedScenario, markScenarioModified,
   } = useScenario();
   const selectedScenarioId = selectedScenario?.id ?? null;
@@ -155,8 +155,6 @@ export const ScenarioTestingTab = ({ onViewImpact }: { onViewImpact: () => void 
       }
     });
     setInputs((prev) => ({ ...prev, ...nextInputs }));
-    // Defer runScenario so override state has flushed.
-    setTimeout(() => runScenario(), 0);
   };
 
   const hasChanges = Object.keys(overrides).length > 0;
@@ -298,14 +296,6 @@ export const ScenarioTestingTab = ({ onViewImpact }: { onViewImpact: () => void 
           >
             <RotateCcw size={14} aria-hidden />
             Reset
-          </button>
-          <button
-            type="button"
-            onClick={runScenario}
-            disabled={!hasChanges}
-            className="inline-flex items-center justify-center gap-1.5 rounded-md bg-[#001D57] px-4 py-2 text-sm font-semibold text-white hover:bg-[#002577] disabled:opacity-50"
-          >
-            Run scenario
           </button>
         </div>
       </div>
