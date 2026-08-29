@@ -457,7 +457,7 @@ export const ScenarioImpactTab = ({ onBack }: { onBack: () => void }) => {
               Dashboard score (Five Capitals)
             </div>
             <p className="mt-0.5 text-xs text-slate-500">
-              Average of pillar scores using the same flat-hold rollup as the live dashboard.
+              Average of the pillar scenario scores above — deterministic for Human, AI-indicative for the other four capitals.
             </p>
           </div>
           <div className="flex items-center gap-4">
