@@ -118,10 +118,6 @@ export const ScenarioImpactTab = ({ onBack }: { onBack: () => void }) => {
     const scored = livePillars.filter((p) => p.score != null) as Array<{ score: number }>;
     return scored.length ? Math.round(scored.reduce((a, p) => a + p.score, 0) / scored.length) : null;
   }, [livePillars]);
-  const dashboardAfter = useMemo(() => {
-    const scored = scenarioPillars.filter((p) => p.score != null) as Array<{ score: number }>;
-    return scored.length ? Math.round(scored.reduce((a, p) => a + p.score, 0) / scored.length) : null;
-  }, [scenarioPillars]);
 
   const hasOverlay = hasRun && Object.keys(overrides).length > 0;
 
@@ -159,6 +155,26 @@ export const ScenarioImpactTab = ({ onBack }: { onBack: () => void }) => {
     primaryDelta,
     enabled: hasOverlay,
   });
+
+  // Display "after" per pillar: Human uses the deterministic scenario engine;
+  // the other four capitals use the AI-indicative cascade delta (unchanged
+  // until cascade items arrive).
+  const displayAfterFor = (pillarId: string, before: number | null): number | null => {
+    if (pillarId === "human") return scenarioPillars.find((s) => s.id === "human")?.score ?? null;
+    if (before == null) return null;
+    const item = cascade.items.find((i) => i.pillarId === pillarId);
+    return item ? clamp0100(before + item.delta) : before;
+  };
+
+  const dashboardAfter = useMemo(() => {
+    const afters = livePillars
+      .map((p) => displayAfterFor(p.id, p.score))
+      .filter((s): s is number => s != null);
+    return afters.length
+      ? Math.round(afters.reduce((a, s) => a + s, 0) / afters.length)
+      : null;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [livePillars, scenarioPillars, cascade.items]);
 
   // Post-scenario data points (projected values) feed the recovery interventions.
   const projectedDataPoints = useMemo<DataPointInfo[]>(() => {
@@ -236,25 +252,40 @@ export const ScenarioImpactTab = ({ onBack }: { onBack: () => void }) => {
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
         {livePillars.map((p) => {
-          const after = scenarioPillars.find((s) => s.id === p.id)?.score ?? null;
+          const isHuman = p.id === "human";
+          const after = displayAfterFor(p.id, p.score);
           const delta = p.score != null && after != null ? after - p.score : null;
-          const affected = p.id === "human" && delta != null && delta !== 0;
+          const cascadePending = !isHuman && cascade.loading && cascade.items.length === 0;
+          const affected = delta != null && delta !== 0;
           return (
             <div
               key={p.id}
               className={`rounded-xl border border-slate-200 bg-white p-4 ${
-                p.id === "human" ? "" : "bg-slate-50/40"
+                isHuman ? "" : "bg-slate-50/40"
               }`}
             >
-              <div className="text-xs font-semibold uppercase tracking-wide" style={{ color: NAVY }}>
-                {p.name}
+              <div className="flex flex-wrap items-center gap-1.5">
+                <div className="text-xs font-semibold uppercase tracking-wide" style={{ color: NAVY }}>
+                  {p.name}
+                </div>
+                {!isHuman && (
+                  <span className="inline-flex items-center rounded-full border border-indigo-200 bg-indigo-50 px-1.5 py-px text-[9px] font-semibold uppercase tracking-wide text-indigo-700">
+                    AI-indicative
+                  </span>
+                )}
               </div>
               <div className="mt-3 flex items-center justify-between gap-2">
-                <MiniDial score={p.score} label="Current" dim={p.id !== "human"} />
-                <MiniDial score={after} label="Scenario" dim={p.id !== "human"} />
+                <MiniDial score={p.score} label="Current" dim={!isHuman} />
+                <MiniDial score={after} label="Scenario" dim={!isHuman} />
               </div>
               <div className="mt-3 flex justify-center">
-                {affected ? <Delta delta={delta} score={after} /> : <Delta delta={0} score={after ?? p.score} />}
+                {cascadePending ? (
+                  <span className="text-[11px] italic text-slate-400">Estimating…</span>
+                ) : affected ? (
+                  <Delta delta={delta} score={after} />
+                ) : (
+                  <Delta delta={0} score={after ?? p.score} />
+                )}
               </div>
             </div>
           );
@@ -426,7 +457,7 @@ export const ScenarioImpactTab = ({ onBack }: { onBack: () => void }) => {
               Dashboard score (Five Capitals)
             </div>
             <p className="mt-0.5 text-xs text-slate-500">
-              Average of pillar scores using the same flat-hold rollup as the live dashboard.
+              Average of the pillar scenario scores above — deterministic for Human, AI-indicative for the other four capitals.
             </p>
           </div>
           <div className="flex items-center gap-4">
