@@ -18,9 +18,6 @@ const Index = () => {
   const [active, setActive] = useState<TabId>("alerts");
   const { context, loading: chatContextLoading } = useChatContext();
 
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [active]);
 
 
 
