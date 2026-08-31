@@ -199,7 +199,19 @@ export const ScenarioTestingTab = ({ onViewImpact }: { onViewImpact: () => void 
 
   return (
     <div className="space-y-5">
-      <div className="rounded-xl border-l-4 border-amber-400 bg-amber-50 p-4 sm:p-5">
+      {onBack && (
+        <div>
+          <button
+            type="button"
+            onClick={onBack}
+            className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-[#001D57] hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2"
+          >
+            <ChevronLeft size={14} aria-hidden="true" />
+            Back to Predict &amp; interventions
+          </button>
+        </div>
+      )}
+      <div className="space-y-5 rounded-xl border-l-4 border-amber-400 bg-amber-50 p-4 sm:p-5">
         <p className="text-xs font-semibold uppercase tracking-wide text-amber-800">
           Illustrative scenario modelling
         </p>
