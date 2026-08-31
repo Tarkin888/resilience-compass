@@ -87,7 +87,7 @@ const FiveCapitals = () => {
 
           </h1>
           <p className="mt-2 max-w-3xl text-sm text-slate-600">
-            One view of organisational resilience across the five capitals. The Human (Workforce) pillar is live; the other four are illustrative previews. Select a pillar to see its indicator composition.
+            One view of organisational resilience across the five capitals. The Human (Workforce) pillar uses semi-live data; the other four are illustrative previews. Select a pillar to see its indicator composition.
           </p>
         </section>
 
