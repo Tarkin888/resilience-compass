@@ -120,8 +120,7 @@ export default function AdminStatus() {
               This page is the operational view of the live NHS data feeds powering the Human
               Capital dashboard. Each row corresponds to one data point wired to a public
               NHS data source. The Last attempt column shows the most recent capture attempt,
-              regardless of outcome. Outcome is one of captured, no_new_edition, or
-              capture_error. Last successful capture shows the timestamp of the most recent
+              regardless of outcome. Outcome is one of captured, no_new_edition, page_not_found (the edition URL pattern did not resolve to a published page), or capture_error.. Last successful capture shows the timestamp of the most recent
               edition we actually captured into the database; the dashboard headline values and
               edition labels are derived from that capture. Time since success is highlighted
               amber when greater than seven days. Edition captured is the source publication's
