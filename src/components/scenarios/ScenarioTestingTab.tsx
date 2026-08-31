@@ -3,7 +3,7 @@
 // dashboard scores using the existing scoring engine. Live overlay only —
 // nothing is written to the database.
 import { useMemo, useState, useEffect } from "react";
-import { ArrowRight, RotateCcw } from "lucide-react";
+import { ArrowRight, ChevronLeft, RotateCcw } from "lucide-react";
 import { useHumanCapitalData } from "@/hooks/useHumanCapitalData";
 import { useScenario } from "@/contexts/ScenarioContext";
 import { PILLAR_CONFIG } from "@/config/dataPoints";
@@ -63,7 +63,7 @@ function DeltaChip({ delta }: { delta: number | null }) {
   );
 }
 
-export const ScenarioTestingTab = ({ onViewImpact }: { onViewImpact: () => void }) => {
+export const ScenarioTestingTab = ({ onViewImpact, onBack }: { onViewImpact: () => void; onBack?: () => void }) => {
   const { data } = useHumanCapitalData();
   const {
     overrides, setOverride, resetOverrides, hasRun,
@@ -199,7 +199,19 @@ export const ScenarioTestingTab = ({ onViewImpact }: { onViewImpact: () => void 
 
   return (
     <div className="space-y-5">
-      <div className="rounded-xl border-l-4 border-amber-400 bg-amber-50 p-4 sm:p-5">
+      {onBack && (
+        <div>
+          <button
+            type="button"
+            onClick={onBack}
+            className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-[#001D57] hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2"
+          >
+            <ChevronLeft size={14} aria-hidden="true" />
+            Back to Predict &amp; interventions
+          </button>
+        </div>
+      )}
+      <div className="space-y-5 rounded-xl border-l-4 border-amber-400 bg-amber-50 p-4 sm:p-5">
         <p className="text-xs font-semibold uppercase tracking-wide text-amber-800">
           Illustrative scenario modelling
         </p>

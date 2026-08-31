@@ -52,7 +52,10 @@ const Index = () => {
         </div>
         <div role="tabpanel" id={tabPanelId("scenario_testing")} aria-labelledby={tabButtonId("scenario_testing")} hidden={active !== "scenario_testing"}>
           {active === "scenario_testing" && (
-            <ScenarioTestingTab onViewImpact={() => setActive("scenario_impact")} />
+            <ScenarioTestingTab
+              onViewImpact={() => setActive("scenario_impact")}
+              onBack={() => setActive("prediction")}
+            />
           )}
         </div>
         <div role="tabpanel" id={tabPanelId("scenario_impact")} aria-labelledby={tabButtonId("scenario_impact")} hidden={active !== "scenario_impact"}>

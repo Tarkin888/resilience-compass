@@ -239,6 +239,16 @@ export const ScenarioImpactTab = ({ onBack }: { onBack: () => void }) => {
 
   return (
     <div className="space-y-5">
+      {onBack && (
+        <button
+          type="button"
+          onClick={onBack}
+          className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-[#001D57] hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+        >
+          <ChevronLeft size={14} aria-hidden="true" />
+          Back to Scenario Testing
+        </button>
+      )}
       <ScenarioAppliedBanner />
 
       <div className="rounded-xl border border-slate-200 bg-white p-4 sm:p-5">
