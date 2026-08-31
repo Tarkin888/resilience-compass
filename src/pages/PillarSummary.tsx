@@ -18,6 +18,7 @@ const PILLAR_META: Record<string, { trendLabel: string; status: "live" | "previe
 };
 
 const PillarSummary = () => {
+  const navigate = useNavigate();
   const { id } = useParams();
   const { data, loading } = useHumanCapitalData();
 
