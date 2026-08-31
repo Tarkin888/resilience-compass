@@ -160,8 +160,6 @@ const PillarSummary = () => {
           </div>
         </section>
 
-        <section className="mt-6 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-          <h2 className="text-base font-bold" style={{ color: NAVY }}>How to read this view</h2>
           <ul className="mt-3 space-y-2 text-sm text-slate-700">
             <li><span className="inline-flex items-center gap-2"><span className="inline-block h-3 w-3 rounded-full" style={{ background: "#DC2626" }} /><strong>Red (0–35)</strong> — below the minimum threshold; critical risk.</span></li>
             <li><span className="inline-flex items-center gap-2"><span className="inline-block h-3 w-3 rounded-full" style={{ background: "#F59E0B" }} /><strong>Amber (36–66)</strong> — within the operating range, below target.</span></li>
