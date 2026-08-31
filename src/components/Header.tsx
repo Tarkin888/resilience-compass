@@ -54,14 +54,13 @@ export const Header = () => {
           </DropdownMenu>
 
           {/* Existing trust selector */}
-          <button
-            type="button"
-            className="flex min-h-[44px] items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-brand shadow-sm hover:bg-slate-50 sm:px-4"
+          <span
+            aria-label="Demo NHS Trust"
+            className="flex min-h-[44px] items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium shadow-sm"
           >
-            <span className="h-2 w-2 rounded-full bg-accent2" />
+            <span aria-hidden="true" className="h-2 w-2 rounded-full bg-accent2"></span>
             Demo NHS Trust
-            <ChevronDown size={16} className="text-slate-500" />
-          </button>
+          </span>
 
           {user && (
             <button
