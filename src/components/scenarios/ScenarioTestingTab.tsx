@@ -3,7 +3,7 @@
 // dashboard scores using the existing scoring engine. Live overlay only —
 // nothing is written to the database.
 import { useMemo, useState, useEffect } from "react";
-import { ArrowRight, RotateCcw } from "lucide-react";
+import { ArrowRight, ChevronLeft, RotateCcw } from "lucide-react";
 import { useHumanCapitalData } from "@/hooks/useHumanCapitalData";
 import { useScenario } from "@/contexts/ScenarioContext";
 import { PILLAR_CONFIG } from "@/config/dataPoints";
@@ -63,7 +63,7 @@ function DeltaChip({ delta }: { delta: number | null }) {
   );
 }
 
-export const ScenarioTestingTab = ({ onViewImpact }: { onViewImpact: () => void }) => {
+export const ScenarioTestingTab = ({ onViewImpact, onBack }: { onViewImpact: () => void; onBack?: () => void }) => {
   const { data } = useHumanCapitalData();
   const {
     overrides, setOverride, resetOverrides, hasRun,
