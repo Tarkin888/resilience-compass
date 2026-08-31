@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { ArrowRight, ChevronLeft } from "lucide-react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
@@ -22,11 +23,21 @@ const PillarSummary = () => {
   const { id } = useParams();
   const { data, loading } = useHumanCapitalData();
 
+  const liveValues = useMemo<Record<string, number | null>>(() => {
+    const out: Record<string, number | null> = {};
+    Object.entries(data.capturesByKri).forEach(([kriId, caps]) => {
+      const latest = caps[0];
+      out[kriId] = latest ? Number(latest.headline_value) : null;
+    });
+    return out;
+  }, [data]);
+
+  const meta = id ? PILLAR_META[id] : undefined;
+
   const pillar = useMemo(() => {
-    if (!data) return null;
-    const all = computePillarScores(data);
+    const all = computePillarScores(liveValues);
     return all.find((p) => p.id === id) ?? null;
-  }, [data, id]);
+  }, [liveValues, id]);
 
   if (!pillar) {
     return (
@@ -43,8 +54,8 @@ const PillarSummary = () => {
     );
   }
 
-  const isLive = pillar.status === "live";
-  const humanLoading = loading && (liveValues.vacancy == null || liveValues.sickness_absence == null);
+  const isLive = meta?.status === "live";
+  const humanLoading = isLive && loading && (liveValues.vacancy == null || liveValues.sickness_absence == null);
   const displayScore = humanLoading ? null : pillar.score;
 
   return (
@@ -63,7 +74,7 @@ const PillarSummary = () => {
                 </span>
                 <span className="text-sm text-slate-500">/100</span>
                 <span className="ml-2 inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-600">
-                  {pillar.trendLabel}
+                  {meta?.trendLabel ?? "—"}
                 </span>
               </div>
             </div>
@@ -90,7 +101,7 @@ const PillarSummary = () => {
 
           <div className="mt-4 divide-y divide-slate-100">
             {pillar.indicators.map((ind) => (
-              <IndicatorRangeBar key={ind.name} name={ind.name} score={ind.score} sublabel={ind.description} />
+              <IndicatorRangeBar key={ind.name} name={ind.name} score={ind.score ?? 0} sublabel={ind.description} />
             ))}
           </div>
         </section>
