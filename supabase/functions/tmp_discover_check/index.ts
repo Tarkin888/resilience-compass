@@ -1,6 +1,6 @@
 // TEMPORARY diagnostic: verifies discoverLatestEditionUrl against live NHS Digital.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
-import { corsHeaders, discoverLatestEditionUrl } from "../_shared/scrape.ts";
+import { corsHeaders, discoverLatestEditionUrl, fetchEditionPage, findEditionCandidates, publicationPathPrefix } from "../_shared/scrape.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -19,7 +19,19 @@ Deno.serve(async (req) => {
       s.edition_page_url_pattern,
       matcher,
     );
-    out.push({ kri_id: s.kri_id, editionUrl: r?.editionUrl ?? null, fileUrl: r?.fileUrl ?? null });
+    const landing = await fetchEditionPage(s.series_landing_page_url);
+    const prefix = publicationPathPrefix(s.edition_page_url_pattern);
+    const cands = landing.ok ? findEditionCandidates(landing.html, prefix) : [];
+    out.push({
+      kri_id: s.kri_id,
+      landing_ok: landing.ok,
+      landing_status: landing.ok ? 200 : landing.status,
+      html_len: landing.ok ? landing.html.length : 0,
+      prefix,
+      candidates: cands.slice(0, 8),
+      editionUrl: r?.editionUrl ?? null,
+      fileUrl: r?.fileUrl ?? null,
+    });
   }
   return new Response(JSON.stringify(out, null, 2), {
     headers: { ...corsHeaders, "Content-Type": "application/json" },
