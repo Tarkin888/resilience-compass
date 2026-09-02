@@ -191,15 +191,37 @@ Deno.serve(async (req) => {
       }
       if (!gtRow) throw new Error("'Grand Total' row not found");
 
-      // Right-most numeric cells: most recent and prior quarter.
+      // Right-most numeric cells: most recent and prior quarter, tracking
+      // their column indices so we can read the matching period labels.
       const numerics: number[] = [];
+      const numericCols: number[] = [];
       for (let i = gtRow.length - 1; i >= 0 && numerics.length < 2; i--) {
         const v = gtRow[i];
-        if (typeof v === "number" && isFinite(v)) numerics.push(v);
+        if (typeof v === "number" && isFinite(v)) {
+          numerics.push(v);
+          numericCols.push(i);
+        }
       }
       if (numerics.length === 0) throw new Error("no numeric values in Grand Total row");
       headline = numerics[0] * 100;
       prior = numerics[1] != null ? numerics[1] * 100 : null;
+
+      // Period-label row: immediately below the "Total workforce % vacancy
+      // rate" header; one label per data column, e.g. "2026/27 Q1 (Jun-26)".
+      const periodRow = grid[headerRowIdx + 1] as unknown[] | undefined;
+      if (periodRow) {
+        const cell = periodRow[numericCols[0]];
+        if (typeof cell === "string") {
+          const m = cell.match(/\(([A-Za-z]{3})-(\d{2})\)/);
+          if (m) {
+            const monthIdx = MONTHS.findIndex((name) => name.startsWith(m[1].toLowerCase()));
+            if (monthIdx >= 0) {
+              const year = 2000 + Number(m[2]);
+              fileLabel = `${monthName(monthIdx).charAt(0).toUpperCase()}${monthName(monthIdx).slice(1)} ${year}`;
+            }
+          }
+        }
+      }
     } catch (e) {
       const detail = `extract failed: ${(e as Error).message}`;
       await writeLog("value_extract_failed", detail);
