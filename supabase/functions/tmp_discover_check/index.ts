@@ -1,43 +1,36 @@
-// TEMPORARY diagnostic: verifies discoverLatestEditionUrl against live NHS Digital.
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
-import { corsHeaders, discoverLatestEditionUrl, fetchEditionPage, findEditionCandidates, publicationPathPrefix } from "../_shared/scrape.ts";
+// TEMPORARY diagnostic.
+import { corsHeaders } from "../_shared/scrape.ts";
+
+const UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36";
+
+const targets: { name: string; url: string; headers?: Record<string, string> }[] = [
+  { name: "landing-plain", url: "https://digital.nhs.uk/data-and-information/publications/statistical/nhs-sickness-absence-rates" },
+  { name: "landing-slash", url: "https://digital.nhs.uk/data-and-information/publications/statistical/nhs-sickness-absence-rates/" },
+  {
+    name: "landing-browserish",
+    url: "https://digital.nhs.uk/data-and-information/publications/statistical/nhs-sickness-absence-rates",
+    headers: {
+      "User-Agent": UA,
+      "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+      "Accept-Language": "en-GB,en;q=0.9",
+      "Upgrade-Insecure-Requests": "1",
+    },
+  },
+  { name: "edition-known", url: "https://digital.nhs.uk/data-and-information/publications/statistical/nhs-sickness-absence-rates/may-2026" },
+  { name: "vac-landing", url: "https://digital.nhs.uk/data-and-information/publications/statistical/nhs-vacancies-survey" },
+];
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
-  const supabase = createClient(
-    Deno.env.get("SUPABASE_URL")!,
-    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-  );
-  const { data: sources } = await supabase.from("sources").select("*");
   const out: unknown[] = [];
-  for (const s of sources ?? []) {
-    const matcher = s.kri_id === "vacancy"
-      ? (h: string) => /nhs-vac-stats-.*-eng-tables/i.test(h)
-      : (h: string) => /sickness.*absence/i.test(h) && /\.xlsx$/i.test(h);
-    const r = await discoverLatestEditionUrl(
-      s.series_landing_page_url,
-      s.edition_page_url_pattern,
-      matcher,
-    );
-    const landing = await fetchEditionPage(s.series_landing_page_url);
-    const raw = await fetch(s.series_landing_page_url, { headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36", "Accept": "text/html,application/xhtml+xml" } });
-    const rawStatus = raw.status;
-    const rawLen = (await raw.text()).length;
-    const prefix = publicationPathPrefix(s.edition_page_url_pattern);
-    const cands = landing.ok ? findEditionCandidates(landing.html, prefix) : [];
-    out.push({
-      kri_id: s.kri_id,
-      landing_ok: landing.ok,
-      rawStatus, rawLen,
-      landing_status: landing.ok ? 200 : landing.status,
-      html_len: landing.ok ? landing.html.length : 0,
-      prefix,
-      candidates: cands.slice(0, 8),
-      editionUrl: r?.editionUrl ?? null,
-      fileUrl: r?.fileUrl ?? null,
-    });
+  for (const t of targets) {
+    try {
+      const r = await fetch(t.url, { headers: t.headers, redirect: "follow" });
+      const body = await r.text();
+      out.push({ name: t.name, status: r.status, len: body.length, finalUrl: r.url, snippet: body.slice(0, 200) });
+    } catch (e) {
+      out.push({ name: t.name, error: (e as Error).message });
+    }
   }
-  return new Response(JSON.stringify(out, null, 2), {
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
-  });
+  return new Response(JSON.stringify(out, null, 2), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
 });
