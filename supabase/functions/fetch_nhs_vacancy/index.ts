@@ -240,6 +240,13 @@ Deno.serve(async (req) => {
     // date-based label is a fallback only.
     const finalLabel = fileLabel ?? label;
 
+    // Re-check idempotency against the authoritative label (the provisional
+    // date-based check above can miss when the guess was wrong).
+    if (existing && existing[0]?.edition_label === finalLabel) {
+      await writeLog("no_new_edition", `already captured ${finalLabel}`);
+      return respond({ ok: true, kri_id: KRI_ID, outcome: "no_new_edition", edition_label: finalLabel });
+    }
+
     const { data: cap, error: capErr } = await supabase.from("kri_captures").insert({
       kri_id: KRI_ID,
       source_id: source.id,
