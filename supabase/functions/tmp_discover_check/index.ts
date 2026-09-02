@@ -20,11 +20,15 @@ Deno.serve(async (req) => {
       matcher,
     );
     const landing = await fetchEditionPage(s.series_landing_page_url);
+    const raw = await fetch(s.series_landing_page_url, { headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36", "Accept": "text/html,application/xhtml+xml" } });
+    const rawStatus = raw.status;
+    const rawLen = (await raw.text()).length;
     const prefix = publicationPathPrefix(s.edition_page_url_pattern);
     const cands = landing.ok ? findEditionCandidates(landing.html, prefix) : [];
     out.push({
       kri_id: s.kri_id,
       landing_ok: landing.ok,
+      rawStatus, rawLen,
       landing_status: landing.ok ? 200 : landing.status,
       html_len: landing.ok ? landing.html.length : 0,
       prefix,
