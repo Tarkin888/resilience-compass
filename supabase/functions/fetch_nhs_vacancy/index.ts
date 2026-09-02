@@ -214,7 +214,10 @@ Deno.serve(async (req) => {
         if (typeof cell === "string") {
           const m = cell.match(/\(([A-Za-z]{3})-(\d{2})\)/);
           if (m) {
-            const monthIdx = MONTHS.findIndex((name) => name.startsWith(m[1].toLowerCase()));
+            let monthIdx = -1;
+            for (let i = 0; i < 12; i++) {
+              if (monthName(i).startsWith(m[1].toLowerCase())) { monthIdx = i; break; }
+            }
             if (monthIdx >= 0) {
               const year = 2000 + Number(m[2]);
               fileLabel = `${monthName(monthIdx).charAt(0).toUpperCase()}${monthName(monthIdx).slice(1)} ${year}`;
