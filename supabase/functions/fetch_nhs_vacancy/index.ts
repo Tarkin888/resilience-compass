@@ -9,6 +9,7 @@ import {
   CaptureResponse,
   corsHeaders,
   defaultQuarterlyEdition,
+  discoverLatestEditionUrl,
   downloadAndHash,
   editionLabel,
   fetchEditionPage,
