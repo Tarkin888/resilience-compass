@@ -14,6 +14,7 @@ import {
   editionLabel,
   fetchEditionPage,
   findXlsxLink,
+  monthName,
   Outcome,
   requireAdminAuth,
   sanitiseErrorDetail,
@@ -231,10 +232,14 @@ Deno.serve(async (req) => {
       return respond({ ok: false, kri_id: KRI_ID, outcome: "value_extract_failed", error: detail }, 200);
     }
 
+    // Authoritative edition label = period parsed from the workbook; the
+    // date-based label is a fallback only.
+    const finalLabel = fileLabel ?? label;
+
     const { data: cap, error: capErr } = await supabase.from("kri_captures").insert({
       kri_id: KRI_ID,
       source_id: source.id,
-      edition_label: label,
+      edition_label: finalLabel,
       edition_page_url: editionUrl,
       file_source_url: fileUrl,
       file_size_bytes: size,
@@ -251,7 +256,7 @@ Deno.serve(async (req) => {
     await writeLog("success", undefined, cap.id);
     return respond({
       ok: true, kri_id: KRI_ID, outcome: "success",
-      capture_id: cap.id, edition_label: label, headline_value: Number(headline.toFixed(2)),
+      capture_id: cap.id, edition_label: finalLabel, headline_value: Number(headline.toFixed(2)),
     });
   } catch (e) {
     const msg = (e as Error).message ?? String(e);
