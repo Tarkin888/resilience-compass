@@ -14,6 +14,7 @@ import {
   editionLabel,
   fetchEditionPage,
   findXlsxLink,
+  monthName,
   Outcome,
   requireAdminAuth,
   sanitiseErrorDetail,
@@ -99,9 +100,13 @@ Deno.serve(async (req) => {
         editionUrl = buildEditionUrl(source.edition_page_url_pattern, def.month, def.year);
       }
     }
+    // NB: `label` is provisional; the authoritative edition label is derived
+    // from the downloaded workbook's period row below, with this as fallback.
     const label = def ? editionLabel(def.month, def.year) : (editionUrl.split("/").pop() ?? "latest");
 
-    // Idempotency: skip if we've already captured this edition.
+    // Idempotency: skip early only when the provisional label already matches
+    // the last capture; the authoritative file-derived label is re-checked
+    // after parsing below.
     const { data: existing } = await supabase
       .from("kri_captures").select("id, edition_label, captured_at")
       .eq("kri_id", KRI_ID).order("captured_at", { ascending: false }).limit(1);
@@ -161,6 +166,10 @@ Deno.serve(async (req) => {
 
     let headline: number | null = null;
     let prior: number | null = null;
+    // Authoritative edition label, parsed from the workbook's period row
+    // (e.g. "2026/27 Q1 (Jun-26)") — falls back to the provisional date-based
+    // label if parsing fails.
+    let fileLabel: string | null = null;
     try {
       const wb = XLSX.read(bytes, { type: "array" });
       const sheetName = wb.SheetNames.find((n) => /total\s*2018\s*onwards/i.test(n)) ?? wb.SheetNames[0];
@@ -187,25 +196,61 @@ Deno.serve(async (req) => {
       }
       if (!gtRow) throw new Error("'Grand Total' row not found");
 
-      // Right-most numeric cells: most recent and prior quarter.
+      // Right-most numeric cells: most recent and prior quarter, tracking
+      // their column indices so we can read the matching period labels.
       const numerics: number[] = [];
+      const numericCols: number[] = [];
       for (let i = gtRow.length - 1; i >= 0 && numerics.length < 2; i--) {
         const v = gtRow[i];
-        if (typeof v === "number" && isFinite(v)) numerics.push(v);
+        if (typeof v === "number" && isFinite(v)) {
+          numerics.push(v);
+          numericCols.push(i);
+        }
       }
       if (numerics.length === 0) throw new Error("no numeric values in Grand Total row");
       headline = numerics[0] * 100;
       prior = numerics[1] != null ? numerics[1] * 100 : null;
+
+      // Period-label row: immediately below the "Total workforce % vacancy
+      // rate" header; one label per data column, e.g. "2026/27 Q1 (Jun-26)".
+      const periodRow = grid[headerRowIdx + 1] as unknown[] | undefined;
+      if (periodRow) {
+        const cell = periodRow[numericCols[0]];
+        if (typeof cell === "string") {
+          const m = cell.match(/\(([A-Za-z]{3})-(\d{2})\)/);
+          if (m) {
+            let monthIdx = -1;
+            for (let i = 0; i < 12; i++) {
+              if (monthName(i).startsWith(m[1].toLowerCase())) { monthIdx = i; break; }
+            }
+            if (monthIdx >= 0) {
+              const year = 2000 + Number(m[2]);
+              fileLabel = `${monthName(monthIdx).charAt(0).toUpperCase()}${monthName(monthIdx).slice(1)} ${year}`;
+            }
+          }
+        }
+      }
     } catch (e) {
       const detail = `extract failed: ${(e as Error).message}`;
       await writeLog("value_extract_failed", detail);
       return respond({ ok: false, kri_id: KRI_ID, outcome: "value_extract_failed", error: detail }, 200);
     }
 
+    // Authoritative edition label = period parsed from the workbook; the
+    // date-based label is a fallback only.
+    const finalLabel = fileLabel ?? label;
+
+    // Re-check idempotency against the authoritative label (the provisional
+    // date-based check above can miss when the guess was wrong).
+    if (existing && existing[0]?.edition_label === finalLabel) {
+      await writeLog("no_new_edition", `already captured ${finalLabel}`);
+      return respond({ ok: true, kri_id: KRI_ID, outcome: "no_new_edition", edition_label: finalLabel });
+    }
+
     const { data: cap, error: capErr } = await supabase.from("kri_captures").insert({
       kri_id: KRI_ID,
       source_id: source.id,
-      edition_label: label,
+      edition_label: finalLabel,
       edition_page_url: editionUrl,
       file_source_url: fileUrl,
       file_size_bytes: size,
@@ -222,7 +267,7 @@ Deno.serve(async (req) => {
     await writeLog("success", undefined, cap.id);
     return respond({
       ok: true, kri_id: KRI_ID, outcome: "success",
-      capture_id: cap.id, edition_label: label, headline_value: Number(headline.toFixed(2)),
+      capture_id: cap.id, edition_label: finalLabel, headline_value: Number(headline.toFixed(2)),
     });
   } catch (e) {
     const msg = (e as Error).message ?? String(e);
