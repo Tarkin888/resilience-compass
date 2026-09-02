@@ -3,13 +3,13 @@
 // dashboard scores using the existing scoring engine. Live overlay only —
 // nothing is written to the database.
 import { useMemo, useState, useEffect } from "react";
-import { ArrowRight, ChevronLeft, RotateCcw } from "lucide-react";
+import { ArrowRight, ChevronDown, ChevronLeft, RotateCcw } from "lucide-react";
 import { useHumanCapitalData } from "@/hooks/useHumanCapitalData";
 import { useScenario } from "@/contexts/ScenarioContext";
 import { PILLAR_CONFIG } from "@/config/dataPoints";
 import { computePillarScores } from "@/lib/pillarScores";
 import { scoreBand, scoreBandColor } from "@/lib/scoreBand";
-import { SCENARIOS, SCENARIO_SEVERITY_STYLES } from "./scenarios";
+import { SCENARIOS, SCENARIO_SEVERITY_STYLES, type Scenario } from "./scenarios";
 import { ScenarioAppliedBanner } from "./ScenarioAppliedBanner";
 
 interface KriRow {
@@ -60,6 +60,48 @@ function DeltaChip({ delta }: { delta: number | null }) {
     >
       {positive ? "▲" : "▼"} {Math.abs(delta)}
     </span>
+  );
+}
+
+/** Collapsible "Why this data point" panel listing the per-field rationales
+ * configured for a preset. Mirrors the pattern used on AlertCard. */
+function ScenarioFieldRationale({
+  scenario,
+  kriNames,
+}: {
+  scenario: Scenario;
+  kriNames?: Record<string, string>;
+}) {
+  const [open, setOpen] = useState(false);
+  const entries = Object.entries(scenario.fieldRationale ?? {}).filter(
+    ([, text]) => Boolean(text),
+  ) as Array<[string, string]>;
+  if (entries.length === 0) return null;
+  return (
+    <div className="border-t border-slate-200">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="flex w-full items-center justify-between px-3 py-2.5 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+        aria-expanded={open}
+      >
+        <span className="text-sm font-semibold text-slate-900">Why this data point</span>
+        <ChevronDown
+          size={16}
+          className={`text-slate-500 transition-transform ${open ? "rotate-180" : ""}`}
+        />
+      </button>
+      {open && (
+        <div className="space-y-2 border-t border-slate-200 px-3 py-3 text-sm text-slate-700">
+          {entries.map(([kriId, text]) => (
+            <p key={kriId}>
+              {kriNames?.[kriId] ? <span className="font-semibold">{kriNames[kriId]}: </span> : null}
+              {text}
+            </p>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -235,29 +277,34 @@ export const ScenarioTestingTab = ({ onViewImpact, onBack }: { onViewImpact: () 
             const sev = SCENARIO_SEVERITY_STYLES[s.severity];
             const selected = selectedScenarioId === s.id;
             return (
-              <button
+              <div
                 key={s.id}
-                type="button"
-                onClick={() => handleSelectScenario(s.id)}
-                className={`flex flex-col gap-2 rounded-lg border p-3 text-left transition hover:border-[#001D57] hover:shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-brand ${
+                className={`flex flex-col rounded-lg border transition hover:border-[#001D57] hover:shadow-sm ${
                   selected
                     ? "border-[#001D57] bg-[#001D57]/5 ring-2 ring-[#001D57]/30"
                     : "border-slate-200 bg-white"
                 }`}
-                aria-pressed={selected}
               >
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${sev.chip}`}>
-                    <span className={`h-1.5 w-1.5 rounded-full ${sev.dot}`} aria-hidden />
-                    {s.severity}
-                  </span>
-                  <span className="text-[10px] font-medium uppercase tracking-wide text-slate-500">
-                    {s.type}
-                  </span>
-                </div>
-                <div className="text-sm font-semibold text-[#001D57]">{s.title}</div>
-                <p className="text-xs text-slate-600">{s.description}</p>
-              </button>
+                <button
+                  type="button"
+                  onClick={() => handleSelectScenario(s.id)}
+                  className="flex flex-col gap-2 p-3 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+                  aria-pressed={selected}
+                >
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${sev.chip}`}>
+                      <span className={`h-1.5 w-1.5 rounded-full ${sev.dot}`} aria-hidden />
+                      {s.severity}
+                    </span>
+                    <span className="text-[10px] font-medium uppercase tracking-wide text-slate-500">
+                      {s.type}
+                    </span>
+                  </div>
+                  <div className="text-sm font-semibold text-[#001D57]">{s.title}</div>
+                  <p className="text-xs text-slate-600">{s.description}</p>
+                </button>
+                <ScenarioFieldRationale scenario={s} />
+              </div>
             );
           })}
         </div>
