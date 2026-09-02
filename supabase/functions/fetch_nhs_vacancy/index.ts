@@ -161,6 +161,10 @@ Deno.serve(async (req) => {
 
     let headline: number | null = null;
     let prior: number | null = null;
+    // Authoritative edition label, parsed from the workbook's period row
+    // (e.g. "2026/27 Q1 (Jun-26)") — falls back to the provisional date-based
+    // label if parsing fails.
+    let fileLabel: string | null = null;
     try {
       const wb = XLSX.read(bytes, { type: "array" });
       const sheetName = wb.SheetNames.find((n) => /total\s*2018\s*onwards/i.test(n)) ?? wb.SheetNames[0];
