@@ -9,6 +9,7 @@ import {
   CaptureResponse,
   corsHeaders,
   defaultQuarterlyEdition,
+  discoverLatestEditionUrl,
   downloadAndHash,
   editionLabel,
   fetchEditionPage,
@@ -64,18 +65,41 @@ Deno.serve(async (req) => {
       return respond({ ok: false, kri_id: KRI_ID, outcome: "page_not_found", error: "simulated failure" }, 200);
     }
 
-    let def: { month: string; year: number };
+    const VAC_XLSX = (h: string) => /nhs-vac-stats-.*-eng-tables/i.test(h);
+
+    let def: { month: string; year: number } | null = null;
+    let editionUrl: string;
+    let discovered: { editionUrl: string; html: string; fileUrl: string } | null = null;
+
     if (body.month !== undefined || body.year !== undefined) {
       const v = validateEditionInput(body.month, body.year);
       if (!v.ok) {
         return respond({ ok: false, kri_id: KRI_ID, outcome: "page_not_found", error: v.error }, 400);
       }
       def = { month: v.month, year: v.year };
+      editionUrl = buildEditionUrl(source.edition_page_url_pattern, def.month, def.year);
     } else {
-      def = defaultQuarterlyEdition();
+      discovered = await discoverLatestEditionUrl(
+        source.series_landing_page_url,
+        source.edition_page_url_pattern,
+        VAC_XLSX,
+      );
+      if (discovered) {
+        editionUrl = discovered.editionUrl;
+        // Recover month/year from the discovered slug where possible so the
+        // stored edition label stays consistent with the guessed-URL path.
+        const slug = editionUrl.split("/").pop() ?? "";
+        const m = slug.match(/([a-z]+)-(\d{4})/i);
+        if (m) {
+          const v = validateEditionInput(m[1], Number(m[2]));
+          if (v.ok) def = { month: v.month, year: v.year };
+        }
+      } else {
+        def = defaultQuarterlyEdition();
+        editionUrl = buildEditionUrl(source.edition_page_url_pattern, def.month, def.year);
+      }
     }
-    const editionUrl = buildEditionUrl(source.edition_page_url_pattern, def.month, def.year);
-    const label = editionLabel(def.month, def.year);
+    const label = def ? editionLabel(def.month, def.year) : (editionUrl.split("/").pop() ?? "latest");
 
     // Idempotency: skip if we've already captured this edition.
     const { data: existing } = await supabase
@@ -87,20 +111,27 @@ Deno.serve(async (req) => {
     }
     const lastCapturedAt = existing?.[0]?.captured_at ?? null;
 
-    const page = await fetchEditionPage(editionUrl);
-    if (!page.ok) {
-      if (page.status === 404 && withinCadenceWindow(lastCapturedAt, source.update_cadence)) {
-        const friendly = "No new edition published yet — next check after expected publication window.";
-        await writeLog("no_new_edition", friendly);
-        return respond({ ok: false, kri_id: KRI_ID, outcome: "no_new_edition", error: friendly }, 200);
+    let pageHtml: string;
+    if (discovered) {
+      pageHtml = discovered.html;
+    } else {
+      const page = await fetchEditionPage(editionUrl);
+      if (!page.ok) {
+        if (page.status === 404 && withinCadenceWindow(lastCapturedAt, source.update_cadence)) {
+          const friendly = "No new edition published yet — next check after expected publication window.";
+          await writeLog("no_new_edition", friendly);
+          return respond({ ok: false, kri_id: KRI_ID, outcome: "no_new_edition", error: friendly }, 200);
+        }
+        const detail = `edition page returned ${page.status} for ${editionUrl}`;
+        await writeLog("page_not_found", detail);
+        return respond({ ok: false, kri_id: KRI_ID, outcome: "page_not_found", error: detail }, 200);
       }
-      const detail = `edition page returned ${page.status} for ${editionUrl}`;
-      await writeLog("page_not_found", detail);
-      return respond({ ok: false, kri_id: KRI_ID, outcome: "page_not_found", error: detail }, 200);
+      pageHtml = page.html;
     }
 
-    let fileUrl = findXlsxLink(page.html, (h) => /nhs-vac-stats-.*-eng-tables/i.test(h));
-    if (!fileUrl) fileUrl = findXlsxLink(page.html, (h) => /vac.*tables/i.test(h));
+    let fileUrl = discovered?.fileUrl ?? findXlsxLink(pageHtml, VAC_XLSX);
+    if (!fileUrl) fileUrl = findXlsxLink(pageHtml, (h) => /vac.*tables/i.test(h));
+
     if (!fileUrl && source.last_known_file_url) fileUrl = source.last_known_file_url;
     if (!fileUrl) {
       const detail = "no matching xlsx link on edition page";

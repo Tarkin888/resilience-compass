@@ -8,6 +8,8 @@ import {
   CaptureResponse,
   corsHeaders,
   defaultMonthlyEdition,
+  discoverLatestEditionUrl,
+
   downloadAndHash,
   editionLabel,
   fetchEditionPage,
@@ -57,45 +59,68 @@ Deno.serve(async (req) => {
       return respond({ ok: false, kri_id: KRI_ID, outcome: "page_not_found", error: "simulated failure" }, 200);
     }
 
-    let def: { month: string; year: number };
+    const SICKNESS_XLSX = (h: string) => /sickness.*absence/i.test(h) && /\.xlsx$/i.test(h);
+
+    let def: { month: string; year: number } | null = null;
+    let editionUrl: string;
+    let discovered: { editionUrl: string; html: string; fileUrl: string } | null = null;
+
     if (body.month !== undefined || body.year !== undefined) {
       const v = validateEditionInput(body.month, body.year);
       if (!v.ok) {
         return respond({ ok: false, kri_id: KRI_ID, outcome: "page_not_found", error: v.error }, 400);
       }
       def = { month: v.month, year: v.year };
+      editionUrl = buildEditionUrl(source.edition_page_url_pattern, def.month, def.year);
     } else {
-      // The edition page URL pattern targets the publication month, which is
-      // typically ~3 months after the data month for the Sickness Absence
-      // series (e.g. the January 2026 data row is published in the April 2026
-      // edition, available from late April / early May).
-      def = defaultMonthlyEdition();
+      // Discover the latest actually-published edition from the series landing
+      // page. Falls back to date-guessing if discovery fails.
+      discovered = await discoverLatestEditionUrl(
+        source.series_landing_page_url,
+        source.edition_page_url_pattern,
+        SICKNESS_XLSX,
+      );
+      if (discovered) {
+        editionUrl = discovered.editionUrl;
+      } else {
+        // The edition page URL pattern targets the publication month, which is
+        // typically ~3 months after the data month for the Sickness Absence
+        // series.
+        def = defaultMonthlyEdition();
+        editionUrl = buildEditionUrl(source.edition_page_url_pattern, def.month, def.year);
+      }
     }
-    const editionUrl = buildEditionUrl(source.edition_page_url_pattern, def.month, def.year);
     // NB: `label` is provisional; the authoritative edition label is derived
     // below from the latest populated data row in Table 1, so it always
     // matches the headline figure.
-    const provisionalLabel = editionLabel(def.month, def.year);
+    const provisionalLabel = def ? editionLabel(def.month, def.year) : editionUrl.split("/").pop() ?? "latest";
 
     const { data: existing } = await supabase
       .from("kri_captures").select("id, edition_label, captured_at")
       .eq("kri_id", KRI_ID).order("captured_at", { ascending: false }).limit(1);
     const lastCapturedAt = existing?.[0]?.captured_at ?? null;
 
-    const page = await fetchEditionPage(editionUrl);
-    if (!page.ok) {
-      if (page.status === 404 && withinCadenceWindow(lastCapturedAt, source.update_cadence)) {
-        const friendly = "No new edition published yet — next check after expected publication window.";
-        await writeLog("no_new_edition", friendly);
-        return respond({ ok: false, kri_id: KRI_ID, outcome: "no_new_edition", error: friendly }, 200);
+    let pageHtml: string;
+    if (discovered) {
+      pageHtml = discovered.html;
+    } else {
+      const page = await fetchEditionPage(editionUrl);
+      if (!page.ok) {
+        if (page.status === 404 && withinCadenceWindow(lastCapturedAt, source.update_cadence)) {
+          const friendly = "No new edition published yet — next check after expected publication window.";
+          await writeLog("no_new_edition", friendly);
+          return respond({ ok: false, kri_id: KRI_ID, outcome: "no_new_edition", error: friendly }, 200);
+        }
+        const detail = `edition page returned ${page.status} for ${editionUrl}`;
+        await writeLog("page_not_found", detail);
+        return respond({ ok: false, kri_id: KRI_ID, outcome: "page_not_found", error: detail }, 200);
       }
-      const detail = `edition page returned ${page.status} for ${editionUrl}`;
-      await writeLog("page_not_found", detail);
-      return respond({ ok: false, kri_id: KRI_ID, outcome: "page_not_found", error: detail }, 200);
+      pageHtml = page.html;
     }
 
-    let fileUrl = findXlsxLink(page.html, (h) => /sickness.*absence/i.test(h) && /\.xlsx$/i.test(h));
-    if (!fileUrl) fileUrl = findXlsxLink(page.html, () => true);
+    let fileUrl = discovered?.fileUrl ?? findXlsxLink(pageHtml, SICKNESS_XLSX);
+    if (!fileUrl) fileUrl = findXlsxLink(pageHtml, () => true);
+
     if (!fileUrl && source.last_known_file_url) fileUrl = source.last_known_file_url;
     if (!fileUrl) {
       const detail = "no matching xlsx link on edition page";
