@@ -5,12 +5,17 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { PILLAR_CONFIG } from "@/config/dataPoints";
 
 const RED = "#DC2626";
 const AMBER = "#F59E0B";
 const GREEN = "#16A34A";
 const TEAL = "#24BEAA";
 const NAVY = "#001D57";
+
+/** Indicators configured for the Human (Workforce) pillar in dataPoints.ts. */
+const humanIndicators = PILLAR_CONFIG.find((p) => p.id === "human")?.indicators ?? [];
+
 
 function StaticRangeBar() {
   return (
@@ -133,22 +138,45 @@ export const MethodologyDialog = ({ open, onOpenChange, returnFocusRef }: Method
 
           {/* Section 4 */}
           <section>
-            <h3 className="mb-1 text-sm font-bold">The three Workforce indicators</h3>
-            <p className="mb-2">Workforce resilience is tracked through three indicators:</p>
-            <ul className="list-disc space-y-1 pl-5">
-              <li>
-                <strong>Workforce of the Future</strong> — having the right skills to compete in a changing market.
-              </li>
-              <li>
-                <strong>People Resilience</strong> — collective resilience across the workforce, to navigate change
-                and challenging times.
-              </li>
-              <li>
-                <strong>Continuity of Critical Skills</strong> — maintaining the essential skills and experience
-                needed to deliver today's services reliably.
-              </li>
+            <h3 className="mb-1 text-sm font-bold">The Workforce indicators</h3>
+            <p className="mb-2">
+              Workforce resilience is tracked through the indicators configured for the Human
+              (Workforce) pillar:
+            </p>
+            <ul className="space-y-2">
+              {humanIndicators.map((indicator) => {
+                const dp = indicator.dataPoints[0];
+                const isLive = dp?.source === "Live";
+                return (
+                  <li key={indicator.id} className="flex flex-col gap-1">
+                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                      <strong>{indicator.name}</strong>
+                      {isLive ? (
+                        <span
+                          className="inline-flex items-center gap-1 rounded-full border border-blue-200 bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700"
+                          aria-label="Live public data"
+                        >
+                          <span className="h-1.5 w-1.5 rounded-full bg-blue-600" aria-hidden />
+                          Live
+                        </span>
+                      ) : (
+                        <span
+                          className="inline-flex items-center rounded-full border border-slate-200 bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600"
+                          aria-label="Illustrative data"
+                        >
+                          Illustrative
+                        </span>
+                      )}
+                    </div>
+                    {indicator.description && (
+                      <span className="text-xs text-slate-500">{indicator.description}</span>
+                    )}
+                  </li>
+                );
+              })}
             </ul>
           </section>
+
 
           {/* Section 5 */}
           <section>
