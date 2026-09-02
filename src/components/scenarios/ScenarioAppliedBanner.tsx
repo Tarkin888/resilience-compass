@@ -4,7 +4,8 @@ import { useMemo } from "react";
 import { useScenario } from "@/contexts/ScenarioContext";
 import { useHumanCapitalData } from "@/hooks/useHumanCapitalData";
 import { PILLAR_CONFIG } from "@/config/dataPoints";
-import { SCENARIO_SEVERITY_STYLES, type ScenarioSeverity } from "./scenarios";
+import { SCENARIOS, SCENARIO_SEVERITY_STYLES, type ScenarioSeverity } from "./scenarios";
+import { ScenarioFieldRationale } from "./ScenarioTestingTab";
 
 function fmt(value: number, unit: string) {
   const v = unit === "%" ? value.toFixed(1) : String(value);
@@ -51,6 +52,10 @@ export const ScenarioAppliedBanner = () => {
     title = "No scenario applied — adjust an input or pick a preset on the Scenario Testing tab.";
   }
 
+  const presetScenario = selectedScenario
+    ? SCENARIOS.find((s) => s.id === selectedScenario.id) ?? null
+    : null;
+
   const severity = selectedScenario?.severity as ScenarioSeverity | undefined;
   const sevStyle = severity ? SCENARIO_SEVERITY_STYLES[severity] : null;
 
@@ -87,6 +92,16 @@ export const ScenarioAppliedBanner = () => {
         <p className="mt-1.5 text-xs text-slate-600">
           Inputs: {inputBits.join(" · ")}
         </p>
+      )}
+      {presetScenario && (
+        <div className="mt-3 rounded-lg border border-slate-200">
+          <ScenarioFieldRationale
+            scenario={presetScenario}
+            kriNames={Object.fromEntries(
+              Object.entries(kriMeta).map(([id, m]) => [id, m.name]),
+            )}
+          />
+        </div>
       )}
     </div>
   );

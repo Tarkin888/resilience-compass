@@ -65,7 +65,7 @@ function DeltaChip({ delta }: { delta: number | null }) {
 
 /** Collapsible "Why this data point" panel listing the per-field rationales
  * configured for a preset. Mirrors the pattern used on AlertCard. */
-function ScenarioFieldRationale({
+export function ScenarioFieldRationale({
   scenario,
   kriNames,
 }: {
