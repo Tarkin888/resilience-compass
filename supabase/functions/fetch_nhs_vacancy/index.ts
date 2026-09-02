@@ -100,9 +100,13 @@ Deno.serve(async (req) => {
         editionUrl = buildEditionUrl(source.edition_page_url_pattern, def.month, def.year);
       }
     }
+    // NB: `label` is provisional; the authoritative edition label is derived
+    // from the downloaded workbook's period row below, with this as fallback.
     const label = def ? editionLabel(def.month, def.year) : (editionUrl.split("/").pop() ?? "latest");
 
-    // Idempotency: skip if we've already captured this edition.
+    // Idempotency: skip early only when the provisional label already matches
+    // the last capture; the authoritative file-derived label is re-checked
+    // after parsing below.
     const { data: existing } = await supabase
       .from("kri_captures").select("id, edition_label, captured_at")
       .eq("kri_id", KRI_ID).order("captured_at", { ascending: false }).limit(1);
