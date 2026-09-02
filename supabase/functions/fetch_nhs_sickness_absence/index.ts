@@ -8,6 +8,8 @@ import {
   CaptureResponse,
   corsHeaders,
   defaultMonthlyEdition,
+  discoverLatestEditionUrl,
+
   downloadAndHash,
   editionLabel,
   fetchEditionPage,
