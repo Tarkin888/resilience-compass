@@ -5,12 +5,17 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { PILLAR_CONFIG } from "@/config/dataPoints";
 
 const RED = "#DC2626";
 const AMBER = "#F59E0B";
 const GREEN = "#16A34A";
 const TEAL = "#24BEAA";
 const NAVY = "#001D57";
+
+/** Indicators configured for the Human (Workforce) pillar in dataPoints.ts. */
+const humanIndicators = PILLAR_CONFIG.find((p) => p.id === "human")?.indicators ?? [];
+
 
 function StaticRangeBar() {
   return (
