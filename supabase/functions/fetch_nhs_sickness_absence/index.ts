@@ -100,7 +100,11 @@ Deno.serve(async (req) => {
       .eq("kri_id", KRI_ID).order("captured_at", { ascending: false }).limit(1);
     const lastCapturedAt = existing?.[0]?.captured_at ?? null;
 
-    let pageHtml: string;
+    let pageHtml: string | null = null;
+    // Set when the edition page could not be fetched at all but a known-good
+    // file URL is configured — used as a full override so the capture can
+    // still proceed by downloading and parsing that file directly.
+    let overrideFileUrl: string | null = null;
     if (discovered) {
       pageHtml = discovered.html;
     } else {
@@ -111,15 +115,22 @@ Deno.serve(async (req) => {
           await writeLog("no_new_edition", friendly);
           return respond({ ok: false, kri_id: KRI_ID, outcome: "no_new_edition", error: friendly }, 200);
         }
-        const detail = `edition page returned ${page.status} for ${editionUrl}`;
-        await writeLog("page_not_found", detail);
-        return respond({ ok: false, kri_id: KRI_ID, outcome: "page_not_found", error: detail }, 200);
+        if (source.last_known_file_url) {
+          overrideFileUrl = source.last_known_file_url;
+        } else {
+          const detail = `edition page returned ${page.status} for ${editionUrl}`;
+          await writeLog("page_not_found", detail);
+          return respond({ ok: false, kri_id: KRI_ID, outcome: "page_not_found", error: detail }, 200);
+        }
+      } else {
+        pageHtml = page.html;
       }
-      pageHtml = page.html;
     }
 
-    let fileUrl = discovered?.fileUrl ?? findXlsxLink(pageHtml, SICKNESS_XLSX);
-    if (!fileUrl) fileUrl = findXlsxLink(pageHtml, () => true);
+    let fileUrl = overrideFileUrl
+      ?? discovered?.fileUrl
+      ?? (pageHtml ? findXlsxLink(pageHtml, SICKNESS_XLSX) : null);
+    if (!fileUrl && pageHtml) fileUrl = findXlsxLink(pageHtml, () => true);
 
     if (!fileUrl && source.last_known_file_url) fileUrl = source.last_known_file_url;
     if (!fileUrl) {
