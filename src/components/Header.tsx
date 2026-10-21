@@ -7,22 +7,15 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/contexts/AuthContext";
+import { XPResilienceWordmark } from "@/components/brand/XPResilienceWordmark";
 export const Header = () => {
   const { user, signOut } = useAuth();
 
   return (
     <header className="w-full border-b border-slate-200 bg-white">
       <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6 sm:py-4">
-        <div className="flex items-center gap-3">
-          <span
-            aria-hidden
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-brand text-sm font-bold text-accent2"
-          >
-            RC
-          </span>
-          <div className="flex flex-col leading-tight">
-            <span className="text-lg font-bold text-brand sm:text-xl">ResilienC</span>
-          </div>
+        <div className="flex items-center">
+          <XPResilienceWordmark className="h-7 w-auto sm:h-8" />
         </div>
 
         <div className="flex items-center gap-2">
@@ -58,7 +51,7 @@ export const Header = () => {
             aria-label="Demo NHS Trust"
             className="flex min-h-[44px] items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium shadow-sm"
           >
-            <span aria-hidden="true" className="h-2 w-2 rounded-full bg-accent2"></span>
+            <span aria-hidden="true" className="h-2 w-2 rounded-full bg-slatebrand"></span>
             Demo NHS Trust
           </span>
 

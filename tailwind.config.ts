@@ -48,10 +48,13 @@ export default {
           foreground: "hsl(var(--card-foreground))",
         },
         brand: {
-          DEFAULT: "#001D57",
+          DEFAULT: "#0B2050",
         },
-        accent2: {
-          DEFAULT: "#24BEAA",
+        canvas: {
+          DEFAULT: "#F7F8FA",
+        },
+        slatebrand: {
+          DEFAULT: "#475569",
         },
         severity: {
           critical: "#B91C1C",

@@ -1,7 +1,8 @@
+import { BRAND_NAVY } from "@/config/brand";
 import { ScoreBadge } from "./ScoreBadge";
 import { OperatingRangeBar } from "./OperatingRangeBar";
 
-const NAVY = "#001D57";
+const NAVY = BRAND_NAVY;
 
 interface IndicatorProps {
   name: string;

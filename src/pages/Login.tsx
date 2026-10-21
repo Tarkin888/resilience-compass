@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { XPResilienceWordmark } from "@/components/brand/XPResilienceWordmark";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -27,19 +28,11 @@ export default function Login() {
   };
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
+    <main className="flex min-h-screen items-center justify-center bg-canvas px-4">
       <div className="w-full max-w-sm rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-        <div className="flex items-center gap-3">
-          <span
-            aria-hidden
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-brand text-sm font-bold text-accent2"
-          >
-            RC
-          </span>
-          <div className="flex flex-col leading-tight">
-            <span className="text-lg font-bold text-brand">ResilienC</span>
-            <span className="text-base text-slate-500">Sign in to continue</span>
-          </div>
+        <div className="flex flex-col items-start gap-2">
+          <XPResilienceWordmark className="h-9 w-auto" />
+          <span className="text-base text-slate-500">Sign in to continue</span>
         </div>
 
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">

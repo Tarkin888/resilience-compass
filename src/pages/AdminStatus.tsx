@@ -34,7 +34,7 @@ export default function AdminStatus() {
   const { data, loading, error } = useHumanCapitalData();
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col">
+    <div className="min-h-screen bg-canvas text-slate-900 flex flex-col">
       <header className="border-b border-slate-200 bg-white px-4 py-4 sm:px-6">
         <div className="mb-3">
           <BackButton />

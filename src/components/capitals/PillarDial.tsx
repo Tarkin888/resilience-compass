@@ -1,3 +1,4 @@
+import { BRAND_NAVY } from "@/config/brand";
 import { TrendingDown, TrendingUp, Minus } from "lucide-react";
 import { scoreBandColor } from "@/lib/scoreBand";
 
@@ -12,7 +13,7 @@ interface Props {
   onViewDetails: () => void;
 }
 
-const NAVY = "#001D57";
+const NAVY = BRAND_NAVY;
 
 export const PillarDial = ({ name, score, trend, trendLabel, status, onViewDetails }: Props) => {
   const color = scoreBandColor(score);

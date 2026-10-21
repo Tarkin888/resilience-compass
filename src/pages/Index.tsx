@@ -23,7 +23,7 @@ const Index = () => {
 
   return (
     <ScenarioProvider>
-    <div className="min-h-screen bg-slate-50 text-slate-900 text-sm leading-relaxed">
+    <div className="min-h-screen bg-canvas text-slate-900 text-sm leading-relaxed">
       <Header />
       <div className="border-b border-slate-200 bg-white px-4 py-2 sm:px-6">
         <div className="flex flex-wrap items-center justify-between gap-2">

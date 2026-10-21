@@ -1,7 +1,8 @@
+import { BRAND_NAVY } from "@/config/brand";
 import { displayScore } from "@/lib/scoringEngine";
 import { colourForScore, luminance } from "@/lib/scoreBand";
 
-const NAVY = "#001D57";
+const NAVY = BRAND_NAVY;
 
 function badgeTextColor(score: number): string {
   const bg = colourForScore(score);
