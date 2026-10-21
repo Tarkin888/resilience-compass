@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { ChevronLeft } from "lucide-react";
 import { Header } from "@/components/Header";
@@ -18,9 +18,6 @@ const Index = () => {
   const [active, setActive] = useState<TabId>("alerts");
   const { context, loading: chatContextLoading } = useChatContext();
 
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [active]);
 
 
 
@@ -55,7 +52,10 @@ const Index = () => {
         </div>
         <div role="tabpanel" id={tabPanelId("scenario_testing")} aria-labelledby={tabButtonId("scenario_testing")} hidden={active !== "scenario_testing"}>
           {active === "scenario_testing" && (
-            <ScenarioTestingTab onViewImpact={() => setActive("scenario_impact")} />
+            <ScenarioTestingTab
+              onViewImpact={() => setActive("scenario_impact")}
+              onBack={() => setActive("prediction")}
+            />
           )}
         </div>
         <div role="tabpanel" id={tabPanelId("scenario_impact")} aria-labelledby={tabButtonId("scenario_impact")} hidden={active !== "scenario_impact"}>

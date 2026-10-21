@@ -164,3 +164,75 @@ export function requireAdminAuth(req: Request): Response | null {
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
 }
+
+/**
+ * Derive the publication path prefix from an edition URL pattern, i.e. the
+ * part before the {month}/{year} placeholders, trimmed to the last path
+ * segment boundary. e.g.
+ *   "/a/b/nhs-sickness-absence-rates/{month}-{year}" -> "/a/b/nhs-sickness-absence-rates"
+ *   "/a/b/nhs-vacancies-survey/april-2015---{month}-..." -> "/a/b/nhs-vacancies-survey"
+ */
+export function publicationPathPrefix(pattern: string): string {
+  const placeholderIdx = pattern.search(/\{month\}|\{year\}/);
+  const head = placeholderIdx >= 0 ? pattern.slice(0, placeholderIdx) : pattern;
+  const trimmed = head.replace(/\/[^/]*$/, "");
+  return trimmed.startsWith("/") ? trimmed : "/" + trimmed;
+}
+
+/**
+ * Extract candidate edition-page links from a series landing page, in the
+ * order they appear (NHS Digital lists most-recent-first). Only hrefs under
+ * the same publication path as this source are considered.
+ */
+export function findEditionCandidates(html: string, pathPrefix: string): string[] {
+  const doc = new DOMParser().parseFromString(html, "text/html");
+  if (!doc) return [];
+  const out: string[] = [];
+  const seen = new Set<string>();
+  const anchors = doc.querySelectorAll("a[href]");
+  for (const a of anchors as unknown as Element[]) {
+    let href = (a as Element).getAttribute("href") ?? "";
+    if (!href) continue;
+    if (href.startsWith(NHS_BASE)) href = href.slice(NHS_BASE.length);
+    if (href.startsWith("http")) continue;
+    const path = href.split("#")[0].split("?")[0].replace(/\/$/, "");
+    if (!path.startsWith(pathPrefix + "/")) continue;
+    const rest = path.slice(pathPrefix.length + 1);
+    if (!rest || rest.includes("/")) continue;
+    const url = `${NHS_BASE}${path}`;
+    if (seen.has(url)) continue;
+    seen.add(url);
+    out.push(url);
+  }
+  return out;
+}
+
+/**
+ * Discover the latest *published* edition page for a source by walking the
+ * series landing page's edition links (most recent first) and picking the
+ * first one that actually exposes a matching xlsx download. Returns null when
+ * discovery is not possible, so callers fall back to date-guessing.
+ */
+export async function discoverLatestEditionUrl(
+  seriesLandingPageUrl: string | null | undefined,
+  editionPageUrlPattern: string,
+  filenameMatcher: (href: string) => boolean,
+  maxCandidates = 4,
+): Promise<{ editionUrl: string; html: string; fileUrl: string } | null> {
+  if (!seriesLandingPageUrl) return null;
+  try {
+    const landing = await fetchEditionPage(seriesLandingPageUrl);
+    if (!landing.ok) return null;
+    const prefix = publicationPathPrefix(editionPageUrlPattern);
+    const candidates = findEditionCandidates(landing.html, prefix).slice(0, maxCandidates);
+    for (const editionUrl of candidates) {
+      const page = await fetchEditionPage(editionUrl);
+      if (!page.ok) continue;
+      const fileUrl = findXlsxLink(page.html, filenameMatcher);
+      if (fileUrl) return { editionUrl, html: page.html, fileUrl };
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}

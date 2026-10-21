@@ -87,7 +87,7 @@ const FiveCapitals = () => {
 
           </h1>
           <p className="mt-2 max-w-3xl text-sm text-slate-600">
-            One view of organisational resilience across the five capitals. The Human (Workforce) pillar is live; the other four are illustrative previews. Select a pillar to see its indicator composition.
+            One view of organisational resilience across the five capitals. The Human (Workforce) pillar uses semi-live data; the other four are illustrative previews. Select a pillar to see its indicator composition.
           </p>
         </section>
 
@@ -105,10 +105,28 @@ const FiveCapitals = () => {
                   <div className="h-3 w-3/5 animate-pulse rounded bg-slate-100" />
                 </div>
               ) : (
-                <p className="mt-2 max-w-4xl text-sm leading-relaxed text-slate-700">
-                  {statusSummary}
-                </p>
+                <div className="mt-2 max-w-4xl space-y-3">
+                  {(statusSummary ?? "")
+                    .split(/\n\s*\n/)
+                    .map((p) => p.trim())
+                    .filter(Boolean)
+                    .slice(0, 3)
+                    .map((para, i) => (
+                      <p key={i} className="text-sm leading-relaxed text-slate-700">
+                        {para.split(/(\*\*[^*]+\*\*)/g).filter(Boolean).map((part, j) =>
+                          part.startsWith("**") && part.endsWith("**") ? (
+                            <strong key={j} className="font-semibold">
+                              {part.slice(2, -2)}
+                            </strong>
+                          ) : (
+                            <span key={j}>{part}</span>
+                          ),
+                        )}
+                      </p>
+                    ))}
+                </div>
               )}
+
               <p className="mt-3 text-xs text-slate-500">
                 AI-generated from current pillar scores — for discussion, not a substitute for judgement.
               </p>

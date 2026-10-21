@@ -9,10 +9,12 @@ import {
   CaptureResponse,
   corsHeaders,
   defaultQuarterlyEdition,
+  discoverLatestEditionUrl,
   downloadAndHash,
   editionLabel,
   fetchEditionPage,
   findXlsxLink,
+  monthName,
   Outcome,
   requireAdminAuth,
   sanitiseErrorDetail,
@@ -64,20 +66,47 @@ Deno.serve(async (req) => {
       return respond({ ok: false, kri_id: KRI_ID, outcome: "page_not_found", error: "simulated failure" }, 200);
     }
 
-    let def: { month: string; year: number };
+    const VAC_XLSX = (h: string) => /nhs-vac-stats-.*-eng-tables/i.test(h);
+
+    let def: { month: string; year: number } | null = null;
+    let editionUrl: string;
+    let discovered: { editionUrl: string; html: string; fileUrl: string } | null = null;
+
     if (body.month !== undefined || body.year !== undefined) {
       const v = validateEditionInput(body.month, body.year);
       if (!v.ok) {
         return respond({ ok: false, kri_id: KRI_ID, outcome: "page_not_found", error: v.error }, 400);
       }
       def = { month: v.month, year: v.year };
+      editionUrl = buildEditionUrl(source.edition_page_url_pattern, def.month, def.year);
     } else {
-      def = defaultQuarterlyEdition();
+      discovered = await discoverLatestEditionUrl(
+        source.series_landing_page_url,
+        source.edition_page_url_pattern,
+        VAC_XLSX,
+      );
+      if (discovered) {
+        editionUrl = discovered.editionUrl;
+        // Recover month/year from the discovered slug where possible so the
+        // stored edition label stays consistent with the guessed-URL path.
+        const slug = editionUrl.split("/").pop() ?? "";
+        const m = slug.match(/([a-z]+)-(\d{4})/i);
+        if (m) {
+          const v = validateEditionInput(m[1], Number(m[2]));
+          if (v.ok) def = { month: v.month, year: v.year };
+        }
+      } else {
+        def = defaultQuarterlyEdition();
+        editionUrl = buildEditionUrl(source.edition_page_url_pattern, def.month, def.year);
+      }
     }
-    const editionUrl = buildEditionUrl(source.edition_page_url_pattern, def.month, def.year);
-    const label = editionLabel(def.month, def.year);
+    // NB: `label` is provisional; the authoritative edition label is derived
+    // from the downloaded workbook's period row below, with this as fallback.
+    const label = def ? editionLabel(def.month, def.year) : (editionUrl.split("/").pop() ?? "latest");
 
-    // Idempotency: skip if we've already captured this edition.
+    // Idempotency: skip early only when the provisional label already matches
+    // the last capture; the authoritative file-derived label is re-checked
+    // after parsing below.
     const { data: existing } = await supabase
       .from("kri_captures").select("id, edition_label, captured_at")
       .eq("kri_id", KRI_ID).order("captured_at", { ascending: false }).limit(1);
@@ -87,20 +116,38 @@ Deno.serve(async (req) => {
     }
     const lastCapturedAt = existing?.[0]?.captured_at ?? null;
 
-    const page = await fetchEditionPage(editionUrl);
-    if (!page.ok) {
-      if (page.status === 404 && withinCadenceWindow(lastCapturedAt, source.update_cadence)) {
-        const friendly = "No new edition published yet — next check after expected publication window.";
-        await writeLog("no_new_edition", friendly);
-        return respond({ ok: false, kri_id: KRI_ID, outcome: "no_new_edition", error: friendly }, 200);
+    let pageHtml: string | null = null;
+    // Set when the edition page could not be fetched at all but a known-good
+    // file URL is configured — used as a full override so the capture can
+    // still proceed by downloading and parsing that file directly.
+    let overrideFileUrl: string | null = null;
+    if (discovered) {
+      pageHtml = discovered.html;
+    } else {
+      const page = await fetchEditionPage(editionUrl);
+      if (!page.ok) {
+        if (page.status === 404 && withinCadenceWindow(lastCapturedAt, source.update_cadence)) {
+          const friendly = "No new edition published yet — next check after expected publication window.";
+          await writeLog("no_new_edition", friendly);
+          return respond({ ok: false, kri_id: KRI_ID, outcome: "no_new_edition", error: friendly }, 200);
+        }
+        if (source.last_known_file_url) {
+          overrideFileUrl = source.last_known_file_url;
+        } else {
+          const detail = `edition page returned ${page.status} for ${editionUrl}`;
+          await writeLog("page_not_found", detail);
+          return respond({ ok: false, kri_id: KRI_ID, outcome: "page_not_found", error: detail }, 200);
+        }
+      } else {
+        pageHtml = page.html;
       }
-      const detail = `edition page returned ${page.status} for ${editionUrl}`;
-      await writeLog("page_not_found", detail);
-      return respond({ ok: false, kri_id: KRI_ID, outcome: "page_not_found", error: detail }, 200);
     }
 
-    let fileUrl = findXlsxLink(page.html, (h) => /nhs-vac-stats-.*-eng-tables/i.test(h));
-    if (!fileUrl) fileUrl = findXlsxLink(page.html, (h) => /vac.*tables/i.test(h));
+    let fileUrl = overrideFileUrl
+      ?? discovered?.fileUrl
+      ?? (pageHtml ? findXlsxLink(pageHtml, VAC_XLSX) : null);
+    if (!fileUrl && pageHtml) fileUrl = findXlsxLink(pageHtml, (h) => /vac.*tables/i.test(h));
+
     if (!fileUrl && source.last_known_file_url) fileUrl = source.last_known_file_url;
     if (!fileUrl) {
       const detail = "no matching xlsx link on edition page";
@@ -119,6 +166,10 @@ Deno.serve(async (req) => {
 
     let headline: number | null = null;
     let prior: number | null = null;
+    // Authoritative edition label, parsed from the workbook's period row
+    // (e.g. "2026/27 Q1 (Jun-26)") — falls back to the provisional date-based
+    // label if parsing fails.
+    let fileLabel: string | null = null;
     try {
       const wb = XLSX.read(bytes, { type: "array" });
       const sheetName = wb.SheetNames.find((n) => /total\s*2018\s*onwards/i.test(n)) ?? wb.SheetNames[0];
@@ -145,25 +196,61 @@ Deno.serve(async (req) => {
       }
       if (!gtRow) throw new Error("'Grand Total' row not found");
 
-      // Right-most numeric cells: most recent and prior quarter.
+      // Right-most numeric cells: most recent and prior quarter, tracking
+      // their column indices so we can read the matching period labels.
       const numerics: number[] = [];
+      const numericCols: number[] = [];
       for (let i = gtRow.length - 1; i >= 0 && numerics.length < 2; i--) {
         const v = gtRow[i];
-        if (typeof v === "number" && isFinite(v)) numerics.push(v);
+        if (typeof v === "number" && isFinite(v)) {
+          numerics.push(v);
+          numericCols.push(i);
+        }
       }
       if (numerics.length === 0) throw new Error("no numeric values in Grand Total row");
       headline = numerics[0] * 100;
       prior = numerics[1] != null ? numerics[1] * 100 : null;
+
+      // Period-label row: immediately below the "Total workforce % vacancy
+      // rate" header; one label per data column, e.g. "2026/27 Q1 (Jun-26)".
+      const periodRow = grid[headerRowIdx + 1] as unknown[] | undefined;
+      if (periodRow) {
+        const cell = periodRow[numericCols[0]];
+        if (typeof cell === "string") {
+          const m = cell.match(/\(([A-Za-z]{3})-(\d{2})\)/);
+          if (m) {
+            let monthIdx = -1;
+            for (let i = 0; i < 12; i++) {
+              if (monthName(i).startsWith(m[1].toLowerCase())) { monthIdx = i; break; }
+            }
+            if (monthIdx >= 0) {
+              const year = 2000 + Number(m[2]);
+              fileLabel = `${monthName(monthIdx).charAt(0).toUpperCase()}${monthName(monthIdx).slice(1)} ${year}`;
+            }
+          }
+        }
+      }
     } catch (e) {
       const detail = `extract failed: ${(e as Error).message}`;
       await writeLog("value_extract_failed", detail);
       return respond({ ok: false, kri_id: KRI_ID, outcome: "value_extract_failed", error: detail }, 200);
     }
 
+    // Authoritative edition label = period parsed from the workbook; the
+    // date-based label is a fallback only.
+    const finalLabel = fileLabel ?? label;
+
+    // Re-check idempotency against the authoritative label (the provisional
+    // date-based check above can miss when the guess was wrong).
+    if (existing && existing[0]?.edition_label === finalLabel) {
+      await writeLog("no_new_edition", `already captured ${finalLabel}`);
+      return respond({ ok: true, kri_id: KRI_ID, outcome: "no_new_edition", edition_label: finalLabel });
+    }
+
     const { data: cap, error: capErr } = await supabase.from("kri_captures").insert({
       kri_id: KRI_ID,
       source_id: source.id,
-      edition_label: label,
+      edition_label: finalLabel,
       edition_page_url: editionUrl,
       file_source_url: fileUrl,
       file_size_bytes: size,
@@ -180,7 +267,7 @@ Deno.serve(async (req) => {
     await writeLog("success", undefined, cap.id);
     return respond({
       ok: true, kri_id: KRI_ID, outcome: "success",
-      capture_id: cap.id, edition_label: label, headline_value: Number(headline.toFixed(2)),
+      capture_id: cap.id, edition_label: finalLabel, headline_value: Number(headline.toFixed(2)),
     });
   } catch (e) {
     const msg = (e as Error).message ?? String(e);
