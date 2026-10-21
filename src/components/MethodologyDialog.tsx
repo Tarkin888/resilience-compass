@@ -90,7 +90,7 @@ export const MethodologyDialog = ({ open, onOpenChange, returnFocusRef }: Method
           <DialogTitle style={{ color: NAVY }}>How resilience scoring works</DialogTitle>
         </DialogHeader>
         <DialogDescription className="sr-only">
-          Explains how ResilienceC produces its 0–100 resilience scores.
+          Explains how XPResilience produces its 0 to 100 resilience scores.
         </DialogDescription>
 
         <div className="space-y-6 text-sm leading-relaxed" style={{ color: NAVY }}>
