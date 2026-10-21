@@ -1,6 +1,6 @@
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 
-const SYSTEM_PROMPT_TEMPLATE = `You are a resilience data assistant for NHS senior leaders using the ResilienceC dashboard.
+const SYSTEM_PROMPT_TEMPLATE = `You are a resilience data assistant for NHS senior leaders using the XPResilience dashboard.
 Your role is to answer questions about the organisation's resilience data in plain English.
 
 STRICT RULES — follow all of them on every response:
