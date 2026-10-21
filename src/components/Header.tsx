@@ -16,7 +16,7 @@ export const Header = () => {
         <div className="flex items-center gap-3">
           <span
             aria-hidden
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-brand text-sm font-bold text-accent2"
+            className="flex h-9 w-9 items-center justify-center rounded-full bg-brand text-sm font-bold text-white"
           >
             RC
           </span>
@@ -58,7 +58,7 @@ export const Header = () => {
             aria-label="Demo NHS Trust"
             className="flex min-h-[44px] items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium shadow-sm"
           >
-            <span aria-hidden="true" className="h-2 w-2 rounded-full bg-accent2"></span>
+            <span aria-hidden="true" className="h-2 w-2 rounded-full bg-slatebrand"></span>
             Demo NHS Trust
           </span>
 

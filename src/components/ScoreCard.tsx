@@ -80,7 +80,7 @@ export const ScoreCard = () => {
                 ref={methodologyTriggerRef}
                 type="button"
                 onClick={() => setMethodologyOpen(true)}
-                className="mt-1 inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-medium text-accent2 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent2"
+                className="mt-1 inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-medium text-brand hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand"
               >
                 <Info size={14} aria-hidden />
                 How scoring works
