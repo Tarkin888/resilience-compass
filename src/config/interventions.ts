@@ -1,4 +1,4 @@
-// Hardcoded intervention data for the demo. Sourced from the ResilienceC
+// Hardcoded intervention data for the demo. Sourced from the
 // Human Capital Research Bank placeholder. Each entry must keep its
 // stable RC-HC-INT-XXX ID — once the production research bank lands,
 // readMoreUrl will resolve per-entry instead of the shared placeholder.
