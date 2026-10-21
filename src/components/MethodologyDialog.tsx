@@ -38,7 +38,7 @@ function StaticRangeBar() {
         <circle cx="2" cy="13" r="2.5" fill="#000" />
         <circle cx="198" cy="13" r="2.5" fill="#000" />
 
-        {/* teal ticks at 25 and 75 (threshold / target positions) */}
+        {/* navy ticks at 25 and 75 (threshold / target positions) */}
         <line x1="50" y1="6" x2="50" y2="20" stroke={BRAND_NAVY} strokeWidth="2" />
         <line x1="150" y1="6" x2="150" y2="20" stroke={BRAND_NAVY} strokeWidth="2" />
       </svg>
@@ -62,7 +62,7 @@ function StaticRangeBar() {
         ))}
       </div>
       <p className="mt-2 text-[10px] text-slate-500">
-        Colours show the RAG bands (red ≤35, amber 36–66, green ≥67). The teal ticks mark the minimum threshold (25) and target (75) — these are separate from the colour boundaries.
+        Colours show the RAG bands (red ≤35, amber 36–66, green ≥67). The navy ticks mark the minimum threshold (25) and target (75) — these are separate from the colour boundaries.
       </p>
     </div>
   );

@@ -44,7 +44,7 @@ export const OperatingRangeBar = ({ score, name = "Data point", className = "" }
         <circle cx="2" cy="13" r="2.5" fill="#000" />
         <circle cx="198" cy="13" r="2.5" fill="#000" />
 
-        {/* teal ticks at 25 and 75 */}
+        {/* navy ticks at 25 and 75 */}
         <line x1="50" y1="6" x2="50" y2="20" stroke={BRAND_NAVY} strokeWidth="2" />
         <line x1="150" y1="6" x2="150" y2="20" stroke={BRAND_NAVY} strokeWidth="2" />
 
