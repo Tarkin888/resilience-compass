@@ -73,7 +73,7 @@ export const ScenarioAppliedBanner = () => {
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-4 sm:p-5">
       <div className="flex flex-wrap items-center gap-2">
-        <span className="text-sm font-semibold text-[#001D57]">{title}</span>
+        <span className="text-sm font-semibold text-brand">{title}</span>
         {sevStyle && (
           <span
             className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${sevStyle.chip}`}

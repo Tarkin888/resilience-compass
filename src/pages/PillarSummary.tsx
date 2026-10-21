@@ -1,3 +1,4 @@
+import { BRAND_NAVY } from "@/config/brand";
 import { useMemo } from "react";
 import { ArrowRight, ChevronLeft } from "lucide-react";
 import { Link, useNavigate, useParams } from "react-router-dom";
@@ -8,7 +9,7 @@ import { useHumanCapitalData } from "@/hooks/useHumanCapitalData";
 import { computePillarScores } from "@/lib/pillarScores";
 import { scoreBandColor } from "@/lib/scoreBand";
 
-const NAVY = "#001D57";
+const NAVY = BRAND_NAVY;
 
 const PILLAR_META: Record<string, { trendLabel: string; status: "live" | "preview" }> = {
   financial: { trendLabel: "Worsening", status: "preview" },
@@ -41,7 +42,7 @@ const PillarSummary = () => {
 
   if (!pillar) {
     return (
-      <div className="min-h-screen bg-slate-50">
+      <div className="min-h-screen bg-canvas">
         <Header />
         <main className="mx-auto max-w-3xl px-4 py-10">
           <p className="text-sm text-slate-600">Pillar not found.</p>
@@ -59,7 +60,7 @@ const PillarSummary = () => {
   const displayScore = humanLoading ? null : pillar.score;
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900">
+    <div className="min-h-screen bg-canvas text-slate-900">
       <Header />
       <div className="border-b border-slate-200 bg-white px-4 py-3 sm:px-6">
         <Link

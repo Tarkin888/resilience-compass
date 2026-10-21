@@ -1,3 +1,4 @@
+import { BRAND_NAVY } from "@/config/brand";
 import {
   Dialog,
   DialogContent,
@@ -10,8 +11,7 @@ import { PILLAR_CONFIG } from "@/config/dataPoints";
 const RED = "#DC2626";
 const AMBER = "#F59E0B";
 const GREEN = "#16A34A";
-const TEAL = "#24BEAA";
-const NAVY = "#001D57";
+const NAVY = BRAND_NAVY;
 
 /** Indicators configured for the Human (Workforce) pillar in dataPoints.ts. */
 const humanIndicators = PILLAR_CONFIG.find((p) => p.id === "human")?.indicators ?? [];
@@ -39,12 +39,12 @@ function StaticRangeBar() {
         <circle cx="198" cy="13" r="2.5" fill="#000" />
 
         {/* teal ticks at 25 and 75 (threshold / target positions) */}
-        <line x1="50" y1="6" x2="50" y2="20" stroke={TEAL} strokeWidth="2" />
-        <line x1="150" y1="6" x2="150" y2="20" stroke={TEAL} strokeWidth="2" />
+        <line x1="50" y1="6" x2="50" y2="20" stroke={BRAND_NAVY} strokeWidth="2" />
+        <line x1="150" y1="6" x2="150" y2="20" stroke={BRAND_NAVY} strokeWidth="2" />
       </svg>
 
       {/* threshold/target labels */}
-      <div className="relative mt-1 h-4 text-[10px] font-bold" style={{ color: TEAL }} aria-hidden>
+      <div className="relative mt-1 h-4 text-[10px] font-bold" style={{ color: BRAND_NAVY }} aria-hidden>
         <span className="absolute -translate-x-1/2" style={{ left: "25%" }}>
           Min threshold (25)
         </span>

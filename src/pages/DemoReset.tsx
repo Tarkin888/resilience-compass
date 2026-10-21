@@ -72,7 +72,7 @@ export default function DemoReset() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-canvas text-slate-900 flex items-center justify-center px-4">
       <div className="w-full max-w-lg rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
         <h1 className="text-xl font-semibold text-slate-900">Demo reset</h1>
         <p className="mt-2 text-sm text-slate-600">

@@ -179,7 +179,7 @@ export default function AdminSources() {
 
   if (!authed) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+      <div className="min-h-screen flex items-center justify-center bg-canvas">
         <form
           onSubmit={verify}
           noValidate
@@ -212,7 +212,7 @@ export default function AdminSources() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900">
+    <div className="min-h-screen bg-canvas text-slate-900">
       <header className="border-b border-slate-200 bg-white px-4 py-4 sm:px-6">
         <div className="mb-3">
           <BackButton />

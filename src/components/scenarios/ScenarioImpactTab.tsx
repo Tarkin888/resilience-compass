@@ -1,3 +1,4 @@
+import { BRAND_NAVY } from "@/config/brand";
 // Tab — Scenario Impact.
 // Shows within-pillar before/after (existing), plus Prompt 27 additions:
 //  (A) Cross-pillar cascade — AI-indicative knock-on across the other four capitals.
@@ -15,7 +16,7 @@ import { useAIInterventions, type DataPointInfo } from "@/hooks/useAIInterventio
 import { PILLAR_CONFIG, resolveDataPoints } from "@/config/dataPoints";
 import { bandFor } from "@/lib/scoringEngine";
 
-const NAVY = "#001D57";
+const NAVY = BRAND_NAVY;
 
 const TIER_META: Record<1 | 2 | 3, { label: string; badgeClass: string }> = {
   1: { label: "Level 1 — No regret", badgeClass: "bg-green-100 text-green-800 border-green-300" },
@@ -243,7 +244,7 @@ export const ScenarioImpactTab = ({ onBack }: { onBack: () => void }) => {
         <button
           type="button"
           onClick={onBack}
-          className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-[#001D57] hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+          className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-brand hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand"
         >
           <ChevronLeft size={14} aria-hidden="true" />
           Back to Scenario Testing
@@ -482,7 +483,7 @@ export const ScenarioImpactTab = ({ onBack }: { onBack: () => void }) => {
         <button
           type="button"
           onClick={onBack}
-          className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-[#001D57] hover:bg-slate-50"
+          className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-brand hover:bg-slate-50"
         >
           <ChevronLeft size={14} aria-hidden />
           Back to Scenario Testing

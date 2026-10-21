@@ -246,7 +246,7 @@ export const ScenarioTestingTab = ({ onViewImpact, onBack }: { onViewImpact: () 
           <button
             type="button"
             onClick={onBack}
-            className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-[#001D57] hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2"
+            className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-brand hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2"
           >
             <ChevronLeft size={14} aria-hidden="true" />
             Back to Predict &amp; interventions
@@ -267,7 +267,7 @@ export const ScenarioTestingTab = ({ onViewImpact, onBack }: { onViewImpact: () 
 
       <div className="rounded-xl border border-slate-200 bg-white">
         <div className="border-b border-slate-200 px-4 py-3 sm:px-5">
-          <h2 className="text-sm font-bold uppercase tracking-wide text-[#001D57]">Preset scenarios</h2>
+          <h2 className="text-sm font-bold uppercase tracking-wide text-brand">Preset scenarios</h2>
           <p className="mt-0.5 text-xs text-slate-500">
             Click a scenario to load its example values into the calculator below.
           </p>
@@ -279,9 +279,9 @@ export const ScenarioTestingTab = ({ onViewImpact, onBack }: { onViewImpact: () 
             return (
               <div
                 key={s.id}
-                className={`flex flex-col rounded-lg border transition hover:border-[#001D57] hover:shadow-sm ${
+                className={`flex flex-col rounded-lg border transition hover:border-brand hover:shadow-sm ${
                   selected
-                    ? "border-[#001D57] bg-[#001D57]/5 ring-2 ring-[#001D57]/30"
+                    ? "border-brand bg-brand/5 ring-2 ring-brand/30"
                     : "border-slate-200 bg-white"
                 }`}
               >
@@ -300,7 +300,7 @@ export const ScenarioTestingTab = ({ onViewImpact, onBack }: { onViewImpact: () 
                       {s.type}
                     </span>
                   </div>
-                  <div className="text-sm font-semibold text-[#001D57]">{s.title}</div>
+                  <div className="text-sm font-semibold text-brand">{s.title}</div>
                   <p className="text-xs text-slate-600">{s.description}</p>
                 </button>
                 <ScenarioFieldRationale scenario={s} />
@@ -313,7 +313,7 @@ export const ScenarioTestingTab = ({ onViewImpact, onBack }: { onViewImpact: () 
 
       <div className="rounded-xl border border-slate-200 bg-white">
         <div className="border-b border-slate-200 px-4 py-3 sm:px-5">
-          <h2 className="text-sm font-bold uppercase tracking-wide text-[#001D57]">Scenario inputs</h2>
+          <h2 className="text-sm font-bold uppercase tracking-wide text-brand">Scenario inputs</h2>
         </div>
         <div className="divide-y divide-slate-200">
           {liveRows.map((r) => {
@@ -364,7 +364,7 @@ export const ScenarioTestingTab = ({ onViewImpact, onBack }: { onViewImpact: () 
       {hasRun && hasChanges && (
         <div className="rounded-xl border border-slate-200 bg-white">
           <div className="border-b border-slate-200 px-4 py-3 sm:px-5">
-            <h2 className="text-sm font-bold uppercase tracking-wide text-[#001D57]">Scenario result</h2>
+            <h2 className="text-sm font-bold uppercase tracking-wide text-brand">Scenario result</h2>
             <p className="mt-0.5 text-xs text-amber-700">Illustrative only — does not affect live data</p>
           </div>
           <div className="divide-y divide-slate-200">
@@ -384,14 +384,14 @@ export const ScenarioTestingTab = ({ onViewImpact, onBack }: { onViewImpact: () 
               );
             })}
             <div className="flex flex-wrap items-center gap-3 bg-slate-50 px-4 py-3 sm:px-5">
-              <span className="min-w-0 flex-1 text-sm font-semibold text-[#001D57]">Human Capital pillar</span>
+              <span className="min-w-0 flex-1 text-sm font-semibold text-brand">Human Capital pillar</span>
               <RagBadge score={humanBefore} />
               <ArrowRight size={14} className="text-slate-400" aria-hidden />
               <RagBadge score={humanAfter} />
               <DeltaChip delta={humanBefore != null && humanAfter != null ? humanAfter - humanBefore : null} />
             </div>
             <div className="flex flex-wrap items-center gap-3 px-4 py-3 sm:px-5">
-              <span className="min-w-0 flex-1 text-sm font-semibold text-[#001D57]">Dashboard (Five Capitals)</span>
+              <span className="min-w-0 flex-1 text-sm font-semibold text-brand">Dashboard (Five Capitals)</span>
               <RagBadge score={dashboardBefore} />
               <ArrowRight size={14} className="text-slate-400" aria-hidden />
               <RagBadge score={dashboardAfter} />
@@ -402,7 +402,7 @@ export const ScenarioTestingTab = ({ onViewImpact, onBack }: { onViewImpact: () 
             <button
               type="button"
               onClick={onViewImpact}
-              className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-[#001D57] hover:bg-slate-50"
+              className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-brand hover:bg-slate-50"
             >
               View pillar impact
               <ArrowRight size={14} aria-hidden />

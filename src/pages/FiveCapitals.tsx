@@ -1,3 +1,4 @@
+import { BRAND_NAVY } from "@/config/brand";
 import { useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
@@ -11,7 +12,7 @@ import { scoreBand } from "@/lib/scoreBand";
 import { useOrgStatusSummary } from "@/hooks/useOrgStatusSummary";
 
 
-const NAVY = "#001D57";
+const NAVY = BRAND_NAVY;
 
 const PILLAR_META: Record<string, { trend: "up" | "down" | "flat"; trendLabel: string; status: "live" | "preview" }> = {
   financial: { trend: "down", trendLabel: "Worsening", status: "preview" },
@@ -66,7 +67,7 @@ const FiveCapitals = () => {
 
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 text-sm leading-relaxed">
+    <div className="min-h-screen bg-canvas text-slate-900 text-sm leading-relaxed">
       <Header />
 
       <div className="border-b border-slate-200 bg-white px-4 py-2 text-xs text-slate-600 sm:px-6">
